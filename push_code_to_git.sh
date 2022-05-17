@@ -61,6 +61,11 @@ function pushCodeToGit() {
     echo
 }
 
+function hexoDeployCode() {
+    # hexo 部署到gh-pages分支
+    hexo clean && hexo deploy
+}
+
 function main() {
     if [ $# -gt 0 ]
         then
@@ -69,6 +74,9 @@ function main() {
 
             # 提交代码
             pushCodeToGit $*
+
+            # hexo 部署
+            hexoDeployCode
     else
         echo "USAGE: sh $0 'commit message'"
         echo "example: sh $0 'first subimt'"
