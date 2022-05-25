@@ -1,6 +1,7 @@
 ---
 title: Golang Mysql笔记
 date: 2021-05-16 19:31:21
+updated: 2022-05-23 23:17:48
 tags: 
 - Mysql
 - Golang
@@ -1201,6 +1202,566 @@ func prepareSQLAction(ids []int) {
 
 #### 7.1 事务定义
 
-> 
+> - 事务是一个最小的不可再分的工作单元
+>
+> - 通常事务对应一个完整的业务
+>     - 比如银行转账，就是一个最小的工作单元
+>     - 同时这个业务需要执行多次增删改等语句共同完成
+> - Mysql中使用了`Innodb`引擎的数据库或表才支持事务
+> - 事务处理用来维护数据库的完整性，保证成批的SQL语句要么全部执行，要么全部不执行
 
 #### 7.2 事务的ACID
+
+> 通常事务必须满足四个条件(ACID)
+>
+> - 原子性(Atomicity)，也叫不可分割性
+>     - 一个事务(transaction)中所有的操作，要么都全部完成，要么全部不完成，不会结束在中间某个环节
+>     - 实物在执行过程中发生错误，会被回滚(Rollback)到事务开始的状态，就像是这和个事务从来没有被执行过
+> - 一致性(Consistency)
+>     - 在事务开始之前和事务结束结束以后，数据库的完整性没有被破坏
+>     - 表示写入的数据必须完全符合所有的预设规则，包含数据的精确度、串联型，以及后续数据库可以自发性的完成预定的工作
+> - 隔离性(Isolation)，也叫独立性
+>     - 数据库允许多个并发事务同时对其数据进行读写和修改的能力
+>     - 隔离性可以防止多个事务并发执行时，由于交叉执行而导致数据的不一致
+>     - 事务隔离分为不同级别，包括
+>         - 读未提交（Read uncommitted）
+>         - 读提交（read committed）
+>         - 可重复读（repeatable read）
+>         - 串行化（serializable）
+> - 持久性(Durability)
+>     - 事务处理结束后，对数据的修改就是永久的，即使系统故障也不会丢失
+
+#### 7.3 go中事务方法
+
+> go语言中有三个方法可以来实现mysql中的事务操作
+
+##### 7.3.1 开始事务
+
+> 开启事务是database/sql这个包里的Begin方法
+
+```go
+// Begin starts a transaction. The default isolation level is dependent on
+// the driver.
+//
+// Begin uses context.Background internally; to specify the context, use
+// BeginTx.
+func (db *DB) Begin() (*Tx, error) {
+	return db.BeginTx(context.Background(), nil)
+}
+```
+
+##### 7.3.2 提交事务
+
+> 提交事务是开启事务后，返回的Tx结构体里的方法
+
+```go
+// Commit commits the transaction.
+func (tx *Tx) Commit() error {
+	// Check context first to avoid transaction leak.
+	// If put it behind tx.done CompareAndSwap statement, we can't ensure
+	// the consistency between tx.done and the real COMMIT operation.
+	select {
+	default:
+	case <-tx.ctx.Done():
+		if atomic.LoadInt32(&tx.done) == 1 {
+			return ErrTxDone
+		}
+		return tx.ctx.Err()
+	}
+	if !atomic.CompareAndSwapInt32(&tx.done, 0, 1) {
+		return ErrTxDone
+	}
+
+	// Cancel the Tx to release any active R-closemu locks.
+	// This is safe to do because tx.done has already transitioned
+	// from 0 to 1. Hold the W-closemu lock prior to rollback
+	// to ensure no other connection has an active query.
+	tx.cancel()
+	tx.closemu.Lock()
+	tx.closemu.Unlock()
+
+	var err error
+	withLock(tx.dc, func() {
+		err = tx.txi.Commit()
+	})
+	if err != driver.ErrBadConn {
+		tx.closePrepared()
+	}
+	tx.close(err)
+	return err
+}
+
+```
+
+##### 7.3.3 回滚事务
+
+> 提交事务是开启事务后，返回的Tx结构体里的方法
+
+```go
+// Rollback aborts the transaction.
+func (tx *Tx) Rollback() error {
+	return tx.rollback(false)
+}
+```
+
+#### 7.4 事务操作实例
+
+##### 7.4.1 开启事务前表数据
+
+![image-20220523095756292](go_mysql%E4%BD%BF%E7%94%A8.assets/image-20220523095756292.png)
+
+##### 7.4.2 事务操作成功
+
+> 下面代码里
+>
+> - 事务开启
+> - 然后执行2个sql语句
+>     - sqlstr1，将age更新为3
+>     - sqlstr2，将age更新为4
+> - 如果sql1str1和sqlstr2都执行成功，那么事务就执行成功，本次事务就会提交
+>     - 也就是说要么sql都执行成功，就进行事务提交
+>     - 要么sql只要有一处执行失败，就进行事务回滚
+> - 如果sql1str1和sqlstr2其中一个执行失败，那么就会直接进行回滚，函数return，本次执行结束
+
+```go
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+)
+
+// 定义全局db，表示数据库连接池
+var db *sql.DB
+
+// 初始化数据库
+func initDB() (err error) {
+	// dsn: data source name
+	dsn := "root:123456@tcp(127.0.0.1:3306)/prc_ly"
+	// 打开数据库
+	db, err = sql.Open("mysql", dsn)
+	if err != nil {
+		fmt.Printf("open mysql err:%v\n", err)
+		return
+	}
+	
+	// ping mysql
+	err = db.Ping()
+	if err != nil{
+		fmt.Printf("conn mysql err:%v\n", err)
+		return
+	}
+	fmt.Println("数据库初始化成功")
+	return
+}
+
+// 定义数据库字段结构体
+type user struct{
+	id int
+	name string
+	age int
+	hobby string
+}
+
+// 事务操作
+func transactionDBData(){
+	// 开启事务
+	fmt.Println("开始开启事务")
+	tx, err := db.Begin()
+	if err != nil {
+		fmt.Printf("开始事务失败:%v\n", err)
+	}
+	
+	// 提交多个sql操作
+	sqlStr1 := "update user set age = 3 where id = 1"
+	sqlStr2 := "update user set age = 4 where id = 2"
+	
+	// 执行sqlstr1
+	_, err = tx.Exec(sqlStr1)
+	if err != nil {
+		// 执行sql有错误，事务要回滚，并且直接函数返回
+		tx.Rollback()
+		fmt.Printf("执行sqlstr1错误需要回滚:%v\n", err)
+		return
+	}
+	// 执行sqlstr1
+	_, err = tx.Exec(sqlStr2)
+	if err != nil {
+		// 执行sql有错误，事务要回滚，并且直接函数返回
+		tx.Rollback()
+		fmt.Printf("执行sqlstr1错误需要回滚:%v\n", err)
+		return
+	}
+	
+	// 上面没问题就开始提交事务
+	err = tx.Commit()
+	if err != nil{
+		tx.Rollback()
+		fmt.Printf("提交事务出错需要回滚:%v\n", err)
+		return
+	}
+	fmt.Printf("事务执行成功")
+}
+
+func main() {
+	err := initDB()
+	if err != nil {
+		fmt.Printf("数据库初始化失败:%v\n", err)
+	}
+	
+	// 事务执行
+	transactionDBData()
+}
+```
+
+![image-20220523095904385](go_mysql%E4%BD%BF%E7%94%A8.assets/image-20220523095904385.png)
+
+##### 7.4.3 事务成功后表数据
+
+> 可以看到事务实行成功以后，id=1和id=2的age都进行了更新
+
+![image-20220523095943669](go_mysql%E4%BD%BF%E7%94%A8.assets/image-20220523095943669.png)
+
+##### 7.4.4 事务操作失败
+
+> 事务操作失败，那么只要有一个sql执行失败、或者提交事务失败，那么本次事务就会回滚，那么数据就不会更新
+>
+> - 模拟事务执行失败，表数据里只有id等于1和2的数据，所以可以模拟更新age字段时，将age字段写错，比如写成ages
+> - 然后将id=1和id=2的ages(正确字段是age)更新为2
+>     - 此时的id=1数据，age是3（上面事务操作成功后的数据）
+>     - 此时的id=1数据，age是4（上面事务操作成功后的数据）
+
+```go
+// 关键修改的代码，将age字段写错，比如写成ages
+sqlStr1 := "update user set ages = 2 where id = 1"
+sqlStr2 := "update user set ages = 2 where id = 2"
+```
+
+![image-20220523101004206](go_mysql%E4%BD%BF%E7%94%A8.assets/image-20220523101004206.png)
+
+> 可以看到执行事务失败后，进行了回滚，再次查看表数据，id=1和id=2的数据没变，仍是3和4
+
+![image-20220523101057390](go_mysql%E4%BD%BF%E7%94%A8.assets/image-20220523101057390.png)
+
+### 8、SQL中的占位符
+
+> sql中的占位符是原生数据库本来的语法，和`golang`语言没有关系
+
+| 数据库     | 占位符       |
+| ---------- | ------------ |
+| MySQL      | ?            |
+| PostgreSql | $1、$2、$3等 |
+| SQLite     | ?和$1        |
+
+## 四、sqlx
+
+### 1、sqlx安装
+
+> sqlx是个第三方库，能简化数据库操作，提交效率
+>
+> sqlx替换了原生的`database/sql`这个包
+
+```bash
+# sqlx安装
+go get github.com/jmoiron/sqlx
+```
+
+### 2、sqlx初始化数据库
+
+> sqlx.Connect()直接连数据库，并且将原来`database/sql`的open和ping方法二者结合为一
+>
+> 注意：
+>
+> - 定义全局变量db时，是定义的`*sqlx.DB`
+> - 也可使用MustConnect来校验连接，连接失败就会panic
+>     - MustConnect底层调用的就是Connect方法
+
+```go
+// sqlx.Connect代码源码
+// Connect to a database and verify with a ping.
+func Connect(driverName, dataSourceName string) (*DB, error) {
+	db, err := Open(driverName, dataSourceName)
+	if err != nil {
+		return nil, err
+	}
+	err = db.Ping()
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+	return db, nil
+}
+```
+
+```go
+// MustConnect方法源码
+// MustConnect connects to a database and panics on error.
+func MustConnect(driverName, dataSourceName string) *DB {
+	db, err := Connect(driverName, dataSourceName)
+	if err != nil {
+		panic(err)
+	}
+	return db
+}
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	// 这个包替换了database/sql这个包
+	"github.com/jmoiron/sqlx"
+)
+
+// 定义sqlx.DB全局变量，表示一个连接池
+var db *sqlx.DB
+
+func initDB() (err error){
+	dsn := "root:123456@tcp(127.0.0.1:3306)/prc_ly"
+	db, err = sqlx.Connect("mysql", dsn)
+	if err != nil {
+		fmt.Printf("数据库连接失败:%v\n", err)
+		return
+	}
+	fmt.Println("数据库连接成功")
+	return
+}
+
+func main(){
+	err := initDB()
+	if err != nil {
+		fmt.Printf("初始化数据失败:%v\n", err)
+		return
+	}
+}
+```
+
+![image-20220523103145835](go_mysql%E4%BD%BF%E7%94%A8.assets/image-20220523103145835.png)
+
+### 3、sqlx查询
+
+#### 3.1 单条记录查询
+
+> 使用的`Get`方法，其实可以看到需要传入的参数里
+>
+> - dest: 是一个空接口类型，可以是一个结构体指针，来接收查询到的值
+> - query: 是一个字符串，表示是执行sql的字符串
+>     - 可以用`?`进行占位符
+> - args: 表示是参数
+>     - 可以用来传递`?`占位符的值
+> - 注意：
+>     - 在定义接收查询结果的结构体里，字段名需要写成首字母大写
+>     - 因为Get方法里的`Get`用到了反射，那么为了在别的包能找到定义接收结果的结构体，结构体字段的首字母都要大写
+
+```go
+// Get方法源码
+// Get using this DB.
+// Any placeholder parameters are replaced with supplied args.
+// An error is returned if the result set is empty.
+func (db *DB) Get(dest interface{}, query string, args ...interface{}) error {
+	return Get(db, dest, query, args...)
+}
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	// 这个包替换了database/sql这个包
+	"github.com/jmoiron/sqlx"
+)
+
+// 定义sqlx.DB全局变量，表示一个连接池
+var db *sqlx.DB
+
+// 初始化数据库
+func initDB() (err error){
+	dsn := "root:123456@tcp(127.0.0.1:3306)/prc_ly"
+	db, err = sqlx.Connect("mysql", dsn)
+	if err != nil {
+		fmt.Printf("数据库连接失败:%v\n", err)
+		return
+	}
+	fmt.Println("数据库连接成功")
+	return
+}
+
+type user struct{
+	Name string
+	Age int
+}
+
+
+// 单条查询数据
+func queryRowData(id int) {
+	sqlStr := "select name, age from user where id = ?"
+	var uObj user
+	err := db.Get(&uObj, sqlStr, id)
+	if err != nil {
+		fmt.Printf("查询数据失败：%v\n", err)
+		return
+	}
+	fmt.Printf("uObj:%+#v\n", uObj)
+}
+
+func main(){
+	err := initDB()
+	if err != nil {
+		fmt.Printf("初始化数据失败:%v\n", err)
+		return
+	}
+	
+	// 查询数据
+	queryRowData(1)
+}
+```
+
+![image-20220523221603385](go_mysql%E4%BD%BF%E7%94%A8.assets/image-20220523221603385.png)
+
+#### 3.2 多条记录查询
+
+> 查询多条使用`Select`方法
+
+```go
+// select方法
+// Select using this DB.
+// Any placeholder parameters are replaced with supplied args.
+func (db *DB) Select(dest interface{}, query string, args ...interface{}) error {
+	return Select(db, dest, query, args...)
+}
+```
+
+```go
+// 查询多条记录
+func queryMultiRowData(id int) {
+	sqlStr := "select name, age from user where id > ?"
+	
+	// 初始化切片
+	uObj := make([]user, 0, 10)
+	
+	err := db.Select(&uObj, sqlStr, id)
+	if err != nil {
+		fmt.Printf("查询多条数据失败：%v\n", err)
+		return
+	}
+	fmt.Printf("uObj:%+v\n", uObj)
+}
+```
+
+![image-20220523222434551](go_mysql%E4%BD%BF%E7%94%A8.assets/image-20220523222434551.png)
+
+### 4、增删改数据
+
+> sqlx里的增删改数据操作和原生的`database/sql`里的方法一致，都是用`Exec`方法，就不做赘述
+
+### 5、事务支持
+
+> `sqlx`中提供了：
+>
+> - `db.Beginx()`：开启事务
+>
+> - `tx.Exec()`：事务执行sql语句
+> - `tx.Rollback()`: 事务进行回滚
+> - `tx.Commit()`:  提交事务
+>
+> 因为sqlx里的事务操作也和原生的`database/sql`里的事务操作类似，所以就不做重复记录了
+
+## 五、SQL注入理解
+
+### 1、SQL注入示例
+
+> SQL注入就是在查询数据库时，尝试性的在数据查询后面拼接上`or 1=1 #`这样的语句，就会把所有数据都查出来
+>
+> - `#`表示后面的语句都注释掉
+>
+> 如何避免SQL注入
+>
+> - 不要自己拼接SQL语句
+> - 让SQL语句在SQL服务器进行预编译
+
+```go
+package main
+
+import (
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	// 这个包替换了database/sql这个包
+	"github.com/jmoiron/sqlx"
+)
+
+// 定义sqlx.DB全局变量，表示一个连接池
+var db *sqlx.DB
+
+// 初始化数据库
+func initDB() (err error){
+	dsn := "root:123456@tcp(127.0.0.1:3306)/prc_ly"
+	db, err = sqlx.Connect("mysql", dsn)
+	if err != nil {
+		fmt.Printf("数据库连接失败:%v\n", err)
+		return
+	}
+	fmt.Println("数据库连接成功")
+	return
+}
+
+type user struct{
+	Name string
+	Age int
+}
+
+
+// Sql注入查询记录
+func sqlInjectDBData(name string) {
+	// 手动拼接sql
+	sqlStr := fmt.Sprintf("select name, age from user where name = '%v'", name)
+	
+	fmt.Printf("手动拼接的sql：%v\n", sqlStr)
+	
+	// 初始化切片
+	uObj := make([]user, 0, 10)
+	
+	err := db.Select(&uObj, sqlStr)
+	if err != nil {
+		fmt.Printf("查询多条数据失败：%v\n", err)
+		return
+	}
+	fmt.Printf("uObj:%+v\n", uObj)
+}
+
+func main(){
+	err := initDB()
+	if err != nil {
+		fmt.Printf("初始化数据失败:%v\n", err)
+		return
+	}
+	
+	// 正确查询
+	sqlInjectDBData("sam")
+	
+	// Sql注入查询实例
+	sqlInjectDBData("sam' or 1=1 #")
+}
+```
+
+![image-20220523225248038](go_mysql%E4%BD%BF%E7%94%A8.assets/image-20220523225248038.png)
+
+### 2、注入分析
+
+```go
+// 在编写查询代码时，在代码里进行手动拼接sql
+sqlStr := fmt.Sprintf("select name, age from user where name = '%v'", name)
+
+// 在执行时，写了如下代码
+sqlInjectDBData("sam' or 1=1 #")
+
+// 那么上面写的语句在sqlStr里就会变成
+select name, age from user where name = 'sam' or 1=1 #' "
+
+// 这样去查询数据库,当有sam这个值时，查询出了sam的记录，并且1=1，表示永远为真，会把所有数据都查出来，这样就是SQL注入了
+```
+
