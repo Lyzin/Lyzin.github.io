@@ -9531,11 +9531,30 @@ func main() {
 > - reflect包使用`reflect.TypeOf`获取对象的类型
 > - reflect包使用`reflect.ValueOf`获取对象的值
 
-### 1、反射获取对象类型
+### 1、反射获取对象类型:TypeOf
 
-> Go语言中，使用`reflect.TypeOf()`函数可以获得任意值的类型对象
+> Go语言中，使用`reflect.TypeOf()`函数可以获得任意值的`类型对象`
 >
-> 所以可以看到用来获取任意对象的类型
+> - 从而通过`类型对象`可以访问该值的`类型信息`
+> - TypeOf返回任意值的反射类型。
+> - 如果任意值的类型对象是一个nil，TypeOf返回nil。
+>
+> 下面代码分析
+>
+> - 定义了一个reflectType方法，接收一个空接口类型的x，表示接收任意类型的变量
+>     - 方法里面调用了`reflect`反射包的`TypeOf(x)`方法，表示用来获取传入的x的类型
+> - main函数中定义了三个变量，类型分别是int/string/boolean
+>     - 执行结果的截图来看，正确的打印出来了变量的对应类型
+
+```go
+// TypeOf方法源码：Typeof可以动态的返回任意值的类型
+// TypeOf returns the reflection Type that represents the dynamic type of i.
+// If i is a nil interface value, TypeOf returns nil.
+func TypeOf(i interface{}) Type {
+	eface := *(*emptyInterface)(unsafe.Pointer(&i))
+	return toType(eface.typ)
+}
+```
 
 ```go
 package main
@@ -9564,14 +9583,262 @@ func main() {
 
 ![image-20220328223413135](go%E7%AC%94%E8%AE%B0.assets/image-20220328223413135.png)
 
-#### 1.1 类型和种类
+#### 1.1 反射中的类型和种类
 
-> 反射类型其实把类型划分为两种：
+> 反射类型其实把类型划细分为两种，从`TypeOf`方法的返回值是`Type`可以看到，`Type自身是一个接口类型
 >
 > - 一种是类型Type
->     - 是指用type关键字创建的自定义类型
+>     - 是指用`type`关键字创建的`自定义类型`
 > - 一种是种类Kind
->     - 是指底层类型，比如指针，结构体等，表示一大类的类型
+>     - 是指`底层类型`，比如指针，结构体等，表示一大类的类型
+
+##### 1.1.1 TypeOf返回的Type是接口类型
+
+> Type接口与是TypeOf方法返回值的类型，里面有很多方法
+>
+> Type接口的注释的中文翻译：
+>
+> - `Type`是`go type`的代表
+> - 不是所有的方法都适用于所有kinds的types。如果有限制条件的的话，会在每个方法的文档中注明。
+> - 在调用特定类型的方法之前，请使用Kind方法来找出类型的种类。
+> - 调用一个不适合该类型的方法会导致运行时的panic
+> - 类型值是可以比较的，比如用==运算符，所以它们可以作为map类型的键使用，如果两个类型值代表相同的类型，它们就是相等的。
+
+```go
+// Type is the representation of a Go type.
+//
+// Not all methods apply to all kinds of types. Restrictions,
+// if any, are noted in the documentation for each method.
+// Use the Kind method to find out the kind of type before
+// calling kind-specific methods. Calling a method
+// inappropriate to the kind of type causes a run-time panic.
+//
+// Type values are comparable, such as with the == operator,
+// so they can be used as map keys.
+// Two Type values are equal if they represent identical types.
+type Type interface {
+	// Methods applicable to all types.
+
+	// Align returns the alignment in bytes of a value of
+	// this type when allocated in memory.
+	Align() int
+
+	// FieldAlign returns the alignment in bytes of a value of
+	// this type when used as a field in a struct.
+	FieldAlign() int
+
+	// Method returns the i'th method in the type's method set.
+	// It panics if i is not in the range [0, NumMethod()).
+	//
+	// For a non-interface type T or *T, the returned Method's Type and Func
+	// fields describe a function whose first argument is the receiver,
+	// and only exported methods are accessible.
+	//
+	// For an interface type, the returned Method's Type field gives the
+	// method signature, without a receiver, and the Func field is nil.
+	//
+	// Methods are sorted in lexicographic order.
+	Method(int) Method
+
+	// MethodByName returns the method with that name in the type's
+	// method set and a boolean indicating if the method was found.
+	//
+	// For a non-interface type T or *T, the returned Method's Type and Func
+	// fields describe a function whose first argument is the receiver.
+	//
+	// For an interface type, the returned Method's Type field gives the
+	// method signature, without a receiver, and the Func field is nil.
+	MethodByName(string) (Method, bool)
+
+	// NumMethod returns the number of methods accessible using Method.
+	//
+	// Note that NumMethod counts unexported methods only for interface types.
+	NumMethod() int
+
+	// Name returns the type's name within its package for a defined type.
+	// For other (non-defined) types it returns the empty string.
+	Name() string
+
+	// PkgPath returns a defined type's package path, that is, the import path
+	// that uniquely identifies the package, such as "encoding/base64".
+	// If the type was predeclared (string, error) or not defined (*T, struct{},
+	// []int, or A where A is an alias for a non-defined type), the package path
+	// will be the empty string.
+	PkgPath() string
+
+	// Size returns the number of bytes needed to store
+	// a value of the given type; it is analogous to unsafe.Sizeof.
+	Size() uintptr
+
+	// String returns a string representation of the type.
+	// The string representation may use shortened package names
+	// (e.g., base64 instead of "encoding/base64") and is not
+	// guaranteed to be unique among types. To test for type identity,
+	// compare the Types directly.
+	String() string
+
+	// Kind returns the specific kind of this type.
+	Kind() Kind
+
+	// Implements reports whether the type implements the interface type u.
+	Implements(u Type) bool
+
+	// AssignableTo reports whether a value of the type is assignable to type u.
+	AssignableTo(u Type) bool
+
+	// ConvertibleTo reports whether a value of the type is convertible to type u.
+	// Even if ConvertibleTo returns true, the conversion may still panic.
+	// For example, a slice of type []T is convertible to *[N]T,
+	// but the conversion will panic if its length is less than N.
+	ConvertibleTo(u Type) bool
+
+	// Comparable reports whether values of this type are comparable.
+	// Even if Comparable returns true, the comparison may still panic.
+	// For example, values of interface type are comparable,
+	// but the comparison will panic if their dynamic type is not comparable.
+	Comparable() bool
+
+	// Methods applicable only to some types, depending on Kind.
+	// The methods allowed for each kind are:
+	//
+	//	Int*, Uint*, Float*, Complex*: Bits
+	//	Array: Elem, Len
+	//	Chan: ChanDir, Elem
+	//	Func: In, NumIn, Out, NumOut, IsVariadic.
+	//	Map: Key, Elem
+	//	Ptr: Elem
+	//	Slice: Elem
+	//	Struct: Field, FieldByIndex, FieldByName, FieldByNameFunc, NumField
+
+	// Bits returns the size of the type in bits.
+	// It panics if the type's Kind is not one of the
+	// sized or unsized Int, Uint, Float, or Complex kinds.
+	Bits() int
+
+	// ChanDir returns a channel type's direction.
+	// It panics if the type's Kind is not Chan.
+	ChanDir() ChanDir
+
+	// IsVariadic reports whether a function type's final input parameter
+	// is a "..." parameter. If so, t.In(t.NumIn() - 1) returns the parameter's
+	// implicit actual type []T.
+	//
+	// For concreteness, if t represents func(x int, y ... float64), then
+	//
+	//	t.NumIn() == 2
+	//	t.In(0) is the reflect.Type for "int"
+	//	t.In(1) is the reflect.Type for "[]float64"
+	//	t.IsVariadic() == true
+	//
+	// IsVariadic panics if the type's Kind is not Func.
+	IsVariadic() bool
+
+	// Elem returns a type's element type.
+	// It panics if the type's Kind is not Array, Chan, Map, Ptr, or Slice.
+	Elem() Type
+
+	// Field returns a struct type's i'th field.
+	// It panics if the type's Kind is not Struct.
+	// It panics if i is not in the range [0, NumField()).
+	Field(i int) StructField
+
+	// FieldByIndex returns the nested field corresponding
+	// to the index sequence. It is equivalent to calling Field
+	// successively for each index i.
+	// It panics if the type's Kind is not Struct.
+	FieldByIndex(index []int) StructField
+
+	// FieldByName returns the struct field with the given name
+	// and a boolean indicating if the field was found.
+	FieldByName(name string) (StructField, bool)
+
+	// FieldByNameFunc returns the struct field with a name
+	// that satisfies the match function and a boolean indicating if
+	// the field was found.
+	//
+	// FieldByNameFunc considers the fields in the struct itself
+	// and then the fields in any embedded structs, in breadth first order,
+	// stopping at the shallowest nesting depth containing one or more
+	// fields satisfying the match function. If multiple fields at that depth
+	// satisfy the match function, they cancel each other
+	// and FieldByNameFunc returns no match.
+	// This behavior mirrors Go's handling of name lookup in
+	// structs containing embedded fields.
+	FieldByNameFunc(match func(string) bool) (StructField, bool)
+
+	// In returns the type of a function type's i'th input parameter.
+	// It panics if the type's Kind is not Func.
+	// It panics if i is not in the range [0, NumIn()).
+	In(i int) Type
+
+	// Key returns a map type's key type.
+	// It panics if the type's Kind is not Map.
+	Key() Type
+
+	// Len returns an array type's length.
+	// It panics if the type's Kind is not Array.
+	Len() int
+
+	// NumField returns a struct type's field count.
+	// It panics if the type's Kind is not Struct.
+	NumField() int
+
+	// NumIn returns a function type's input parameter count.
+	// It panics if the type's Kind is not Func.
+	NumIn() int
+
+	// NumOut returns a function type's output parameter count.
+	// It panics if the type's Kind is not Func.
+	NumOut() int
+
+	// Out returns the type of a function type's i'th output parameter.
+	// It panics if the type's Kind is not Func.
+	// It panics if i is not in the range [0, NumOut()).
+	Out(i int) Type
+
+	common() *rtype
+	uncommon() *uncommonType
+}
+```
+
+##### 1.1.2 Type接口的Name和Kind方法
+
+> - Name方法
+>     - 对于已定义的类型，Name返回该类型在其包中的名称
+>     - 对于其他（未定义的）类型，它返回空字符串
+>     - Name方法自身返回值是`string`类型
+> - Kind方法
+>     - Kind返回该类型的具体种类
+>     - Kind方法自身返回值`Kind`类型，
+>     - `Kind`类型的注释解释：
+>         - Kind代表一个类型所代表的特定种类。
+>         - 零的Kind不是一个有效的类型。
+
+```go
+// Name方法源码
+// Name returns the type's name within its package for a defined type.
+// For other (non-defined) types it returns the empty string.
+Name() string
+
+// Kind方法源码
+// Kind returns the specific kind of this type.
+Kind() Kind
+
+// Kind类型源码
+// A Kind represents the specific kind of type that a Type represents.
+// The zero Kind is not a valid kind.
+type Kind uint
+```
+
+
+
+
+
+
+
+
+
+
 
 ```go
 package main
@@ -9773,6 +10040,8 @@ func main() {
 ```
 
 ![image-20220328232318252](go%E7%AC%94%E8%AE%B0.assets/image-20220328232318252.png)
+
+#### 3.2 结构体反射`tag`
 
 > 通过字段名获取指定结构体字段信息，可以根据字段名，单独获取字段信息，更灵活一些
 >

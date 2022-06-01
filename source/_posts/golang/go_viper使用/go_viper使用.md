@@ -320,7 +320,7 @@ func main(){
 
 ### 2、viper获取配置文件里的值
 
-#### 2.1 获取值的方法
+#### 2.1 获取值支持的方法
 
 > Viper提供了下面这些方法根据值类型获取值，具体内部实现可以去看源码
 >
@@ -344,14 +344,36 @@ IsSet(key string) : bool
 AllSettings() : map[string]interface{}
 ```
 
-##### 2.2.1 Get
+#### 2.2 IsSet方法校验key存在
+
+> 需要注意的是：每一个Get方法在找不到值的时候都会返回零值(nil)，有些场景为了能够保证能够读取正确的值，从而避免不必要的问题出现，那么就提供了IsSet方法，用来校验给定的键(key)是否存在
+>
+> 上面的这些Get方法都适用
+
+```go
+// IsSet方法
+// IsSet checks to see if the key has been set in any of the data locations.
+// IsSet is case-insensitive for a key.
+func IsSet(key string) bool { return v.IsSet(key) }
+```
+
+> 从IsSet方法的代码注释可以看出来：
+>
+> - IsSet检查键是否在任何数据位置被设置过
+>     - key存在，返回True
+>     - key不存在，返回False
+> - IsSet对于一个键是不分大小写的
+
+#### 2.3 常用获取值的方法
+
+##### 2.3.1 Get方法
 
 > Get方法用来根据传入的key获取配置文件里的值
 >
 > - Get可以检索任何给定使用的键的值
 >     - 返回的是一个空接口类型的值
 >     - 如果是map类型，则不能使用map的中括号里放key找值
-> - 对于一个键，Get是不区分大小写的。
+> - `对于一个键，Get是不区分大小写的`
 > - Get的行为是返回与第一个
 > - 设置的地方相关的值。Viper将按照以下顺序进行检查。
 >     - override, flag, env, config file, key/value store, default
@@ -370,13 +392,6 @@ AllSettings() : map[string]interface{}
 //
 // Get returns an interface. For a specific value use one of the Get____ methods.
 func Get(key string) interface{} { return v.Get(key) }
-```
-
-```go
-// IsSet方法
-// IsSet checks to see if the key has been set in any of the data locations.
-// IsSet is case-insensitive for a key.
-func IsSet(key string) bool { return v.IsSet(key) }
 ```
 
 ```go
@@ -412,6 +427,103 @@ fmt.Printf("获取到name:%v  Type:%T\n", name, name)
 >     - 当输入的`key`为`names`时，在配置文件中是`没有`这个key的，所以打印出来是`nil`，表示空值
 
 ![image-20220526004100996](go_viper%E4%BD%BF%E7%94%A8/image-20220526004100996.png)
+
+##### 2.3.2 GetString方法
+
+> GetString以字符串形式返回与键相关的值。
+
+```go
+// GetString returns the value associated with the key as a string.
+func GetString(key string) string { return v.GetString(key) }
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
+)
+
+func initViperCnf () {
+	// 设置默认值
+	viper.SetDefault("conf", ".")
+	
+	// 下面是读取配置文件
+	// 配置文件名称，无扩展名
+	viper.SetConfigName("db_conf")
+	
+	// 需要配置此项，指定配置文件类型
+	viper.SetConfigType("yaml")
+	
+	// 查找配置文件所在路径，可以加很多个
+	viper.AddConfigPath("./conf/")
+	
+	// 读取配置
+	err := viper.ReadInConfig()
+	if err != nil {
+		_, ok := err.(viper.ConfigFileNotFoundError)
+		if ok {
+			fmt.Printf("读取配置文件时未找到:%v\n",err)
+			return
+		} else{
+			fmt.Printf("读取配置文件已找到，读取内容时错误:%v\n", err)
+			return
+		}
+	}
+	fmt.Println("读取配置文件成功")
+	
+	// 配置文件热加载
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		// 配置文件内容变更以后会回调该函数
+		fmt.Printf("监测到配置文件内容发生 %s 动作，文件位置:%s\n", e.Op, e.Name)
+	})
+}
+
+func checkKeyExists(key string) bool {
+	keyExists := viper.IsSet(key)
+	if keyExists {
+		return true
+	} else{
+		return false
+	}
+}
+
+func main(){
+	// 初始化Viper配置
+	initViperCnf()
+	
+	// key name存在
+	nameKey := checkKeyExists("name")
+	if nameKey {
+		name := viper.GetString("name")
+		fmt.Printf("获取到name:%#v  Type:%T\n", name, name)
+	} else {
+		fmt.Printf("获取到name不存在:%#v", nameKey)
+	}
+	
+	// 输入错误的key为names key names不存在
+	namesKey := checkKeyExists("names")
+	if namesKey {
+		names := viper.GetString("names")
+		fmt.Printf("获取到names:%#v  Type:%T\n", names, names)
+	} else {
+		fmt.Printf("获取到names不存在:%#v", namesKey)
+	}
+}
+```
+
+![image-20220530083131838](go_viper%E4%BD%BF%E7%94%A8/image-20220530083131838.png)
+
+
+
+> 从上面的代码分析：
+>
+> - 定义了一个checkKeyExists是否存在的方法来校验key是否存在
+> - 输入了存在的key->`name`，viper是可以正确拿到值
+> - 输入了存在的key->`names，viper不可以正确拿到值，但是返回了零值
 
 ### 3、写入配置文件
 
