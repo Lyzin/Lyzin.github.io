@@ -6,6 +6,7 @@ tags:
 - Golang
 cover: /posts_cover_img/golang/gin.jpg
 categories: Golang Gin笔记
+sticky: 1
 ---
 
 
@@ -171,7 +172,7 @@ c.JSON(200, gin.H{
 type H map[string]interface{}
 ```
 
-```json
+```go
 package main
 
 import (
