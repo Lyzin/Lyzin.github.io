@@ -8,6 +8,7 @@
 #********************************************************************
 #
 
+current_branch=$(git branch|awk '{print $2}')
 current_path=$(pwd)
 theme_name="themes"
 
@@ -69,6 +70,8 @@ function hexoDeployCode() {
 function main() {
     if [ $# -gt 0 ]
         then
+            # 当前分支
+            echo "当前分支:${current_branch}"
             # 添加文件
             addFileToGit
 
