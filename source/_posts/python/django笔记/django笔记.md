@@ -1300,6 +1300,16 @@ python manage.py migrate
 
 ![image-20220715005247735](django%E7%AC%94%E8%AE%B0/image-20220715005247735.png)
 
+##### 3.3.4 migrate不成功原因
+
+> 执行migrate不成功原因，是django在app/migrations目录下生成的迁移文件名不是`initial`结尾的
+
+![image-20220731012701596](django%E7%AC%94%E8%AE%B0/image-20220731012701596.png)
+
+
+
+
+
 #### 3.4 ORM的优化点
 
 > 在表里面一般都有`id`字段，表示主键字段
@@ -1588,10 +1598,33 @@ def query_course(request):
 ### 4、数据序列化
 
 > Django自带序列化模块，可对输出的结果进行序列化后再返回
+>
+> [https://www.cnblogs.com/garyhtml/p/15981110.html](https://www.cnblogs.com/garyhtml/p/15981110.html)
+
+```python
+# 格式：serializers.serialize('序列化成什么格式',数据)
+# 示例：
+
+from django.core import serializers   # 导入
+
+def ab_ser(request):
+    user_queryset = models.User.objects.all()
+    res = serializers.serialize('json',user_queryset)  # 序列化成json格式数据
+        """会自动帮你将数据变成json格式的字符串 并且内部非常的全面"""
+    return HttpResponse(res)  # 返回给前端页面
+```
+
+
 
 ## 四、forms组件
 
 ### 1、forms
+
+### 2、forms校验参数
+
+> 可以用来校验请求参数，不需要每次单独对参数进行各种判断了
+>
+> https://docs.djangoproject.com/zh-hans/4.0/ref/forms/validation/
 
 
 
@@ -1909,6 +1942,61 @@ def logout(request):
 ```
 
 ### 3、Django操作session
+
+### 4、Django解决前端跨域问题
+
+> https://www.cnblogs.com/open-yang/p/11301323.html
+>
+> https://www.jianshu.com/p/4bfa20fddced
+>
+> django框架实现前后端分离，首要的问题是解决跨域请求的问题
+>
+> 什么是跨域请求？
+>
+> - 简单来说就是当前发起的请求的域与该请求指向的资源所在的域不一致。
+>     - 什么是CORS呢？（Corss-Origin Resource Sharing 跨资源共享），也就是说当请求与当前的页面的地址不同即为跨域。（包括协议，域名，端口等）。
+> - 当协议+域名+端口号均相同，那么就是同一个域. 
+> - 整个CORS通信过程，都是浏览器自动完成，不需要用户参与。对于开发者来说，CORS通信与同源的AJAX通信没有差别，代码完全一样。浏览器一旦发现AJAX请求跨源，就会自动添加一些附加的头信息，有时还会多出一次附加的请求，但用户不会有感觉，因此，实现CORS通信的关键是服务器。只要服务器实现了CORS接口，就可以跨源通信
+
+> 在django框架中就是利用CORS来解决跨域请求的问题.
+
+#### 4.1 安装跨域组件
+
+```bash
+pip install django-cors-headers 
+```
+
+#### 4.2 修改settings.py
+
+```python
+# 注册跨域app
+INSTALLED_APPS = [
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'corsheaders', # 注册跨域app，建议写在所有app前面
+    'home'
+]
+
+# 添加中间件
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', # 添加cros中间件，建议放到所有中间件前面
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# 允许所有请求支持跨域
+CORS_ORIGIN_ALLOW_ALL = True
+```
+
+> 上述配置完成后，再去前端使用axios访问接口，就不会出现跨域问题了
 
 
 

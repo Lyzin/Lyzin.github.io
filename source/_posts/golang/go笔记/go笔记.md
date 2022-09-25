@@ -1045,13 +1045,75 @@ func main() {
 }
 ```
 
-### 5、rune类型
+### 5、字符类型
 
-> `rune`官方解释：rune is an alias for int32 and is equivalent to int32 in all ways. It is used, by convention, to distinguish character values from integer values
+> 在go语言中，组成每个字符串的元素叫做`字符`，所以可以通过循环遍历拿到字符
+>
+> - 字符使用`单引号`包裹起来
+> - 字符的值和类型
+>     - 值是输出的`ASCII`的值，对应`ASCII`表查询整数对应的字符，就可以查看到字符，比如`a`对应97
+>     - 类型是int32
+> - 字符只能输入一个元素，不能大于两个
+> - `%c`用来原样输出字符
+> - 字符分类为：byte类型和rune类型
+
+```golang
+package main
+
+import "fmt"
+
+func main() {
+	// 字符
+	char1 := 'a'
+	fmt.Printf("%v\n", char1) // 97
+	fmt.Printf("%T\n", char1) // int32
+}
+```
+
+#### 5.1 字符类型一：byte类型
+
+> - uint8类型(uint表示无符号，是正整数)，表示byte（字节）类型，代表了`ASCII`码的有一个字符
+>
+> - 字符串中的每个字符是uint8类型
+> - 一个汉字占用3个字节，一个字母占用一个字节
+>     - 汉字使用utf8编码
+
+```golang
+package main
+
+import "fmt"
+
+func main() {
+	s1 := "golang"
+	for i := 0; i< len(s1); i++ {
+		fmt.Printf("值v:%v 原样输出:%c 类型：%T\n", s1[i], s1[i], s1[i])
+	}
+}
+```
+
+![image-20220807222652263](go%E7%AC%94%E8%AE%B0/image-20220807222652263.png)
+
+```golang
+package main
+
+import "fmt"
+
+func main() {
+	s1 := "你好go"
+	fmt.Printf("s1 len:%v\n", len(s1)) // s1 len:8
+}
+```
+
+#### 5.2 字符类型二：rune类型
+
+> `rune`官方解释：
+>
+> - rune is an alias for int32 and is equivalent to int32 in all ways. It is used, by convention, to distinguish character values from integer values
 >
 > - int32的别名，几乎在所有方面等同于int32，一般用来表示字符的
 > - 可以使用`%c`取到对应的字符
 > - 用于区分字符值（rune用来表示字符值）和整数值
+> - 当需要处理中文等其他符合字符时，都需要用到`rune`类型，`rune`类型是int32
 
 ```go
 type rune = int32
@@ -1063,7 +1125,6 @@ package main
 import "fmt"
 
 func main() {
-	
 	var str = "hello 你好"
 	fmt.Println("len(str):", len(str)) // 12	
 }
@@ -1071,8 +1132,11 @@ func main() {
 
 > - 结果是12，从字符串字面量看 len(str) 的结果应该是8
 >   - 因为`go`是`utf-8`编码，而`go`底层字符串是用`byte`编码的，一个汉字表示3个字符
->   - 所以`str`的长度是`hello(5个字符)`+`空格(1个字符)`+`你好(6个字符)`=`12个字符`
-> - 所以可以将字符串转为rune类型，来计算字符串长度
+>   - 所以`str`的长度是`hello(5个字符)`+`空格(1个字符)`+`你好(6个字符)`=`12个字符
+
+> 如果字符串里汉字，那么就可以将字符串转为rune类型，来计算字符串长度，这样就符合肉眼看到的字符串长度
+>
+> 转换了以后就不会单独根据汉字或字母自身占用的字符去计算长度了
 
 ```go
 package main
@@ -7249,11 +7313,14 @@ func (s *stuMr) editStu() {
 
 #### 1.1 接口定义
 
-> 接口是一种抽象的类型，一种特殊的类型
->
-> 接口是一组`method`的集合，不关心属性，只关心方法
->
-> 接口用于`不关心变量类型，只关心调用它的什么方法`
+> - 接口定义：
+>     - 接口是一种抽象的类型，一种特殊的类型
+>     - 接口是一组`method`的集合，不关心属性，只关心方法
+>     - 接口用于`不关心变量类型，只关心调用它的什么方法`
+>     - 可以联想到手机、相机、U盘都可以以与电脑的usb接口建立连接，那么手机、相机、U盘的usb卡槽大小一不一样不重要，只要实现了usb接口就可以读取数据
+> - 接口注意：
+>     - 只有当两个或两个意义上的具体类型必须以相同的方式进行处理时，才需要定义接口
+>     - 不要为了接口而写接口，会增加不必要的运行损耗
 
 ```go
 // 接口定义
@@ -7268,54 +7335,78 @@ type 接口名 interface {
 ```
 
 ```go
-/*
-  @Author: lyzin
-    @Date: 2022/02/13 20:19
-    @File: basic_study
-    @Desc: 
-*/
+/**
+@File   : main
+@Date   : 2022/8/7 11:02 下午
+@Author : lyzin
+@Desc   :
+**/
+
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
-type dog struct{}
-type cat struct{}
-type pig struct{}
-
-func (d dog) speak() {
-	fmt.Printf("狗在叫\n")
+type Usb interface {
+	start()
+	stop()
 }
 
-func (c cat) speak() {
-	fmt.Printf("猫在叫\n")
+// 手机实例
+type phone struct {
+	name string
 }
 
-func (p pig) speak() {
-	fmt.Printf("猪在叫\n")
+func (p phone) start() {
+	fmt.Printf("%v开机了\n", p.name)
 }
 
-type speaker interface {
-	speak()
+func (p phone) stop() {
+	fmt.Printf("%v关机了\n", p.name)
 }
 
-func sp(s speaker) {
-	s.speak()
+// 相机实例
+type camera struct {
+	name string
 }
+
+func (c camera) start() {
+	fmt.Printf("%v开机了\n", c.name)
+}
+
+func (c camera) stop() {
+	fmt.Printf("%v关机了\n", c.name)
+}
+
+// 电脑实例
+type computer struct {}
+
+// startWork 电脑启动工作，里面的形参是u，类型是Usb接口类型，只有实现Usb接口类型里面的方法的对象才可以被传入
+func (c computer) startWork(u Usb) {
+	u.start()
+	time.Sleep(time.Second * 3)
+	u.stop()
+}
+
 
 func main() {
-	var d1 dog
-	var c1 cat
-	var p1 pig
-
-	sp(d1)
-	sp(c1)
-	sp(p1)
+	//	实例化手机
+	p1 := phone{name: "华为手机"}
+	
+	// 实例化相机
+	c1 := camera{name: "佳能相机"}
+	
+	// 实例化电脑
+	cp := computer{}
+	
+	// 电脑使用手机
+	cp.startWork(p1)
+	
+	// 电脑使用相机
+	cp.startWork(c1)
 }
-/*
-		狗在叫
-    猫在叫
-    猪在叫
-*/
 ```
 
 #### 1.2 接口实现
@@ -7662,10 +7753,14 @@ func main() {
 > 所以任何类型都实现了空接口
 >
 > 那么空接口的变量可以存任何类型的变量，也就是说，只要变量的类型是空接口，那么就可以接收任意类型的变量
+>
+> 空接口没有任何约束
 
 ##### 1.7.1 空接口变量
 
 > 空接口变量本身的值和类型都是`nil`，所以可以是任意类型
+>
+> 从下面代码可以以看出，当s1是空接口类型时，可以接收整型、字符串、布尔值等等类型，没有类型限制，所有说空接口可以是任意类型
 
 ```go
 package main
@@ -7770,17 +7865,20 @@ func main() {
 }
 ```
 
-##### 1.7.4 接口类型判断
+##### 1.7.4 类型断言
 
-> 空接口可以接收任意类型的变量，那么可以对传进来的变量类型进行判断
+> 空接口可以接收任意类型的变量，那么可以对传进来的变量类型进行判断，叫做`类型断言`
 
 ```go
-// 接口类型判断
+// 接口类型判断，也叫类型断言
 x.(T)
-
-// x表示空接口变量，T表示需要判断的数据类型
-// 这个判断接口类型返回两个值，一个是传进来的值本身，一个是错误码(布尔类型)，当传入的值的类型是判断里指定的类型，则返回true，否则返回false
 ```
+
+> - x表示空接口变量，T表示需要判断的数据类型
+> - 类型断言会返回两个值
+>     - 一个是传进来的值本身
+>     - 一个是错误码(布尔类型)
+>         - 当传入的值的类型是判断里指定的类型，则返回true，否则返回false
 
 ```go
 package main
@@ -7799,7 +7897,6 @@ func showVal(x interface{}) {
 	} else{
 		fmt.Printf("x[%v] type[%T] is not a string type\n", ok, ok)
 	}
-	
 }
 
 func main() {
@@ -7813,7 +7910,129 @@ func main() {
 
 ![image-20220214151505455](go%E7%AC%94%E8%AE%B0/image-20220214151505455.png)
 
+##### 1.7.5 空接口类型断言
 
+> 类型断言和switch语句配合使用，用来判断空接口变量是什么类型
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+// checkType 检查变量的类型
+func checkType(x interface {}) {
+	switch val := x.(type) {
+	case string:
+		fmt.Printf("%v is a string\n", val)
+	case int:
+		fmt.Printf("%v is a int\n", val)
+	case bool:
+		fmt.Printf("%v is a bool\n", val)
+	default:
+		fmt.Printf("unknow Type: %v\n", val)
+	}
+}
+
+type user struct {
+	name string
+}
+
+func main() {
+	checkType("sam")
+	checkType(90)
+	checkType(true)
+	
+	// user 结构体
+	u1 := user{name: "jhon"}
+	checkType(u1)
+}
+```
+
+![image-20220808083735071](go%E7%AC%94%E8%AE%B0/image-20220808083735071.png)
+
+##### 1.7.6 非空接口类型断言
+
+> 类型断言不止可以应用`空接口`类型断言，也可以应用到`非空接口`类型断言
+>
+> 还是以手机、相机使用usb在电脑上查看资料为例
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+type Usb interface {
+	start()
+	stop()
+}
+
+// 手机实例
+type phone struct {
+	name string
+}
+
+func (p phone) start() {
+	fmt.Printf("%v开机了\n", p.name)
+}
+
+func (p phone) stop() {
+	fmt.Printf("%v关机了\n", p.name)
+}
+
+// 相机实例
+type camera struct {
+	name string
+}
+
+func (c camera) start() {
+	fmt.Printf("%v开机了\n", c.name)
+}
+
+func (c camera) stop() {
+	fmt.Printf("%v关机了\n", c.name)
+}
+
+// 电脑实例
+type computer struct {}
+
+// startWork 电脑启动工作，里面的形参是u，类型是Usb接口类型，只有实现Usb接口类型里面的方法的对象才可以被传入
+func (c computer) startWork(u Usb) {
+	uobj, ok := u.(phone);
+	fmt.Printf("变量%v type:%T\n", uobj, uobj)
+	if  ok {
+		u.start()
+	} else {
+		u.stop()
+	}
+}
+
+
+func main() {
+	//	实例化手机
+	p1 := phone{name: "华为手机"}
+	
+	// 实例化相机
+	c1 := camera{name: "佳能相机"}
+	
+	// 实例化电脑
+	cp := computer{}
+	
+	// 电脑使用手机
+	cp.startWork(p1)
+	
+	// 电脑使用相机
+	cp.startWork(c1)
+}
+```
+
+> 上面代码中对于computer的startWork方法进行了修改，里面使用了类型断言，判断传进来的`u`类型是否为phone，如果是phone，执行start方法，不是则执行stop方法
+
+![image-20220808091430004](go%E7%AC%94%E8%AE%B0/image-20220808091430004.png)
 
 ### 2、包
 
@@ -8099,7 +8318,7 @@ import (
 > - 单独运行一个`*.go`文件，因为引用的函数、变量在内存中并没有，所以会提示`undefined`的错误
 > - 所以需要以包的形式运行，也就是引导了哪些文件，`go run `时就跟上所有的`*.go`文件，这样才可以找到对应引用的函数、变量
 
-### 3、go module
+### 3、go包管理
 
 > [https://zhuanlan.zhihu.com/p/330962571](https://zhuanlan.zhihu.com/p/330962571)
 >
@@ -8121,19 +8340,116 @@ import (
 
 #### 3.1 go module历史
 
-> 为什么要有go module?
->
-> 
+> - 在go1.11版本之前，使用自定义的包，需要将项目放到gopath目录下
+> - go1.1之后的版本则不用手动配置
+>     - 使用`go mod`管理项目依赖
+>     - 也不需要将项目放到gopath目录下
+>     - go1.13+以后可以彻底不需要gopath
 
 #### 3.2 go module使用
 
-> 
+##### 3.2.1 go mod初始化项目
+
+> 在开发项目时，可以使用`go mod`命令生成一个`go.mod`文件管理项目的依赖
+
+```bash
+# 在项目目录下执行下面命令
+go mod init example.com/studygo
+
+# 上述命令会在项目目录下生成一个go.mod文件来管理项目依赖
+```
+
+![image-20220807230007597](go%E7%AC%94%E8%AE%B0/image-20220807230007597.png)
+
+##### 3.2.2 调用本地包
+
+> 在studygo项目中新建目录calc包，calc里面放了两个公共函数，`Add`和`Sub`
+>
+> 在studygo中新建main.go文件，调用calc中的Add和Sub函数，导入时需要从`go.mod`中定义的`module`名开始写，导入以后，就可以本地包的文件夹名点的方式来调用本地包里的方法、结构体、常量等
+
+![image-20220807230934626](go%E7%AC%94%E8%AE%B0/image-20220807230934626.png)
 
 
 
+##### 3.2.3 go mod常用命令
+
+> 下面是go mod的命令
+>
+
+        download    download modules to local cache -- 下载依赖的module到本地的gopath的pkg对应包里面
+        edit        edit go.mod from tools or scripts -- 编辑go.mod文件
+        graph       print module requirement graph -- 打印模块依赖图，前提是调用了第三方包
+        init        initialize new module in current directory -- 创建一个新的module，创建go.mod文件
+        tidy        add missing and remove unused modules -- 增加丢失的module，去掉未使用的module
+        vendor      make vendored copy of dependencies -- 将依赖复制到vendor下
+        verify      verify dependencies have expected content -- 检查依赖，检查下载的第三方库有无本地修改，有修改返回非0，否则会验证成功
+        why         explain why packages or modules are needed -- 解释为什么需要依赖
+
+##### 3.2.4 调用第三方包
+
+> 调用第三方包需要两步
+>
+> - 第一步：先写调用的代码
+> - 第二步：go mod tidy增加第三方包
+
+![image-20220807233216662](go%E7%AC%94%E8%AE%B0/image-20220807233216662.png)
 
 
 
+#### 3.3 go.mod文件
+
+> [https://juejin.cn/post/6844903954879348750](https://juejin.cn/post/6844903954879348750)
+
+```golang
+module example.com/foobar
+
+go 1.13
+
+require (
+    example.com/apple v0.1.2
+    example.com/banana v1.2.3
+    example.com/banana/v2 v2.3.4
+    example.com/pineapple v0.0.0-20190924185754-1b0db40df49a
+)
+
+exclude example.com/banana v1.2.4
+replace example.com/apple v0.1.2 => example.com/rda v0.1.0 
+replace example.com/banana => example.com/hugebanana
+```
+
+> go.mod 是启用了 Go moduels 的项目所必须的最重要的文件，它描述了当前项目（也就是当前模块）的元信息，每一行都以一个动词开头，目前有以下 5 个动词:
+>
+> - module：用于定义当前项目的模块路径。
+> - go：用于设置预期的 Go 版本。
+> - require：用于设置一个特定的模块版本。
+> - exclude：用于从使用中排除一个特定的模块版本。
+> - replace：用于将一个模块版本替换为另外一个模块版本。
+
+#### 3.4 go.sum文件
+
+> go.sum 是类似于比如 dep 的 Gopkg.lock 的一类文件，它详细罗列了当前项目直接或间接依赖的所有模块版本，并写明了哪些模块版本的 SHA-256 哈希值以备 Go 在今后的操作中保证项目所依赖的那些模块版本不会被篡改。
+
+#### 3.5 GO111MODULE
+
+> `GO111MODULE`环境变量主要是 Go modules 的开关，主要有以下参数：
+>
+> - auto：只在项目包含了 go.mod 文件时启用 Go modules，在 Go 1.13 中仍然是默认值，详见 ：golang.org/issue/31857。
+> - on：无脑启用 Go modules，推荐设置，未来版本中的默认值，让 GOPATH 从此成为历史。
+> - off：禁用 Go modules。
+
+#### 3.6 go get和go install命令
+
+> - go get命令
+>     - Get将其命令行参数解析为特定模块版本的软件包。
+>     - 更新 go.mod 以要求这些版本，下载源代码到模块缓存，然后构建并安装指定的软件包。
+> - go install命令
+>     - go install命令可以用来构建和安装软件包。当指定一个版本时，'go install'在模块感知模式下运行，忽略当前目录下的go.mod文件
+
+> - get和install命令选择
+>     - 用get构建和安装软件包的做法已经过时了。
+>     - 在未来的版本中，-d标志将被默认启用，'go get'将只被用于调整当前模块的依赖关系。
+>     - 要使用当前模块的依赖关系安装软件包，请使用'go install'。
+>     - 要安装一个无视当前模块的软件包，使用'go install'，在每个参数后面加上@version后缀，如"@latest"。
 
 ## 十一、文件操作
 
@@ -9508,9 +9824,10 @@ func main() {
 
 > https://www.kancloud.cn/cattong/go_command_tutorial/261351
 >
-> 常用来查看当前go文件的文档
+> - 常用来查看当前go文件的文档
 >
-> godoc可以快速查看对应模块的文档
+>
+> - godoc可以快速查看对应模块的文档
 
 ## 十二、反射
 
@@ -10890,7 +11207,7 @@ func main() {
 
 ![image-20220502002356328](go%E7%AC%94%E8%AE%B0/image-20220502002356328.png)
 
-#### 4.9 chhannel练习题
+#### 4.9 channel练习题
 
 > // 练习题
 >
@@ -11206,3 +11523,6 @@ func main() {
 
 ![image-20220502142538484](go%E7%AC%94%E8%AE%B0/image-20220502142538484.png)
 
+### 5、Context
+
+> 

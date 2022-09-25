@@ -466,17 +466,15 @@ func main() {
 
 ![image-20220316223722700](go_gin%E5%AD%A6%E4%B9%A0.assets/image-20220316223722700.png)
 
-### 5、gin绑定参数
+### 5、gin使用结构体获取请求参数
 
 > [https://blog.csdn.net/wohu1104/article/details/121928193](https://blog.csdn.net/wohu1104/article/details/121928193)
->
-> 上面是好多种获取参数的方法，可以分开来用
->
-> 但是我们也可以通过请求的`Content-Type`的类型通过反射来自动提取请求中的`querystring、form表单、json、xml`等参数到结构体
->
-> 所以可以使用`.ShouldBind()`来自动提取这几种类型的数据，并把值绑定到对应的结构体对象上
->
-> 绑定参数也就是不需要我们通过上面的哪几种方式去获取参数了，统一使用结构体来提取参数
+
+> - gin中使用结构体获取请求参数
+>     - 第2、第3章获取请求参数的方式比较单一，gin中提供了更便捷的获取请求参数的方式
+>     - 可以通过请求的`Content-Type`的类型通过反射来自动提取请求中的`querystring(GET方式)、form表单(POST方式)、json、xml`等参数到结构体
+>     - 可以使用`.ShouldBind()`来自动提取这几种类型的数据，并把值绑定到对应的结构体对象上
+>     - 绑定参数也就是不需要通过上面的第2、第3章的方式去获取参数了，统一使用结构体来提取参数
 
 ```go
 // ShouldBind
@@ -492,11 +490,11 @@ func (c *Context) ShouldBind(obj interface{}) error {
 	b := binding.Default(c.Request.Method, c.ContentType())
 	return c.ShouldBindWith(obj, b)
 }
-
-// shouldBind绑定数据顺序
-1.如果是get请求，只是用form绑定引擎(query)
-2.如果是post请求，先检查content-type是不是JSON/XML，然后再使用form(form-data)
 ```
+
+> - shouldBind绑定数据顺序
+>     - 如果是get请求，只是用form绑定引擎(query)
+>     - 如果是post请求，先检查content-type是不是JSON/XML，然后再使用form(form-data)
 
 #### 5.1 结构体字段小写
 
@@ -544,7 +542,10 @@ func main() {
 
 #### 5.2 结构体字段大写
 
-> 为什么获取不到呢？因为结构体我们是gin这个包要访问我们在自己包里定义的结构体里的字段，在go语言中，一个包要访问另一个包里的字段，这个字段首字母必须是大写的才可以被访问到，那么我们将结构体字段改成大写试试
+> - 为什么获取不到呢？
+>     - 因为结构体是`gin`这个包要访问我们在自己包里定义的结构体里的字段，
+>     - 在o语言中，一个包要访问另一个包里的字段，这个字段首字母必须是大写的才可以被访问到
+>     - 那么将结构体字段改成大写试试
 
 ```go
 package main
@@ -586,17 +587,21 @@ func main() {
 
 ![image-20220321210628756](go_gin%E5%AD%A6%E4%B9%A0.assets/image-20220321210628756.png)
 
-> 可以看到有返回值了，但是返回值是空的，返回的是结构体字段的零值，那么也就表示在`shouldBind`的时候，传进来的参数`name`和`age`仍然没有找到对应字段进行绑定，因为结构体字段是首字母大写的，那么我们把请求里的`name`和`age`改成首字母大写试试
+> 可以看到结构体字段被返回了，但是返回值是空的？
+>
+> - 从结果来看，结构体字段的值都是对应类型的零值，其实就说明了即使进行了请求参数的`shouldBind`，但是并没有获取请求参数里的值给`UserInfo`这个结构体中的对应字段，也就是`shouldBind`的时候，传进来的参数`name`和`age`仍然没有找到对应字段进行绑定
+
+> - 由于`UserInfo`结构体字段修改成了首字母大写的，那么我们把`GET`请求里的`name`和`age`改成首字母大写试试重新请求，看看`shouldBind`是否可以获取到请求参数里对应`Name`和`Age`传进来的值
 
 ![image-20220321210841637](go_gin%E5%AD%A6%E4%B9%A0.assets/image-20220321210841637.png)
 
-#### 5.3 请求字段都小写
+> 可以看到请求参数首字母大写后，`UserInfo`这个结构体里设置的`Name`和`Age`字段通过`ShouldBind`方法成功绑定了请求参数的值
 
-> 可以看到有数据返回了，但是我们不想要在请求和返回时的字段值首字母大写，那么就需要添加结构体tag了，tag表示是用了反射
+#### 5.3 接口请求字段都小写
+
+> 从第5.2章看到有数据返回了，但是前后端交互时肯定不能是请求和返回时的字段值都是首字母大写，那么就需要使用结构体tag了，让字段都变为小写，tag表示是用了反射来获取结构体中的字段：
 >
-> gin中：
->
-> - GET请求大多用`form`这个tag
+> - Gin中的GET请求大多用`form`这个tag
 
 ```go
 package main

@@ -9,6 +9,8 @@ categories: VUE笔记
 
 ## 一、vue介绍
 
+> [https://www.bilibili.com/video/BV1zq4y1p7ga?p=75&vd_source=501c3f3a75e1512aa5b62c6a10d1550c](https://www.bilibili.com/video/BV1zq4y1p7ga?p=75&vd_source=501c3f3a75e1512aa5b62c6a10d1550c)
+
 ### 1、vue介绍
 
 > 官网：https://cn.vuejs.org/
@@ -1190,3 +1192,941 @@ categories: VUE笔记
 
 ![image-20220714103624008](vue%E7%AC%94%E8%AE%B0/image-20220714103624008.png)
 
+#### 8.3 v-else-if
+
+> 相当于是用v-if的一个分支，但是必须要和`v-if`配套使用，否则不会被识别
+
+```html
+<body>
+    <div id="app">
+        <div v-if="count === 1">1级</div>
+        <div v-else-if="count === 2">2级</div>
+        <div v-else="count === 3">3级</div>
+    </div>
+</body>
+<script src="../lib/vue/vue_v2.6.14.js"></script>
+<script>
+    const vm = new Vue({
+        "el": "#app",
+        data: {
+            flag: true,
+            count: 1
+        }
+    })
+</script>
+```
+
+![image-20220725232754842](vue%E7%AC%94%E8%AE%B0/image-20220725232754842.png)
+
+### 9、列表渲染指令
+
+#### 9.1 v-for
+
+> 主要是用来将数组循环渲染成一个列表的结构
+>
+> v-for用`item in items`形式的语法
+>
+> - `items`是待循环的数组
+> - `item`是被循环的每一项
+>
+> 需要循环哪个DOM结构，就给那个页面结构加v-for
+
+```html
+# 举例
+<li v-for="item in userinfos">name: {{ item.name }}</li>
+
+# vue代码
+<script>
+    const vm = new Vue({
+        "el": "#app",
+        data: {
+            userinfo: [{
+                id: 1,
+                name: "Sam"
+            }, {
+                id: 2,
+                name: "Jam"
+            }, {
+                id: 3,
+                name: "Tom"
+            }, ]
+        }
+    })
+```
+
+#### 9.2 v-for支持索引
+
+> v-for支持可选的第二个参数，也就是当前项的索引
+>
+> `(item, index) in items`
+>
+> 注意：
+>
+> - v-for中的`item`项和`index`索引都是形参，所以可以替换成别的形参名
+> - 索引是按需添加，不强制
+
+```html
+# 举例
+<li v-for="(item, index) in userinfos">index:{{ index }}, name: {{ item.name }}</li>
+
+# vue代码
+<script>
+    const vm = new Vue({
+        "el": "#app",
+        data: {
+            userinfo: [{
+                id: 1,
+                name: "Sam"
+            }, {
+                id: 2,
+                name: "Jam"
+            }, {
+                id: 3,
+                name: "Tom"
+            }, ]
+        }
+    })
+```
+
+> 示例
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        li {
+            list-style: none;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 200px;
+            height: 160px;
+        }
+        
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <table>
+            <thead>
+                <th>index</th>
+                <th>id</th>
+                <th>name</th>
+            </thead>
+            <tr v-for="(item, index) in userinfo">
+                <td>索引:{{ index }}</td>
+                <td>{{ item.id }}</td>
+                <td>{{ item.name }}</td>
+            </tr>
+        </table>
+    </div>
+</body>
+<script src="../lib/vue/vue_v2.6.14.js"></script>
+<script>
+    const vm = new Vue({
+        "el": "#app",
+        data: {
+            userinfo: [{
+                id: 1,
+                name: "Sam"
+            }, {
+                id: 2,
+                name: "Jam"
+            }, {
+                id: 3,
+                name: "Tom"
+            }, ]
+        }
+    })
+</script>
+
+</html>
+```
+
+![image-20220725234559909](vue%E7%AC%94%E8%AE%B0/image-20220725234559909.png)
+
+#### 9.3 v-for推荐添加key
+
+> vue官方推荐，只要用到了v-for指令，那么一定要绑定一个`:key`属性，
+>
+> key值注意事项：
+>
+> - 对于key的值只能是字符串或数字类型
+> - 并且key的值不能重复，否则会报`Duplicate keys detected`的错误
+> - 并且尽量以`当前循环项的id`作为`key`的值
+> - 不推荐`index`作为key的值，会出现数据错乱
+>     - 原因是如果添加数据时，添加数据成功以后，当前数据的索引值会变化，所以索引就不唯一了，并且和数据不是唯一绑定的，只有id才是和数据唯一绑定的
+> - 指定key可以提升性能，放置列表错乱
+
+```html
+<body>
+    <div id="app">
+        <table>
+            <thead>
+                <th>index</th>
+                <th>id</th>
+                <th>name</th>
+            </thead>
+            <!-- v-for绑定key属性， 推荐以id作为key的值 -->
+            <tr v-for="(item, index) in userinfo" :key="item.id">
+                <td>索引:{{ index }}</td>
+                <td>{{ item.id }}</td>
+                <td>{{ item.name }}</td>
+            </tr>
+        </table>
+    </div>
+```
+
+## 三、vue-cli
+
+### 1、vue-cli介绍
+
+> vue-cli是vue.js开发的标准工具，简化基于webpack创建工程化vue项目的过程
+>
+> 网址：[https://cli.vuejs.org/zh](https://cli.vuejs.org/zh)
+
+> 以下来源于vue-cli官网
+>
+> Vue CLI 是一个基于 Vue.js 进行快速开发的完整系统，提供：
+>
+> - 通过 `@vue/cli` 实现的交互式的项目脚手架。
+> - 通过 `@vue/cli` + `@vue/cli-service-global` 实现的零配置原型开发。
+> - 一个运行时依赖 (@vue/cli-service)，该依赖：
+>     - 可升级；
+>     - 基于 webpack 构建，并带有合理的默认配置；
+>     - 可以通过项目内的配置文件进行配置；
+>     - 可以通过插件进行扩展。
+> - 一个丰富的官方插件集合，集成了前端生态中最好的工具。
+> - 一套完全图形化的创建和管理 Vue.js 项目的用户界面。
+>
+> Vue CLI 致力于将 Vue 生态中的工具基础标准化。它确保了各种构建工具能够基于智能的默认配置即可平稳衔接，这样你可以专注在撰写应用上，而不必花好几天去纠结配置的问题。与此同时，它也为每个工具提供了调整配置的灵活性，无需 eject。
+
+#### 1.1 vue-cli组件
+
+> Vue CLI 有几个独立的部分——如果你看到了我们的[源代码](https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue)，你会发现这个仓库里同时管理了多个单独发布的包。
+
+##### 1.1.1 CLI
+
+> CLI (`@vue/cli`) 是一个全局安装的 npm 包，提供了终端里的 `vue` 命令。它可以通过 `vue create` 快速搭建一个新项目，或者直接通过 `vue serve` 构建新想法的原型。你也可以通过 `vue ui` 通过一套图形化界面管理你的所有项目。我们会在接下来的指南中逐章节深入介绍。
+
+##### 1.1.2 CLI服务
+
+> CLI 服务 (`@vue/cli-service`) 是一个开发环境依赖。它是一个 npm 包，局部安装在每个 `@vue/cli` 创建的项目中。
+>
+> CLI 服务是构建于 [webpack](http://webpack.js.org/) 和 [webpack-dev-server](https://github.com/webpack/webpack-dev-server) 之上的。它包含了：
+>
+> - 加载其它 CLI 插件的核心服务；
+> - 一个针对绝大部分应用优化过的内部的 webpack 配置；
+> - 项目内部的 `vue-cli-service` 命令，提供 `serve`、`build` 和 `inspect` 命令
+
+### 2、vue-cli安装和卸载
+
+#### 2.1 vue-cli安装
+
+> 安装vue-cli需要对node有版本要求
+>
+> Vue CLI 4.x
+>
+> - 需要[Node.js](https://nodejs.org/) v8.9 或更高版本 (推荐 v10 以上)
+> - 可以使用 [n](https://github.com/tj/n)，[nvm](https://github.com/creationix/nvm) 或 [nvm-windows](https://github.com/coreybutler/nvm-windows) 在同一台电脑中管理多个 Node 版本。
+
+```bash
+npm install -g @vue/cli
+```
+
+![image-20220727132545206](vue%E7%AC%94%E8%AE%B0/image-20220727132545206.png)
+
+> 如果已经安装过了，会提示下方报错
+
+![image-20220727131119691](vue%E7%AC%94%E8%AE%B0/image-20220727131119691.png)
+
+> 安装之后，就可以在命令行中访问 vue 命令
+
+```bash
+# 可以通过简单运行 vue，看看是否展示出了一份所有可用命令的帮助信息，来验证它是否安装成功。
+vue
+```
+
+![image-20220727131300873](vue%E7%AC%94%E8%AE%B0/image-20220727131300873.png)
+
+![image-20220727132629020](vue%E7%AC%94%E8%AE%B0/image-20220727132629020.png)
+
+> 还可以用这个命令来检查其版本是否正确
+
+```bash
+vue -V
+```
+
+![image-20220727132657452](vue%E7%AC%94%E8%AE%B0/image-20220727132657452.png)
+
+#### 2.2 vue-cli卸载
+
+```bash
+# vue-cli2版本
+npm uninstall vue-cli -g
+
+# vue-cli3版本
+npm uninstall @vue/cli -g
+```
+
+### 3、vue初体验
+
+#### 3.1 创建第一个vue项目
+
+> 使用vue-cli创建工程化的vue
+>
+> 项目
+
+```bash
+# 创建项目文件夹，然后进入目录，使用命令行来创建vue项目
+vue create tester-tools
+```
+
+![image-20220727133457863](vue%E7%AC%94%E8%AE%B0/image-20220727133457863.png)
+
+> 可以看到有两个提示
+>
+> - 第一个提示是询问我们需要更换npm的镜像源吗？可以选否
+> - 第二个提示是询问`pick a preset`，表示`请选择预设`，可以用上下箭头选择
+>     - 如果选择`Default ([Vue 3] babel, eslint) `，会自动安装vue3，并安装`babel、eslint`
+>     - 如果选择`Default ([Vue 2] babel, eslint) `，会自动安装vue2，并安装`babel、eslint`
+> - 建议选择`Manually select features`，表示手动选择需要的功能，这样定制更高
+
+![image-20220727133956649](vue%E7%AC%94%E8%AE%B0/image-20220727133956649.png)
+
+> 可以看到有很多选项，有选中的表示已经选择了该功能
+>
+> - Babel解决js兼容性，必须`选中`
+> - TypeScript是微软的一种js语言，可以`不选`
+> - Progressive Web App (PWA) Support是渐进式的框架，可以`不选`
+> - Router是路由，可以`不选`
+> - Vuex，可以`不选`
+> - CSS Pre-processors是css预处理器，建议`选中`，
+>     - 使用空格就可以选中
+> - Linter / Formatter是代码风格，可以`不选`
+>     - 如果团队中有人用双引号，有人用单引号，那么这个工具就会报错，项目跑步起来，所以这个插件建议不安装
+> - Unit Testing是单元测试，可以`不选`
+> - E2E Testing是端对端测试，可以`不选`
+>
+> 最终选择完的结果如下
+
+![image-20220727134848045](vue%E7%AC%94%E8%AE%B0/image-20220727134848045.png)
+
+> 选择好以后，按`回车`进行下一步，会提示选择vue的版本
+>
+> - 目前学习是用的vue2，那么就选择`2.x`
+
+![image-20220727134950708](vue%E7%AC%94%E8%AE%B0/image-20220727134950708.png)
+
+> 接下来选择CSS预处理，这里选择`less`后回车
+
+![image-20220727135106581](vue%E7%AC%94%E8%AE%B0/image-20220727135106581.png)
+
+> 接下来继续提示下面的插件的配置文件想放到package.json，还是放到插件的独立的配置文件
+>
+> - 这里建议选择插件的独立的配置文件，这样可以更加独立的维护
+> - 因为package.json是项目依赖的管理文件，肯定不希望这些插件的配置信息在里面
+
+![image-20220727135415371](vue%E7%AC%94%E8%AE%B0/image-20220727135415371.png)
+
+> 此时会提示：是否想当前预设保存给未来的项目，这里可以选择否，输入`N`，后面创建vue项目可以自定义选择别的插件
+>
+> - 也可以选择`y`，当前配置就会给后面创建项目的时候来使用
+
+![image-20220727135533651](vue%E7%AC%94%E8%AE%B0/image-20220727135533651.png)
+
+> 接着会提示，选择安装依赖的包管理器，可选`Yarn`或`NPM`，这里可以选择`NPM`
+>
+> 选择`NPM`后，就会开始创建项目了
+
+![image-20220727135923350](vue%E7%AC%94%E8%AE%B0/image-20220727135923350.png)
+
+> 到这第一个vue项目就创建好了
+
+#### 3.2 运行第一个vue项目
+
+> 从上面的创建好vue项目后的提示可以看到提示了我们如何运行项目
+
+```bash
+# 切换到项目目录
+$ cd tester-tools
+
+# 启动项目
+$ npm run serve
+```
+
+![image-20220727140349959](vue%E7%AC%94%E8%AE%B0/image-20220727140349959.png)
+
+> 从上面的启动项目可以看出来
+>
+> - vue项目先启动了开发服务器
+>     - 从这句话就可以看出来：`INFO  Starting development server...`
+> - 应用运行在本地和网络地址也提示出来了
+>       - Local:http://localhost:8080/
+>         - 表示本机IP和端口
+>       - Network: http://10.1.108.84:8080
+>         - 表示网络IP和端口
+
+> 那访问下本机的IP和端口，看下我们创建的第一个vue项目，浏览器打开`http://localhost:8080/`
+
+![image-20220727140704208](vue%E7%AC%94%E8%AE%B0/image-20220727140704208.png)
+
+> 可以看到浏览器打开是VUE的默认欢迎页面，那么我们的第一个vue项目就启动成功了
+>
+> 注意：
+>
+> - `npm run serve`这个窗口不要关闭，关闭了上面访问`http://localhost:8080/`就无法访问了
+
+#### 3.3 vue项目结构
+
+> 上面我们成功的创建并启动了第一个vue项目，下面来分析下vue项目的目录结构，更加充分了解vue项目
+>
+> 从下面截图可以看出，vue项目基本分为下面几个目录
+>
+> - node_modules
+> - public
+> - src
+
+![image-20220727141741534](vue%E7%AC%94%E8%AE%B0/image-20220727141741534.png)
+
+##### 3.3.1 src目录
+
+> src目录，见名知意也知道是`source`源码的意思，表示所有写的代码都在这个目录下
+
+![image-20220727150745362](vue%E7%AC%94%E8%AE%B0/image-20220727150745362.png)
+
+> src目录的目录结构
+>
+> - assets目录
+>     - 项目中的静态资源，包括图片、css样式表
+>
+> - components（`重要`）
+>     - 将`封装好`、`可复用`的组件放到`components`目录中
+> - App.vue
+>     - 项目的根组件
+>     - 定义页面的UI结构
+> - main.js
+>     - 是项目入口文件，整个项目运行时，优先运行`main.js`
+
+##### 3.3.2 public目录
+
+> public目录，公共目录，里面存储了存放公共内容的目录，常见的内容有
+>
+> - `favicon.ico`，网站的icon
+> - `index.html`，单页面项目，所有内容都是在`index.html`里面
+
+```html
+<template>
+  <div id="app">
+    <img alt="Vue logo" src="./assets/logo.png">
+    <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
+    <HelloWorld msg="欢迎来到VUE项目"/>
+  </div>
+</template>
+
+<script>
+import HelloWorld from './components/HelloWorld.vue'
+
+export default {
+  name: 'App',
+  components: {
+    HelloWorld
+  }
+}
+</script>
+
+<style lang="less">
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+</style>
+```
+
+> 可以看到里面有div，id是app，就和实例化vue里传递给`el`属性的值是同一个，vue控制的就是这个`div`块
+
+##### 3.3.3 node_modules
+
+> 下载的第三方包的存储目录
+
+#### 3.4 vue运行流程
+
+> 工程化的vue项目，vue的功能
+>
+> - 核心概念：通过`src/main.js`将`src/components/App.vue`的页面UI结构渲染到`index.html`的指定区域中
+>     - `App.vue`用来编写需要被渲染的模板结构
+>     - `index.html`中预留一个`el`区域
+>     - `main.js`把`App.vue`的页面UI结构渲染到`index.html`预留的`el`区域
+
+```js
+// 下面是src/main.js文件的内容
+
+// 导入vue包，得到vue构造函数
+import Vue from 'vue'
+
+// 导入App.vue组件，将来要把App.vue中的模板结构渲染到html页面中去
+import App from './App.vue'
+
+Vue.config.productionTip = false
+
+// 创建vue实例对象
+new Vue({
+  // 把render函数指向的组件，渲染到html页面中去
+  render: h => h(App),
+}).$mount('#app')
+```
+
+```vue
+// 下面是src/components/App.vue文件的内容
+<template>
+  <div id="app">
+    <img alt="Vue logo" src="./assets/logo.png">
+    <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
+    <HelloWorld msg="欢迎来到VUE项目"/>
+  </div>
+</template>
+
+<script>
+import HelloWorld from './components/HelloWorld.vue'
+
+export default {
+  name: 'App',
+  components: {
+    HelloWorld
+  }
+}
+</script>
+
+<style lang="less">
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+</style>
+```
+
+```html
+# 下面代码是public/index.html
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    
+    <!-- 这里是需要被渲染的div区域 -->
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
+</html>
+```
+
+> 注意:
+>
+> - main.js中的render函数把`App.vue`的页面结构渲染给`index.html`时，`render函数`本质会将`App.vue`里UI结构，完全替换index.html里的`<div id="app"></div>`这一块，相当于是全部替换了，此时去查看页面结构，会发现没有id为`app`的div块，显示的页面结构是`App.vue`里的页面结构内容
+
+![image-20220727162915860](vue%E7%AC%94%E8%AE%B0/image-20220727162915860.png)
+
+##### 3.4.1 main.js中的vue实例对象
+
+> - vue实例vue对象时，都会传一个`el`属性指向`#app`
+>
+> - 但是在`main.js`中这个属性没有了，但是可以看到render函数后面有一个`$mount(“#app”)`
+>     - `$mount(“#app”)`作用就是和`el`属性都完全一样的
+
+### 4、组件(component)
+
+#### 4.1 vue组件化开发
+
+##### 4.1.1 组件化开发
+
+> 根据封装的意思，将页面上可`重用`的UI结构封装为组件，进而方便项目的开发和维护
+
+##### 4.1.2 vue组件化开发
+
+> vue本身是支持组件化开发的框架
+>
+> vue中规定
+>
+> - 组件的文件后缀名是`.vue`
+>     - 第一个vue项目的`src/App.vue`这个文件就是一个vue组件
+
+##### 4.1.3 vue组件的三部分
+
+> 每个`xxx.vue`组件都由3部分组成，分别是：
+>
+> - template：组件的模板结构
+> - script：组件的JavaScript行为
+> - style：组件的样式
+>     - 本质就是组件的css样式
+
+##### 4.1.4 第一个vue组件示例
+
+```vue
+// 组件第一部分：template
+<template>
+    <div>
+        <p>这是index.vue组件</p>
+        <p>这是我的第一个组件</p>
+        <p>username: {{ username }}</p>
+    </div>
+</template>
+
+// 组件第二部分：script
+<script>
+    // 默认导出，固定写法
+    export default {
+        // data数据源，下面这么写vue会报错
+        data: {
+            username: "sam"
+        }
+    }
+</script>
+
+//  组件第三部分：style样式
+<style>
+    p {
+        font-size: 24px;
+        color: deeppink;
+    }
+</style>
+```
+
+##### 4.1.5 组件data数据源注意事项
+
+> data数据源注意事项：
+>
+> - `xx.vue`组件中的data不能像之前vue实例对象里的一样，不能指向对象
+> - 组件中的data必须是一个函数，然后data这个函数将数据源给返回
+
+> 如果data数据源指向了对象，那么就会报错，报错如下
+
+```javascript
+<script>
+    // 默认导出，固定写法
+    export default {
+        // data数据源，下面这么写vue会报错
+		// data指向了一个对象，就会报错
+        data: {
+            username: "sam"
+        }
+    }
+</script>
+```
+
+![image-20220727174142040](vue%E7%AC%94%E8%AE%B0/image-20220727174142040.png)
+
+> 需要让data是一个函数，这样组件中的`template`区域才可拿到正确的数据
+
+```javascript
+<script>
+    // 默认导出，固定写法
+    export default {
+        // data数据源
+        // data数据源必须是一个函数
+        data(){
+            return {
+                username: "sam"
+            }
+            
+        }
+    }
+</script>
+```
+
+![image-20220727174527920](vue%E7%AC%94%E8%AE%B0/image-20220727174527920.png)
+
+##### 4.1.6 组件中定义methods方法
+
+> 组件中定义methods方法和vue实例对象中一样，在`methods`中定义方法即可
+
+```vue
+<template>
+    <div>
+        <p>这是index.vue组件</p>
+        <p>这是我的第一个组件</p>
+        <br>
+        <p>用户名{{ username }}</p>
+        <button @click="showMsg">点击修改用户名</button>
+    </div>
+</template>
+
+<script>
+    // 默认导出，固定写法
+    export default {
+        // data数据源
+        // data数据源必须是一个函数
+        data(){
+            return {
+                username: "修改前是:admin"
+            }
+            
+        },
+        // methods中定义方法
+        methods: {
+            showMsg() {
+                this.username = "修改后是:sam"
+            }
+        }
+
+    }
+</script>
+
+<style>
+    p {
+        font-size: 24px;
+        color: deeppink;
+    }
+</style>
+```
+
+![image-20220727175431493](vue%E7%AC%94%E8%AE%B0/image-20220727175431493.png)
+
+> 组件中`methods`里的方法的`this`是什么？
+>
+> - 在vue组件中，`this`表示当前组件的实例对象
+>     - 组件的实例对象中也有`username`属性，那么就可以直接用this来调用
+
+![image-20220727175612828](vue%E7%AC%94%E8%AE%B0/image-20220727175612828.png)
+
+##### 4.1.7 唯一根节点
+
+> 在vue中，只能有一个根节点，否则会报错
+
+```vue
+# 下面在组件的template中定义了两个div，就会报错
+<template>
+    <div>
+        <p>这是index.vue组件</p>
+        <p>这是我的第一个组件</p>
+        <br>
+        <p>用户名{{ username }}</p>
+        <button @click="showMsg">点击修改用户名</button>
+    </div>
+	<!-- 这里是第二个div，但是会报错 -->
+    <div>
+        <p>第二个div</p>
+    </div>
+</template>
+```
+
+![image-20220727231603798](vue%E7%AC%94%E8%AE%B0/image-20220727231603798.png)
+
+##### 4.1.8 启动less语法
+
+> 在创建vue工程化项目时，选择了less插件，那如何在vue组件中启用less呢？如下代码
+
+```css
+<style lang="less">
+    p {
+        font-size: 24px;
+        color: deeppink;
+    }
+</style>
+```
+
+#### 4.2 组件的使用
+
+##### 4.2.1 组件关系
+
+> 组件创建好以后，彼此之间是相互独立的，不存在父子关系
+
+![image-20220727232531377](vue%E7%AC%94%E8%AE%B0/image-20220727232531377.png)
+
+> 组件嵌套后，才产生了父子关系、兄弟关系
+>
+> - 组件A嵌套了组件B和组件C，组件A和（组件B、组件C）是父子关系
+> - 组件B和组件C是兄弟关系
+
+![image-20220727232734321](vue%E7%AC%94%E8%AE%B0/image-20220727232734321.png)
+
+##### 4.2.2 使用组件三步骤
+
+> 当组件写好以后，如何使用组件有三个步骤
+>
+> - 步骤一：在组件(`xxx.vue`的`script`节点中)中使用import语法导入需要的组件
+> - 步骤二：在组件(`xxx.vue`的`script`节点中)中使用components节点注册组件
+> - 步骤三：在组件(`xxx.vue`的`template`节点中)中以标签形式使用注册的组件
+
+```vue
+<template>
+  <div>
+    <!-- 步骤3：以标签形式使用注册的组件 -->
+    <Card></Card>
+  </div>
+</template>
+
+<script>
+// 步骤1：导入components目录下的自定义组件
+import Card from '@/components/Card.vue'
+
+export default {
+  // 步骤2：在components节点下注册组件
+  components: {
+    Card
+  }
+}
+</script>
+
+<style lang="less">
+</style>
+
+```
+
+![image-20220727234712929](vue%E7%AC%94%E8%AE%B0/image-20220727234712929.png)
+
+> 需要注意事项是：
+>
+> - 步骤1中导入组件的`@`符号，是表示从项目的`./src`目录开始查找组件，这个是webpack里的内容，vue使用`@`很有好的自定义了这个快捷方式，表示从`./src`目录下开始导入`components`目录里的组件
+> - 步骤2中在`components`节点注册组件时，只写了`Card`，表示`{“Card”:“Card”}`，就是说这个对象的key和value都是一样的，那就可以简写为`Card`
+
+> 推荐vscode插件：
+>
+> - Path Autocomplete
+>
+>     - 使用这个插件时，一定要记得vscode打开的是项目目录，比如项目根目录名字叫`tester-tool`，那么就需要用vscode打开这个目录，不能打开上一级，否则这个插件无法提示components路径
+>
+>     - 在vscode的settings.json中配置如下
+>
+>         -  "path-autocomplete.extensionOnImport": true,
+>
+>             ​    "path-autocomplete.pathMappings": {
+>
+>             ​        "@": "${folder}/src"
+>
+>             ​    }
+>
+> - Vuter
+
+##### 4.2.3 私有组件
+
+> 在单独的组件A中的`components`节点下注册了组件B，那么组件B只能在当前组件A中使用，不能被其他组件C使用，组件B就是私有组件
+
+##### 4.2.4 全局组件
+
+> 在vue项目的`main.js`入口文件中，通过`Vue.component()`方法来注册全局组件
+
+```javascript
+import Vue from 'vue'
+import App from './App.vue'
+
+// 导入需要全局注册的组件
+import Count from '@/components/Count.vue'
+
+// 注册全局组件
+// 参数1：字符串格式，表示组件的”注册名称“
+// 参数2：导入的需要被全局注册的组件
+Vue.component("Count", Count)
+
+
+Vue.config.productionTip = false
+
+new Vue({
+    render: h => h(App),
+}).$mount('#app')
+```
+
+![image-20220728001832174](vue%E7%AC%94%E8%AE%B0/image-20220728001832174.png)
+
+> 全局注册组件
+
+![image-20220728003835277](vue%E7%AC%94%E8%AE%B0/image-20220728003835277.png)
+
+> 在根组件App调用组件Left、Right组件
+
+![image-20220728004101194](vue%E7%AC%94%E8%AE%B0/image-20220728004101194.png)
+
+> 上面代码中：
+>
+> - Count组件被注册为全局组件
+> - 根组件App引入了组件Left、组件Right
+> - 组件Left、组件Right中又分别引入了全局组件Count
+>
+> 最终页面展示的效果
+
+![image-20220728004134774](vue%E7%AC%94%E8%AE%B0/image-20220728004134774.png)
+
+##### 4.2.3 组件props属性
+
+> props是组件的`自定义属性`
+>
+> 在封装通用组件的时候，合理的使用`props`属性可以极大提高组件复用性
+>
+> - 上面这句话怎么理解更好呢？
+>     - 比如封装了一个组件A，组件B和组件C地方都用到了这个组件A，但是希望组件B和组件C给组件A传进去的值是不一样，使用props属性，就可以在组件B和组件C调用组件A，传进去不同的值
+> - props作为自定义属性，允许调用者通过自定义属性，给当前组件指定初始值
+>     - 这句话理解为调用封装好的组件时，调用格式为`<组件名></组件名>`，封装好的组件有props属性时，就可以再调用的时候，将props里定义的属性拿过来到调用格式里当做属性，格式会变为`<组件名 props中的属性></组件名>`
+>     - 比如Count组件中定义了props属性，里面有个属性值是init，那么Left组件调用Count组件，就可以写成`<Count :init="9"></Count>`，其中`:`是`v-bind`的简写，表示属性绑定，这样给init属性设置了值，那么Count组件中就能接收到这个初始值，那么谁调用Count组件，传不同的值，也就做到了Count组件的复用，可以接收不同的初始值
+
+```javascript
+// 语法结构
+export default {
+    // 组件的自定义属性
+    props: ['自定义属性A', '自定义属性B', '其它自定义属性...']
+}
+```
+
+```vue
+// Count.vue组件
+<template>
+  <div class="count">
+      <p>这是全局组件Count</p>
+      <p>count:{{ init }}</p>
+      <button @click="addCount">+1</button>
+  </div>
+</template>
+
+<script>
+export default {
+  // 自定义props属性的初始化值
+  props: ["init"]
+}
+</script>
+```
+
+> 从上面的Count组件中可以看到props自定义属性，那么调用Count组件方就可以使用这些自定义属性了
+>
+> 比如Left.vue中就以标签形式调用Count组件，并且给Count组件标签中添加Count组件的props自定义属性init
+
+```vue
+// Left.vue组件
+<template>
+  <div class="left">
+      <p>这是Left组件</p>
+      <hr>
+      // 这里首先Count被注册为全局组件了
+      // 然后Count组件有一个自定义的init属性
+      <Count init="9"></Count>
+  </div>
+</template>
+```
+
+> 此时打开浏览器页面查看Left.vue结构，从下面可以看到Left组件中的Count组件的props中的init自定义属性值就是传进去的9，但是要注意的是，此时的init值的类型是字符串，那么在页面操作Left组件的`+`号操作，可以看到Count组件中的加法结果其实是字符串拼接了，因为init值是字符串9，每次+1都和`9`这个字符串拼接
