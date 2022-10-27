@@ -1,10 +1,10 @@
 ---
-title: Golang基础编程
+title: Go基础编程
 date: 2021-05-16 19:31:21
 tags: 
-- Golang
+- Go
 cover: /posts_cover_img/golang/golang_code.jpeg
-categories: Golang基础编程
+categories: Go基础编程
 sticky: 1
 ---
 

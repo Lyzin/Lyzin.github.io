@@ -1,12 +1,12 @@
 ---
-title: Golang Zap日志库
+title: Go Zap日志库
 date: 2022-05-25 08:43:00
 updated: 2022-05-25 08:43:00
 tags:
-- Golang
+- Go
 - Zap
 cover: /posts_cover_img/golang/go_zap.png
-categories: Golang Zap日志库
+categories: Go Zap日志库
 ---
 
 ## 一、Zap介绍与安装

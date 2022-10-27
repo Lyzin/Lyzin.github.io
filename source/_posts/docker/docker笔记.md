@@ -536,8 +536,8 @@ docker  cp   容器名或容器id:容器目录  拷贝出来文件的存放目�
 # step1: 在宿主机内创建需要的复制文件目录
 $ mkdir  testdir
 
-# enter命令： 是自己封装的快速进入docker container 的命令
-$ enter lyos
+# step2: 进入docker container 的命令
+$ docker exec -it lyos /bin/bash
 $ echo "docker cp: container to host" > dockercp.txt
 
 # step3: 在宿主机上将容器内的文件拷贝到宿主机

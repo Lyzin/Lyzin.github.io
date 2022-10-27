@@ -1,12 +1,12 @@
 ---
-title: Golang Redis使用
+title: Go Redis使用
 date: 2022-05-23 23:17:48
 updated: 2022-05-23 23:17:48
 tags:
 - Redis
-- Golang
+- Go
 cover: /posts_cover_img/golang/go_redis.png
-categories: Golang Redis使用
+categories: Go Redis使用
 ---
 
 ## 一、搭建Redis环境

@@ -1,12 +1,12 @@
 ---
-title: Golang RPC
+title: Go RPC
 date: 2022-08-01 16:32:29
 updated: 2022-08-01 16:32:29
 tags:
-- Golang
+- Go
 - RPC
 cover:
-categories: Golang RPC
+categories: Go RPC
 ---
 
 ## 一、RPC协议

@@ -1,11 +1,11 @@
 ---
-title: Golang日志收集项目
+title: Go日志收集项目
 date: 2022-05-16 19:31:21
 tags: 
 - 日志收集
-- Golang
+- Go
 cover: /posts_cover_img/golang/golang_code.jpeg
-categories: Golang日志收集项目
+categories: Go日志收集项目
 ---
 
 

@@ -1,12 +1,12 @@
 ---
-title: Golang Viper使用
+title: Go Viper使用
 date: 2022-05-24 21:30:31
 updated: 2022-05-24 21:30:31
 tags:
 - Viper
-- Golang
+- Go
 cover: /posts_cover_img/golang/go_viper.png
-categories: Golang Viper使用
+categories: Go Viper使用
 ---
 
 ## 一、viper介绍与安装
