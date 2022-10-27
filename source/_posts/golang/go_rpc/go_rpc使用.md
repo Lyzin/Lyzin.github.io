@@ -5,7 +5,7 @@ updated: 2022-08-01 16:32:29
 tags:
 - Go
 - RPC
-cover:
+cover: /posts_cover_img/golang/go_package.jpeg
 categories: Go RPC
 ---
 
