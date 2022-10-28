@@ -3,7 +3,7 @@ title: Go基础编程
 date: 2021-05-16 19:31:21
 tags: 
 - Go
-cover: /posts_cover_img/golang/golang_code.jpeg
+cover: /posts_cover_img/golang/go_code.jpeg
 categories: Go基础编程
 sticky: 1
 ---
