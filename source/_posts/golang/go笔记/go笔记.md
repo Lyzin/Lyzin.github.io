@@ -163,11 +163,13 @@ sticky: 1
 
 ![image-20211026115327001](go%E7%AC%94%E8%AE%B0/image-20211026115327001.png)
 
-### 9、最新配置Go开发
+### 9、最新配置Go开发环境
 
-> https://www.bilibili.com/video/BV1bV41177KD?spm_id_from=333.999.0.0
+> [https://www.bilibili.com/video/BV1bV41177KD?spm_id_from=333.999.0.0](https://www.bilibili.com/video/BV1bV41177KD?spm_id_from=333.999.0.0)
 
-### 10、Goland配置go root
+### 10、Goland相关配置
+
+#### 10.1 配置go root
 
 > 低版本的`goland`配置高版本的`go sdk`会提示报错：
 >
@@ -191,11 +193,40 @@ const TheVersion = `go1.17.8`
 
 > 保存后重启goland编辑器，然后就可以配置go sdk了
 
+#### 10.2 取消代码折叠
+
+> 代码折叠之前是这样的，可以看到
+>
+> - 导入的包被折叠
+> - 函数参数被折叠
+>
+> 查看的时候需要一个一个点开，很不方便
+
+![image-20230109235020556](go笔记/image-20230109235020556.png)
+
+> 关闭代码折叠，配置路径在Goland编辑器的Preferences->编辑器->代码折叠
+>
+> - 去掉勾选"导入",表示代码顶部的import语句不再折叠
+> - 去掉勾选"格式化字符串",表示代码中有字符串格式化的参数都不进行折叠
+
+![image-20230109235242167](go笔记/image-20230109235242167.png)
+
+> 查看取消折叠的效果，就不用手动挨个点开了
+
+![image-20230109235456394](go笔记/image-20230109235456394.png)
+
+#### 10.3 设置函数参数提示
+
+> 可以设置在调用函数是函数形参名是否展示，配置路径在Goland编辑器的Preferences->编辑器->嵌入提示->Go
+
+![image-20230109235643606](go笔记/image-20230109235643606.png)
+
 ### 11、goproxy设置
 
-> 参照七牛云设置即可
+> 参照七牛云设置即可：[https://goproxy.cn/](https://goproxy.cn/)
 >
-> [https://goproxy.cn/](https://goproxy.cn/)
+
+#### 11.1 windows设置
 
 ```go
 // windows打开PowerShell并执行
@@ -207,21 +238,19 @@ go env -w GO111MODULE=on
 go env -w GOPROXY="https://goproxy.cn"
 ```
 
+#### 11.2 macos/linux设置
+
+> 如果macos终端使用iterm2，应该是在~/.zshrc中配置
+
+```bash
+$ echo "export GO111MODULE=on" >> ~/.profile
+$ echo "export GOPROXY=https://goproxy.cn" >> ~/.profile
+$ source ~/.profile
+```
+
 ## 二、运行代码
 
-### 1、第一行代码
-
-> 代码注释:
->
-> ```go
-> // 单行注释
-> 
-> /*
-> 多行注释
-> 多行注释
-> 多行注释
-> */
-> ```
+### 1、第一行代码HelloWorld
 
 ```go
 package main
@@ -277,34 +306,48 @@ fmt.Println(string('b'))
 
 ### 6、跨平台编译代码
 
-> `GO`代码可以跨平台编译
->
-> 只需要指定对应目标操作系统的平台和处理器架构就可以了
+> `GO`代码可以做到跨平台编译，在打包时需要指定对应目标操作系统的平台和处理器架构就可以构建出跨平台的可执行程序
 
-#### 6.1 `mac`编译`linux`程序
+#### 6.1 `mac`平台编译`linux/windows`程序
 
 ```bash
-# 编译linux程序64位
+# 编译64位linux程序
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
 
-# 编译windows程序64位
+# 编译64位windows程序
 CGO_ENABLED=0 GOOS=win dows GOARCH=amd64 go build
 ```
 
-#### 6.2 `linux`编译`mac`和`windows`程序
+#### 6.2 `linux`平台编译`mac/windows`程序
 
 ```bash
-# 编译mac程序64位
+# 编译64位mac程序
 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build
 
-# 编译windows程序64位
+# 编译64位windows程序
 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build
 ```
 
-#### 6.3 `windows`下编译`mac`程序
+#### 6.3 `windows`平台编译`mac/windows`程序
 
 ```bash
+# 编译64位mac程序
 set CGO_ENABLED=0 set GOOS=darwin set GOARCH=amd64 go build
+
+# 编译64位linux程序
+set CGO_ENABLED=0 set GOOS=linux set GOARCH=amd64 go build
+```
+
+### 7、代码注释
+
+```go
+// 单行注释
+
+/*
+	多行注释
+	多行注释
+	多行注释
+*/
 ```
 
 ## 三、变量与常量
@@ -586,8 +629,8 @@ func main() {
 
 > `iota`是常量计数器，只能在`conts`常量中使用
 >
-> - `const`中每新增一行常量声明，将使`iota`的计数加一，初始的`iota`值为0
->   - 这里要注意当批量声明`const`时，如果第一个常量没有显式的写值等于`iota`，当下面的`x`常量值写了等于`iota`,那么该x常量的值就是`iota`从`0`开始到这个`x`的值,而不是从`0`开始，因为`iota`也说明了只要`const`中新增一行，`iota`就会加一
+> - `iota`的初始值为0
+> - `const`中每新增一行常量声明，将使`iota`的计数加一
 
 ```go
 package main
@@ -616,52 +659,75 @@ func main() {
     // ----
     fmt.Println(b1) // 0
     fmt.Println(b2) // 1
-    fmt.Println(b3) // 3
+    fmt.Println(b3) // 3 因为是匿名变量将iota等于2的舍弃掉了，所以b3=3
 }
 ```
 
 #### 5.4 iota的几种场景
 
-> - `iota`的核心:
->  - 每新增一行常量声明，将使`iota`的计数加一
->   - 并且`const`重新出现`iota`才会置为0
+##### 5.4.1 iota被插队
+
+> - `iota`的核心: 每新增一行常量声明，将使`iota`的计数加一
+> - 同一个`const`关键字声明里，如果iota有一行被插队了，那么被插队的下一个常量仍是会继续加一
 
 ```go
 package main
 
 import "fmt"
 
-// iota插队: `const`中每新增一行常量声明，将使`iota`的计数加一，
+// iota插队: const中每新增一行常量声明，将使iota的计数加一，
 const (
-    b1 = iota
-    b2 = 100 // 表示在const中新增一行，并且是在同一个const中
-    b3 = iota
+	b1 = iota
+	b2 = 100 // 表示在const中新增一行，并且是在同一个const中
+	b3 = iota
+)
+```
+
+
+
+>   - 使用`const`关键字重新声明常量时，再新的const中iota才会置为0
+>   - 出现`iota`才会置为0
+
+```go
+package main
+
+import "fmt"
+
+// iota默认从0开始
+
+// iota插队: const中每新增一行常量声明，将使iota的计数加一，
+const (
+	b1 = iota
+	b2 = 100 // 表示在const中新增一行，并且是在同一个const中
+	b3 = iota
 )
 
-// 多个常量声明在一行
+// 多个常量声明在一行，那么一行的iota值是同一个
 const (
-    // d1和d2在同一行，所以iota是0，所以d1:0 + 1 = 1, d2: 0 + 2 = 2
-    d1, d2 = iota + 1, iota + 2
-
-    // d1和d2在同一行，所以iota是0，所以d3:1 + 1 = 2, d4: 1 + 2 = 3
-    d3, d4 = iota + 1, iota + 2
+	// d1和d2在同一行，所以iota是0，所以d1:0 + 1 = 1, d2: 0 + 2 = 2
+	d1, d2 = iota + 1, iota + 2
+	
+	// d3和d4在同一行，所以iota是1，所以d3:1 + 1 = 2, d4: 1 + 2 = 3
+	d3, d4 = iota + 1, iota + 2
 )
 
 
 func main() {
-    fmt.Println(b1) // 0
-    fmt.Println(b2) // 1
-    fmt.Println(b3) // 2
-
-    // <--->
-    fmt.Println(d1) // 1
-    fmt.Println(d2) // 2
-    fmt.Println(d3) // 2
-    fmt.Println(d4) // 3
+	fmt.Println(b1) // 0
+	fmt.Println(b2) // 100
+	fmt.Println(b3) // 2
+	fmt.Println(b4) // 2
+	
+	fmt.Println("<-->")
+	
+	fmt.Println(d1) // 1
+	fmt.Println(d2) // 2
+	fmt.Println(d3) // 2
+	fmt.Println(d4) // 3
 }
 ```
 
-
+##### 5.4.3 iota位运算
 
 ## 四、数据类型
 
@@ -7307,7 +7373,7 @@ func (s *stuMr) editStu() {
 }
 ```
 
-## 十、接口和包
+## 十、接口与反射
 
 ### 1、接口
 
@@ -8034,7 +8100,587 @@ func main() {
 
 ![image-20220808091430004](go%E7%AC%94%E8%AE%B0/image-20220808091430004.png)
 
-### 2、包
+### 2、反射
+
+> **程序编译**：
+>
+> - 程序在编译时，变量的值会被转换为内存地址，变量名不会被编译器写入到可执行部分。
+>
+> **反射**：
+>
+> - 是指在程序运行期对程序本身进行访问和修改的能力。
+>
+> **反射的作用**：
+>
+> - 在运行程序时，程序无法获取自身的信息。
+> - 支持反射的语言可以在程序编译期将变量的反射信息，如字段名称、类型信息、结构体信息等整合到可执行文件中，并给程序提供接口访问反射信息，这样就可以在程序运行期获取类型的反射信息，并且有能力修改它们
+>
+> `GO`语言中使用`reflect`包来进行访问反射信息
+>
+> - reflect包使用`reflect.TypeOf`获取对象的类型
+> - reflect包使用`reflect.ValueOf`获取对象的值
+
+#### 2.1 反射获取类型
+
+> Go语言中，使用`reflect.TypeOf()`函数可以获得任意值的`类型对象`
+>
+> - 从而通过`类型对象`可以访问该值的`类型信息`
+> - TypeOf返回任意值的反射类型。
+> - 如果任意值的类型对象是一个nil，TypeOf返回nil。
+>
+> 下面代码分析
+>
+> - 定义了一个reflectType方法，接收一个空接口类型的x，表示接收任意类型的变量
+>     - 方法里面调用了`reflect`反射包的`TypeOf(x)`方法，表示用来获取传入的x的类型
+> - main函数中定义了三个变量，类型分别是int/string/boolean
+>     - 执行结果的截图来看，正确的打印出来了变量的对应类型
+
+```go
+// TypeOf方法源码：Typeof可以动态的返回任意值的类型
+// TypeOf returns the reflection Type that represents the dynamic type of i.
+// If i is a nil interface value, TypeOf returns nil.
+func TypeOf(i interface{}) Type {
+	eface := *(*emptyInterface)(unsafe.Pointer(&i))
+	return toType(eface.typ)
+}
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+func reflectType(x interface{}){
+	v := reflect.TypeOf(x)
+	fmt.Printf("%v type:%v\n",x, v)
+}
+
+func main() {
+	var a = 34
+	reflectType(a)
+
+	var b = "sam"
+	reflectType(b)
+
+	var c = true
+	reflectType(c)
+}
+```
+
+![image-20220328223413135](go%E7%AC%94%E8%AE%B0/image-20220328223413135.png)
+
+#### 2.2 反射中的类型和种类
+
+> 反射类型其实把类型划细分为两种，从`TypeOf`方法的返回值是`Type`可以看到，`Type自身是一个接口类型
+>
+> - 一种是类型Type
+>     - 是指用`type`关键字创建的`自定义类型`
+> - 一种是种类Kind
+>     - 是指`底层类型`，比如指针，结构体等，表示一大类的类型
+
+##### 2.2.1 TypeOf返回的Type是接口类型
+
+> Type接口与是TypeOf方法返回值的类型，里面有很多方法
+>
+> Type接口的注释的中文翻译：
+>
+> - `Type`是`go type`的代表
+> - 不是所有的方法都适用于所有kinds的types。如果有限制条件的的话，会在每个方法的文档中注明。
+> - 在调用特定类型的方法之前，请使用Kind方法来找出类型的种类。
+> - 调用一个不适合该类型的方法会导致运行时的panic
+> - 类型值是可以比较的，比如用==运算符，所以它们可以作为map类型的键使用，如果两个类型值代表相同的类型，它们就是相等的。
+
+```go
+// Type is the representation of a Go type.
+//
+// Not all methods apply to all kinds of types. Restrictions,
+// if any, are noted in the documentation for each method.
+// Use the Kind method to find out the kind of type before
+// calling kind-specific methods. Calling a method
+// inappropriate to the kind of type causes a run-time panic.
+//
+// Type values are comparable, such as with the == operator,
+// so they can be used as map keys.
+// Two Type values are equal if they represent identical types.
+type Type interface {
+	// Methods applicable to all types.
+
+	// Align returns the alignment in bytes of a value of
+	// this type when allocated in memory.
+	Align() int
+
+	// FieldAlign returns the alignment in bytes of a value of
+	// this type when used as a field in a struct.
+	FieldAlign() int
+
+	// Method returns the i'th method in the type's method set.
+	// It panics if i is not in the range [0, NumMethod()).
+	//
+	// For a non-interface type T or *T, the returned Method's Type and Func
+	// fields describe a function whose first argument is the receiver,
+	// and only exported methods are accessible.
+	//
+	// For an interface type, the returned Method's Type field gives the
+	// method signature, without a receiver, and the Func field is nil.
+	//
+	// Methods are sorted in lexicographic order.
+	Method(int) Method
+
+	// MethodByName returns the method with that name in the type's
+	// method set and a boolean indicating if the method was found.
+	//
+	// For a non-interface type T or *T, the returned Method's Type and Func
+	// fields describe a function whose first argument is the receiver.
+	//
+	// For an interface type, the returned Method's Type field gives the
+	// method signature, without a receiver, and the Func field is nil.
+	MethodByName(string) (Method, bool)
+
+	// NumMethod returns the number of methods accessible using Method.
+	//
+	// Note that NumMethod counts unexported methods only for interface types.
+	NumMethod() int
+
+	// Name returns the type's name within its package for a defined type.
+	// For other (non-defined) types it returns the empty string.
+	Name() string
+
+	// PkgPath returns a defined type's package path, that is, the import path
+	// that uniquely identifies the package, such as "encoding/base64".
+	// If the type was predeclared (string, error) or not defined (*T, struct{},
+	// []int, or A where A is an alias for a non-defined type), the package path
+	// will be the empty string.
+	PkgPath() string
+
+	// Size returns the number of bytes needed to store
+	// a value of the given type; it is analogous to unsafe.Sizeof.
+	Size() uintptr
+
+	// String returns a string representation of the type.
+	// The string representation may use shortened package names
+	// (e.g., base64 instead of "encoding/base64") and is not
+	// guaranteed to be unique among types. To test for type identity,
+	// compare the Types directly.
+	String() string
+
+	// Kind returns the specific kind of this type.
+	Kind() Kind
+
+	// Implements reports whether the type implements the interface type u.
+	Implements(u Type) bool
+
+	// AssignableTo reports whether a value of the type is assignable to type u.
+	AssignableTo(u Type) bool
+
+	// ConvertibleTo reports whether a value of the type is convertible to type u.
+	// Even if ConvertibleTo returns true, the conversion may still panic.
+	// For example, a slice of type []T is convertible to *[N]T,
+	// but the conversion will panic if its length is less than N.
+	ConvertibleTo(u Type) bool
+
+	// Comparable reports whether values of this type are comparable.
+	// Even if Comparable returns true, the comparison may still panic.
+	// For example, values of interface type are comparable,
+	// but the comparison will panic if their dynamic type is not comparable.
+	Comparable() bool
+
+	// Methods applicable only to some types, depending on Kind.
+	// The methods allowed for each kind are:
+	//
+	//	Int*, Uint*, Float*, Complex*: Bits
+	//	Array: Elem, Len
+	//	Chan: ChanDir, Elem
+	//	Func: In, NumIn, Out, NumOut, IsVariadic.
+	//	Map: Key, Elem
+	//	Ptr: Elem
+	//	Slice: Elem
+	//	Struct: Field, FieldByIndex, FieldByName, FieldByNameFunc, NumField
+
+	// Bits returns the size of the type in bits.
+	// It panics if the type's Kind is not one of the
+	// sized or unsized Int, Uint, Float, or Complex kinds.
+	Bits() int
+
+	// ChanDir returns a channel type's direction.
+	// It panics if the type's Kind is not Chan.
+	ChanDir() ChanDir
+
+	// IsVariadic reports whether a function type's final input parameter
+	// is a "..." parameter. If so, t.In(t.NumIn() - 1) returns the parameter's
+	// implicit actual type []T.
+	//
+	// For concreteness, if t represents func(x int, y ... float64), then
+	//
+	//	t.NumIn() == 2
+	//	t.In(0) is the reflect.Type for "int"
+	//	t.In(1) is the reflect.Type for "[]float64"
+	//	t.IsVariadic() == true
+	//
+	// IsVariadic panics if the type's Kind is not Func.
+	IsVariadic() bool
+
+	// Elem returns a type's element type.
+	// It panics if the type's Kind is not Array, Chan, Map, Ptr, or Slice.
+	Elem() Type
+
+	// Field returns a struct type's i'th field.
+	// It panics if the type's Kind is not Struct.
+	// It panics if i is not in the range [0, NumField()).
+	Field(i int) StructField
+
+	// FieldByIndex returns the nested field corresponding
+	// to the index sequence. It is equivalent to calling Field
+	// successively for each index i.
+	// It panics if the type's Kind is not Struct.
+	FieldByIndex(index []int) StructField
+
+	// FieldByName returns the struct field with the given name
+	// and a boolean indicating if the field was found.
+	FieldByName(name string) (StructField, bool)
+
+	// FieldByNameFunc returns the struct field with a name
+	// that satisfies the match function and a boolean indicating if
+	// the field was found.
+	//
+	// FieldByNameFunc considers the fields in the struct itself
+	// and then the fields in any embedded structs, in breadth first order,
+	// stopping at the shallowest nesting depth containing one or more
+	// fields satisfying the match function. If multiple fields at that depth
+	// satisfy the match function, they cancel each other
+	// and FieldByNameFunc returns no match.
+	// This behavior mirrors Go's handling of name lookup in
+	// structs containing embedded fields.
+	FieldByNameFunc(match func(string) bool) (StructField, bool)
+
+	// In returns the type of a function type's i'th input parameter.
+	// It panics if the type's Kind is not Func.
+	// It panics if i is not in the range [0, NumIn()).
+	In(i int) Type
+
+	// Key returns a map type's key type.
+	// It panics if the type's Kind is not Map.
+	Key() Type
+
+	// Len returns an array type's length.
+	// It panics if the type's Kind is not Array.
+	Len() int
+
+	// NumField returns a struct type's field count.
+	// It panics if the type's Kind is not Struct.
+	NumField() int
+
+	// NumIn returns a function type's input parameter count.
+	// It panics if the type's Kind is not Func.
+	NumIn() int
+
+	// NumOut returns a function type's output parameter count.
+	// It panics if the type's Kind is not Func.
+	NumOut() int
+
+	// Out returns the type of a function type's i'th output parameter.
+	// It panics if the type's Kind is not Func.
+	// It panics if i is not in the range [0, NumOut()).
+	Out(i int) Type
+
+	common() *rtype
+	uncommon() *uncommonType
+}
+```
+
+##### 2.2.2 Type接口的Name和Kind方法
+
+> - Name方法
+>     - 对于已定义的类型，Name返回该类型在其包中的名称
+>     - 对于其他（未定义的）类型，它返回空字符串
+>     - Name方法自身返回值是`string`类型
+> - Kind方法
+>     - Kind返回该类型的具体种类
+>     - Kind方法自身返回值`Kind`类型，
+>     - `Kind`类型的注释解释：
+>         - Kind代表一个类型所代表的特定种类。
+>         - 零的Kind不是一个有效的类型。
+
+```go
+// Name方法源码
+// Name returns the type's name within its package for a defined type.
+// For other (non-defined) types it returns the empty string.
+Name() string
+
+// Kind方法源码
+// Kind returns the specific kind of this type.
+Kind() Kind
+
+// Kind类型源码
+// A Kind represents the specific kind of type that a Type represents.
+// The zero Kind is not a valid kind.
+type Kind uint
+```
+
+> 下面是示例代码
+
+```go
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+func reflectType(x interface{}){
+	v := reflect.TypeOf(x)
+	fmt.Printf("type:%v <==> kind:%v\n", v.Name(), v.Kind())
+}
+
+func main() {
+	var a = 34
+	reflectType(a)
+
+	var b = "sam"
+	reflectType(b)
+
+	var c = true
+	reflectType(c)
+
+	d1 := make([]int, 10, 10)
+	d1 = []int{1,2,3,4}
+	reflectType(d1)
+
+	type e struct{
+		name string
+	}
+	e1 := e{
+		name: "sam",
+	}
+	reflectType(e1)
+}
+```
+
+> 从下面的运行结果看出， 结构体的类型是e类型，种类是struct结构体
+>
+> Go语言的反射中像数组、切片、Map、指针等类型的变量，它们的`.Name()`都是返回`空`。
+
+![image-20220328224924305](go%E7%AC%94%E8%AE%B0/image-20220328224924305.png)
+
+#### 2.3 反射获取值
+
+> `reflect.ValueOf()`返回的是`reflect.Value`类型，其中包含了原始值的值信息。`reflect.Value`与原始值之间可以互相转换。
+
+```go
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+func reflectType(x interface{}){
+	v := reflect.ValueOf(x)
+	fmt.Printf("value:%+v <==> kind:%v\n", v, v.Kind())
+}
+
+func main() {
+	var a = 34
+	reflectType(a)
+
+	var b = "sam"
+	reflectType(b)
+
+	var c = true
+	reflectType(c)
+
+	d1 := make([]int, 10, 10)
+	d1 = []int{1,2,3,4}
+	reflectType(d1)
+
+	type e struct{
+		name string
+	}
+	e1 := e{
+		name: "sam",
+	}
+	reflectType(e1)
+}
+```
+
+![image-20220328225337645](go%E7%AC%94%E8%AE%B0/image-20220328225337645.png)
+
+#### 2.4 结构体反射
+
+> 任意值通过`reflect.TypeOf()`获得反射对象信息后，如果它的类型是结构体，可以通过反射值对象（`reflect.Type`）的两个方法来获取结构体信息
+>
+> - `NumField()`方法：返回结构体成员字段数量
+>     - 所以可以用来统计一个结构体里有多少个字段
+> - `Field()`方法：根据索引，返回索引对应的结构体字段的信息
+>     - 可以获取一个结构体的一个字段的具体详细信息，比如Name，tag， index等
+
+```go
+# Field() 方法源代码， 根据索引，返回索引对应的结构体字段的信息，返回值是StructField类型
+// Field returns the i'th struct field.
+func (t *structType) Field(i int) (f StructField) {
+	if i < 0 || i >= len(t.fields) {
+		panic("reflect: Field index out of bounds")
+	}
+	p := &t.fields[i]
+	f.Type = toType(p.typ)
+	f.Name = p.name.name()
+	f.Anonymous = p.embedded()
+	if !p.name.isExported() {
+		f.PkgPath = t.pkgPath.name()
+	}
+	if tag := p.name.tag(); tag != "" {
+		f.Tag = StructTag(tag)
+	}
+	f.Offset = p.offset()
+
+	// NOTE(rsc): This is the only allocation in the interface
+	// presented by a reflect.Type. It would be nice to avoid,
+	// at least in the common cases, but we need to make sure
+	// that misbehaving clients of reflect cannot affect other
+	// uses of reflect. One possibility is CL 5371098, but we
+	// postponed that ugliness until there is a demonstrated
+	// need for the performance. This is issue 2320.
+	f.Index = []int{i}
+	return
+}
+
+// StructField是一个结构体，可以看到这个结构体里的源代码的字段
+// A StructField describes a single field in a struct.
+type StructField struct {
+	// Name is the field name.
+	Name string
+
+	// PkgPath is the package path that qualifies a lower case (unexported)
+	// field name. It is empty for upper case (exported) field names.
+	// See https://golang.org/ref/spec#Uniqueness_of_identifiers
+	PkgPath string
+
+	Type      Type      // field type 字段类型
+	Tag       StructTag // field tag string 字段标签
+	Offset    uintptr   // offset within struct, in bytes 字段在结构体中的字节偏移量
+	Index     []int     // index sequence for Type.FieldByIndex 用于Type.FieldByIndex时的索引切片
+	Anonymous bool      // is an embedded field 是否匿名字段
+}
+```
+
+```go
+// NumField() 是接口方法
+// NumField returns a struct type's field count.
+// It panics if the type's Kind is not Struct.
+NumField() int
+```
+
+#### 2.5 结构体反射示例
+
+> for循环遍历结构体所有字段信息，返回结构体成员字段数量
+>
+> - for循环会把所有字段的信息获取到
+>
+> - 当然也可以根据字段名，单独获取字段信息
+
+```go
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+type person struct{
+	Name string `liu:"name"`
+	Age int `liu:"name"`
+}
+
+func main() {
+	p1 := person{
+		Name: "sam",
+		Age: 19,
+	}
+	// 先生成一个reflect的Type类型，才可以调用Field和NumField方法
+	t := reflect.TypeOf(p1)
+	// t type:person 	 t.kind:struct
+	fmt.Printf("t type:%v \t t.kind:%v\n\n", t.Name(), t.Kind())
+
+	// for循环遍历结构体所有字段信息，返回结构体成员字段数量
+	for i := 0; i < t.NumField(); i++{
+		// Field方法传入索引，返回索引对应的结构体字段的信息，比如Name， Type， Tag等
+		field := t.Field(i)
+		fmt.Printf("field:%v\n", field)
+
+		// 字段的name就是结构体定义的首字母字段名
+		fmt.Printf("name:%v\n", field.Name)
+
+		// 字段的Type就是结构体定义的字段的类型
+		fmt.Printf("type:%v\n", field.Type)
+		
+		// 这里的Tag是我们自己在结构体里定义的liu，使用Get通过tag名获取真正的tag的值
+		fmt.Printf("tag:%v\n\n", field.Tag.Get("liu"))
+	}
+}
+```
+
+![image-20220328232318252](go%E7%AC%94%E8%AE%B0/image-20220328232318252.png)
+
+#### 2.6s 结构体反射`tag`
+
+> https://github.com/golang/go/wiki/Well-known-struct-tags
+>
+> 通过字段名获取指定结构体字段信息，可以根据字段名，单独获取字段信息，更灵活一些
+>
+> 使用到了反射值对象（`reflect.Type`）的`FieldByName`方法
+
+```go
+// FieldByName源码也是接口方法，需要统一实现，传入了字段名，然后返回了结构体字段类型和布尔类型，结构体字段类型就和上面的for循环一样，可以获取结构字段的详细信息了，比如name，type，tag等
+// FieldByName returns the struct field with the given name
+// and a boolean indicating if the field was found.
+FieldByName(name string) (StructField, bool)
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+type person struct{
+	Name string `liu:"name"`
+	Age int `liu:"name"`
+}
+
+
+func main() {
+	p1 := person{
+		Name: "sam",
+		Age: 19,
+	}
+	// 先生成一个reflect的Type类型，才可以调用Field和NumField方法
+	t := reflect.TypeOf(p1)
+	// t type:person 	 t.kind:struct
+	fmt.Printf("t type:%v \t t.kind:%v\n\n", t.Name(), t.Kind())
+
+	// 根据字段名，单独获取字段信息, 更灵活
+	field, ok := t.FieldByName("Name")
+	fmt.Printf("fieldObj:%v  ok:%v\n", field, ok)
+	if ok {
+		// 字段的name就是结构体定义的首字母字段名
+		fmt.Printf("name:%v\n", field.Name)
+
+		// 字段的Type就是结构体定义的字段的类型
+		fmt.Printf("type:%v\n", field.Type)
+
+		// 这里的Tag是我们自己在结构体里定义的liu，使用Get通过tag名获取真正的tag的值
+		fmt.Printf("tag:%v\n\n", field.Tag.Get("liu"))
+	}
+}
+```
+
+asdad
+
+
+
+## 十一、包
 
 > Go语言中支持模块化的开发理念，在Go语言中使用`包（package）`来支持代码模块化和代码复用。
 >
@@ -8042,14 +8688,14 @@ func main() {
 >
 > - Go语言为我们提供了很多内置包，如`fmt`、`os`、`io`等。
 
-#### 2.1 包的组成
+### 1、包的组成
 
 > 包类型大致可以分为`自定义包`和`main`两类
 >
 > - `自定义包`：表示这个包是自定义的包，包含一单独的功能，比如注册，登录等
 > - `main`：表示是一个可以执行，可以编译成`可执行文件`的包
 
-#### 2.2 自定义包
+#### 1.2 自定义包
 
 > 可以根据自己的需要创建自定义包
 >
@@ -8066,7 +8712,7 @@ package packagename
 */
 ```
 
-##### 2.2.1 包可见性
+#### 1.2 包可见性
 
 > 在同一个包内部声明的标识符都位于同一个命名空间下
 >
@@ -8125,7 +8771,7 @@ func sayHi() {
 }
 ```
 
-##### 2.2.2 自定义包注意事项
+#### 1.3 自定义包注意事项
 
 > 参考：
 >
@@ -8145,7 +8791,7 @@ func sayHi() {
 > - 包一般使用域名作为目录名称，这样能保证包名的唯一性
 >   - 比如 GitHub 项目的包一般会放到`GOPATH/src/github.com/userName/projectName `目录下
 
-##### 2.2.3 包禁止循环引用
+#### 1.4 包禁止循环引用
 
 > `go`语言中禁止包的循环导入
 >
@@ -8153,13 +8799,13 @@ func sayHi() {
 
 ![image-20220215132419145](go%E7%AC%94%E8%AE%B0/image-20220215132419145.png)
 
-#### 2.3 main包
+#### 1.5 main包
 
 > 包名为`main`的包是应用程序的入口包，这种包编译后会得到一个可执行文件
 >
 > 而编译不包含`main`包的源代码则不会得到可执行文件
 
-#### 2.4 包的导入
+#### 1.6 包的导入
 
 > 要在代码中引用其他包的内容，需要使用`import`关键字导入使用的包
 >
@@ -8174,7 +8820,7 @@ func sayHi() {
 import "包的路径"
 ```
 
-##### 2.4.1 包导入案例讲解
+##### 1.6.1 包导入案例讲解
 
 > 导入的包名是从`GOPATH/src/ `后开始计算的
 >
@@ -8280,7 +8926,7 @@ func main() {
 
 ![image-20220214182104927](go%E7%AC%94%E8%AE%B0/image-20220214182104927.png)
 
-#### 2.5 匿名导包
+#### 1.7 匿名导包
 
 > 如果只希望导入包，而不使用包内部的数据，可以使用匿名导入包
 >
@@ -8293,17 +8939,32 @@ import (
 )
 ```
 
-#### 2.6 init函数
+#### 1.8 init函数
 
-> `init函数`既没有参数，也没有返回值
+> `init函数`是包的初始化函数
 >
-> 是在程序运行时自动被调用执行，不能再代码中主动调用它
+> init函数的特点：
 >
-> 一个包里只能有一个`init函数`
+> - init函数的定义没有入参也没有出参
+> - 一个源文件可以有`任意个`init函数
+>
+> - 是在程序运行时自动被调用执行，不能在代码中主动调用它
+> - 当程序启动的时候，init函数会按照它们`声明的顺序自动执行`
+> - 一个包的初始化过程是按照代码中引入的顺序来进行的，所有在该包中声明的`init`函数都将被串行调用并且仅调用执行一次
+> - 每一个包初始化的时候都是先执行依赖的包中声明的`init`函数再执行当前包中声明的`init`函数，确保在程序的`main`函数开始执行时所有的依赖包都已初始化完成
+
+> 参考：[https://www.bilibili.com/read/cv12167787/](https://www.bilibili.com/read/cv12167787/)
+
+```go
+// init函数
+func init(){
+  // ...
+}
+```
 
 ![image-20220214224358662](go%E7%AC%94%E8%AE%B0/image-20220214224358662.png)
 
-##### 2.6.1 导包的init函数执行顺序
+##### 1.8.1 导包时init函数执行顺序
 
 > 从下图可以看出init函数导入包时的顺序
 
@@ -8311,14 +8972,14 @@ import (
 
 ![image-20220214232204476](go%E7%AC%94%E8%AE%B0/image-20220214232204476.png)
 
-#### 2.7 包的运行注意事项
+#### 1.9 包的运行注意事项
 
 > 当一个main包里有多个`*.go`文件时，而且文件之间有互相的依赖引用，当运行时，不能运行单独的文件
 >
 > - 单独运行一个`*.go`文件，因为引用的函数、变量在内存中并没有，所以会提示`undefined`的错误
 > - 所以需要以包的形式运行，也就是引导了哪些文件，`go run `时就跟上所有的`*.go`文件，这样才可以找到对应引用的函数、变量
 
-### 3、go包管理
+### 2、go包管理
 
 > [https://zhuanlan.zhihu.com/p/330962571](https://zhuanlan.zhihu.com/p/330962571)
 >
@@ -8338,7 +8999,7 @@ import (
 >
 > https://blog.csdn.net/u011069013/article/details/110114319
 
-#### 3.1 go module历史
+#### 2.1 go module历史
 
 > - 在go1.11版本之前，使用自定义的包，需要将项目放到gopath目录下
 > - go1.1之后的版本则不用手动配置
@@ -8346,9 +9007,9 @@ import (
 >     - 也不需要将项目放到gopath目录下
 >     - go1.13+以后可以彻底不需要gopath
 
-#### 3.2 go module使用
+#### 2.2 go module使用
 
-##### 3.2.1 go mod初始化项目
+##### 2.2.1 go mod初始化项目
 
 > 在开发项目时，可以使用`go mod`命令生成一个`go.mod`文件管理项目的依赖
 
@@ -8361,7 +9022,7 @@ go mod init example.com/studygo
 
 ![image-20220807230007597](go%E7%AC%94%E8%AE%B0/image-20220807230007597.png)
 
-##### 3.2.2 调用本地包
+##### 2.2.2 调用本地包
 
 > 在studygo项目中新建目录calc包，calc里面放了两个公共函数，`Add`和`Sub`
 >
@@ -8369,9 +9030,7 @@ go mod init example.com/studygo
 
 ![image-20220807230934626](go%E7%AC%94%E8%AE%B0/image-20220807230934626.png)
 
-
-
-##### 3.2.3 go mod常用命令
+##### 2.2.3 go mod常用命令
 
 > 下面是go mod的命令
 >
@@ -8385,7 +9044,7 @@ go mod init example.com/studygo
         verify      verify dependencies have expected content -- 检查依赖，检查下载的第三方库有无本地修改，有修改返回非0，否则会验证成功
         why         explain why packages or modules are needed -- 解释为什么需要依赖
 
-##### 3.2.4 调用第三方包
+##### 2.2.4 调用第三方包
 
 > 调用第三方包需要两步
 >
@@ -8394,9 +9053,7 @@ go mod init example.com/studygo
 
 ![image-20220807233216662](go%E7%AC%94%E8%AE%B0/image-20220807233216662.png)
 
-
-
-#### 3.3 go.mod文件
+#### 2.3 go.mod文件
 
 > [https://juejin.cn/post/6844903954879348750](https://juejin.cn/post/6844903954879348750)
 
@@ -8425,11 +9082,11 @@ replace example.com/banana => example.com/hugebanana
 > - exclude：用于从使用中排除一个特定的模块版本。
 > - replace：用于将一个模块版本替换为另外一个模块版本。
 
-#### 3.4 go.sum文件
+#### 2.4 go.sum文件
 
 > go.sum 是类似于比如 dep 的 Gopkg.lock 的一类文件，它详细罗列了当前项目直接或间接依赖的所有模块版本，并写明了哪些模块版本的 SHA-256 哈希值以备 Go 在今后的操作中保证项目所依赖的那些模块版本不会被篡改。
 
-#### 3.5 GO111MODULE
+#### 2.5 GO111MODULE
 
 > `GO111MODULE`环境变量主要是 Go modules 的开关，主要有以下参数：
 >
@@ -8437,7 +9094,7 @@ replace example.com/banana => example.com/hugebanana
 > - on：无脑启用 Go modules，推荐设置，未来版本中的默认值，让 GOPATH 从此成为历史。
 > - off：禁用 Go modules。
 
-#### 3.6 go get和go install命令
+#### 2.6 go get和go install命令
 
 > - go get命令
 >     - Get将其命令行参数解析为特定模块版本的软件包。
@@ -8451,7 +9108,7 @@ replace example.com/banana => example.com/hugebanana
 >     - 要使用当前模块的依赖关系安装软件包，请使用'go install'。
 >     - 要安装一个无视当前模块的软件包，使用'go install'，在每个参数后面加上@version后缀，如"@latest"。
 
-## 十一、文件操作
+## 十二、文件操作
 
 > 在`go`语言中，可以对文件进行读写操作
 
@@ -8990,2539 +9647,3 @@ func main() {
 
 > 这一部分先待定，目前暂时用不到
 
-## 十二、常用模块
-
-### 1、time模块
-
-> 时间概念解释
-
-> **GMT**：Greenwich Mean Time [[1\]
->
-> 格林威治标准时间 ; 英国伦敦格林威治定为0°经线开始的地方，地球每15°经度 被分为一个时区，共分为24个时区，相邻时区相差一小时；例: 中国北京位于东八区，GMT时间比北京时间慢8小时。
-
-> **UTC**: Coordinated Universal Time
->
-> 世界协调时间；经严谨计算得到的时间，精确到秒，误差在0.9s以内， 是比GMT更为精确的世界时间
-
-> **DST**: Daylight Saving Time
->
-> 夏季节约时间，即夏令时；是为了利用夏天充足的光照而将时间调早一个小时，北美、欧洲的许多国家实行夏令时；
-
-> **CST**:
->
-> 四个不同时区的缩写：
->
-> 1. Central Standard Time (USA) UT-6:00   美国标准时间
-> 2. Central Standard Time (Australia) UT+9:30  澳大利亚标准时间
-> 3. China Standard Time UT+8:00     中国标准时间
-> 4. Cuba Standard Time UT-4:00     古巴标准时间
-
-#### 1.1 当前时间
-
-> 用来表示时间，可以通过`time.Now()`函数获取本地的时间(东八区)，以及年、月、日等对象信息
-
-```go
-/*
-  @Author: lyzin
-    @Date: 2022/02/17 22:51
-    @File: basic_study
-    @Desc: 
-*/
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main() {
-	now := time.Now()
-	fmt.Printf("now:%v\n", now) // now:2022-02-20 22:00:21.9037896 +0800 CST m=+0.002991401
-	year := now.Year()
-	fmt.Printf("year:%v\n", year) 
-	
-	month := now.Month()
-	fmt.Printf("month:%v\n", month)
-	
-	day := now.Day()
-	fmt.Printf("day:%v\n", day)
-	
-	hour := now.Hour()
-	fmt.Printf("hour:%v\n", hour)
-	
-	minute := now.Minute()
-	fmt.Printf("minute:%v\n", minute)
-	
-	second := now.Second()
-	fmt.Printf("second:%v\n", second)
-}
-```
-
-#### 1.2 获取时间戳
-
-> 时间戳是最长用的一个时间格式
->
-> 表示从1970年至当前时间的总毫秒数，被称为`unix时间戳`
->
-> 使用`now.Unix()`获取当前时间戳
-
-```go
-/*
-  @Author: lyzin
-    @Date: 2022/02/17 22:51
-    @File: basic_study
-    @Desc: 
-*/
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main() {
-	now := time.Now()
-	// 秒时间戳
-	timeStamp1 := now.Unix()
-	fmt.Printf("timeStamp1:%v\n", timeStamp1)
-
-	// 毫秒时间戳
-	timeStamp2 := (now.Unix()) * 1000
-	fmt.Printf("timeStamp2:%v\n", timeStamp2)
-	
-	// 纳秒时间戳
-	timeStamp3 := now.UnixNano()
-	fmt.Printf("timeStamp3:%v\n", timeStamp3)
-}
-```
-
-#### 1.3 时间间隔常量
-
-> `time`包可以用来快速获取一个时间的常量
->
-> 时间间隔只有时、分、秒，没有天、年、日
-
-![image-20220220221753457](go%E7%AC%94%E8%AE%B0/image-20220220221753457.png)
-
-```go
-/*
-  @Author: lyzin
-    @Date: 2022/02/17 22:51
-    @File: basic_study
-    @Desc: 
-*/
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main() {
-	// 时间间隔秒数, 1秒
-	sec := time.Second
-	fmt.Printf("sec:%v\n", sec) // 1s
-
-	// 时间间隔分, 1分
-	min := time.Minute
-	fmt.Printf("min:%v\n", min) // 1m0s
-
-	// 时间间隔小时, 1小时
-	hour := time.Hour
-	fmt.Printf("hour:%v\n", hour) // 1h0m0s
-}
-```
-
-#### 1.4 时间后延Add
-
-> 时间可以往后延续
->
-> `now.Add()`函数传参里就是对应的时间数，可以是时分秒
-
-```go
-/*
-  @Author: lyzin
-    @Date: 2022/02/17 22:51
-    @File: basic_study
-    @Desc: 
-*/
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main() {
-	// 时间间隔小时, 1小时
-	hour := time.Hour
-	fmt.Printf("hour:%v\n", hour) // 1h0m0s
-
-	// 24小时以后，需要先拿到当前时间，再去当前时间的基础上再添加
-	now := time.Now()
-	afterTime := now.Add(24 * (time.Hour))
-	fmt.Printf("afterTime:%v\n", afterTime)
-}
-```
-
-#### 1.5 时间格式化
-
-##### 1.5.1 当前时间转换为字符串时间
-
-> `go`语言中使用时间模块的`Format`进行格式化，但是不是常见的`%Y-%m-%d %X`，而是用`20061234`来表示，因为`go`语言诞生于2006年1月2号15点04分
->
-> 时间格式化是将时间对象转换为字符串类型时间
-
-```go
-// 于常见格式对比
-Y   		m		d		H		M		S
-2006		1		2		3		4		5
-
-// 15:04:05表示24小时计时法
-// 03:04:05表示12小时计时法，可以添加AM/PM用来表示上午或下午
-```
-
-```go
-/*
-  @Author: lyzin
-    @Date: 2022/02/17 22:51
-    @File: basic_study
-    @Desc: 
-*/
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main() {
-	// 当前时间
-	now := time.Now()
-
-	// 格式化时间
-	str1 := now.Format("2006-01-02 03:04")
-	fmt.Printf("str1:%v\n", str1)
-
-	// 15:04:05表示24小时计时法
-	// 03:04:05表示12小时计时法，可以添加AM/PM用来表示上午或下午
-	str2 := now.Format("2006/01/02 15:04:05")
-	fmt.Printf("str2:%v\n", str2)
-}
-```
-
-##### 1.5.2 字符串时间转换为时间戳(parse/ParseInLocation)
-
-> `time.Parse()` 按照对应的格式解析字符串类型的时间，再转换为时间戳
->
-> `Parse`函数：
->
-> - 解析一个格式化的时间字符串并返回它代表的时间
-> - 如果缺少表示时区的信息，Parse会将时区设置为UTC
->   - 当解析具有时区缩写的时间字符串时，如果该时区缩写具有已定义的时间偏移量，会使用该偏移量。如果时区缩写是"UTC"，会将该时间视为UTC时间，不考虑Location
-
-```go
-/*
-  @Author: lyzin
-    @Date: 2022/02/17 22:51
-    @File: basic_study
-    @Desc: 
-*/
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main() {
-	// timeObj 是返回了字符串类型的时间格式
-	timeObj, err := time.Parse("2006-01-02", "2010-10-10")
-	if err != nil {
-		fmt.Printf("parse time failed:%v\n", err)
-	}
-	fmt.Printf("timeObj:%v\n", timeObj) // 2010-10-10 00:00:00 +0000 UTC
-	fmt.Printf("timeObj:%v\n", timeObj.Unix()) // 1286668800
-}
-```
-
-> `time.ParseInLocation()`和`time.Parse()`的区别
->
-> - 第一，当缺少时区信息时，Parse将时间解释为UTC时间，而ParseInLocation将返回值的Location设置为loc，即作为本地的时区
-> - 第二，当时间字符串提供了时区偏移量信息时，Parse会尝试去匹配本地时区，而ParseInLocation会去匹配loc
-
-```go
-// ParseInLocation源码
-func ParseInLocation(layout, value string, loc *Location) (Time, error)
-
-/* 
-	layout: 布局;安排，用来指定时间的格式
-	 value: 需要转换的时间字符串
-		 loc: 指定时区
-*/
-```
-
-> 下面代码可以看出来:
->
-> - `Parse`函数转换出来的时区是`+0000 UTC`时间，不是东八区
-> - `time.LoadLocation`先加载时区，再将获取的时区值传递给`ParseInLocation`函数，这样转换出来的就是东八区时间
-
-```go
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main() {
-	nowTime := time.Now()
-	fmt.Printf("nowTime:%v\n\n", nowTime)
-	
-	// 手动指定一个时间，计算差值
-	specTime := "2019-12-22 12:12:12"
-	specTimeFmt, _ := time.Parse("2006-01-02 15:04:05", specTime)
-	
-	// 可以看到specTimeFmt:2022-02-22 13:12:12 +0000 UTC， 默认不是东八区时间
-	fmt.Printf("specTimeFmt:%v\n", specTimeFmt)
-	
-	// 先加载时区，东八区
-	loc, _ := time.LoadLocation("Asia/ShangHai")
-	
-	// 再将时区传递给ParseInLoaction函数，这样转换出来的时间格式时区也是东八区
-	specTimeFmtNew, _ := time.ParseInLocation("2006-01-02 15:04:05", specTime, loc)
-	fmt.Printf("\nspecTimeFmtNew:%v\n", specTimeFmtNew)
-}
-```
-
-##### 1.5.3 时间戳转换为字符串时间
-
-> 使用`time.Unix(时间戳, 0)`转为字符串可读的时间格式
->
-> - `0`表示一个标志位
-> - `time.Unix()`函数返回的对象继续可以调用`Format`函数进行时间格式化
-
-```go
-/*
-  @Author: lyzin
-    @Date: 2022/02/17 22:51
-    @File: basic_study
-    @Desc: 
-*/
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main() {
-	// 当前时间
-	now := time.Now()
-
-	// 时间戳
-	timeStamp1 := now.Unix()
-	fmt.Printf("timeStamp1:%v\n", timeStamp1)
-
-	// 时间戳转换为字符串时间
-	cu := time.Unix(timeStamp1, 0)
-	fmt.Printf("cu:%v\n", cu) // 2022-02-20 22:50:47 +0800 CST
-
-	// cu对象继续调用Format方法进行格式化时间
-	fcu := cu.Format("2006/01/02 15:04:05")
-	fmt.Printf("fcu:%v\n", fcu) // 2022/02/20 22:50:47
-}
-```
-
-#### 1.6 time.Sleep
-
-> 下面是`Sleep`的源码
-
-```go
-// Sleep源码
-// Sleep pauses the current goroutine for at least the duration d.
-// A negative or zero duration causes Sleep to return immediately.
-func Sleep(d Duration)
-
-// Duration源码
-// A Duration represents the elapsed time between two instants
-// as an int64 nanosecond count. The representation limits the
-// largest representable duration to approximately 290 years.
-type Duration int64
-
-const (
-	minDuration Duration = -1 << 63
-	maxDuration Duration = 1<<63 - 1
-)
-```
-
-> 从源码可以看出来，Sleep函数需要传入的形参类型是`Duration`，所以不能将一个`int`类型的变量传给它，需要进行转换
->
-> 直接在`Sleep()`函数里只写数字，表示单位是`纳秒`
-
-```go
-/*
-  @Author: lyzin
-    @Date: 2022/02/17 22:51
-    @File: basic_study
-    @Desc: 
-*/
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main() {
-	// 时间间隔
-	n := 5
-	// 不能直接给Sleep里传入time.Sleep(n)，需要先进行类型转换
-	// 下面是休息了5s
-	fmt.Printf("5s前开始了:%v\n", time.Now())
-	time.Sleep(time.Duration(n) * time.Second)
-	fmt.Printf("5s后结束了:%v\n", time.Now())
-
-	fmt.Printf("3s前开始了:%v\n", time.Now())
-	time.Sleep(3 * time.Second)
-	fmt.Printf("3s后结束了:%v\n", time.Now())
-}
-
-```
-
-![image-20220220230924765](go%E7%AC%94%E8%AE%B0/image-20220220230924765.png)
-
-#### 1.7 时间差Sub
-
-> 利用`Sub`函数可以快速计算出两个时间的差值
->
-> 需要注意的是，`Sub`时，开始时间、结束时间的时区一定要一致
-
-```go
-时间差值 := 结束时间.Sub(开始时间)
-```
-
-```go
-	nowTime := time.Now()
-	fmt.Printf("nowTime:%v\n", nowTime)
-	
-	// 今天和两天后的时间差
-	dt := afterTime.Sub(nowTime)
-	fmt.Printf("dt:%v\n", dt)
-```
-
-### 2、path模块
-
-> https://studygolang.com/pkgdoc
->
-> path实现了对斜杠分隔的路径的实用操作函数。
-
-### 3、os模块
-
-> os包提供了操作系统函数的不依赖平台的接口。设计为Unix风格的，虽然错误处理是go风格的；失败的调用会返回错误值而非错误码。
->
-> 通常错误值里包含更多信息:
->
-> - 例如，如果某个使用一个文件名的调用（如Open、Stat）失败了，打印错误时会包含该文件名，错误类型将为*PathError，其内部可以解包获得更多信息。
-> - os包的接口规定为在所有操作系统中都是一致的。非公用的属性可以从操作系统特定的[syscall](http://godoc.org/syscall)包获取。
-
-### 4、数据类型转换
-
-> Go语言中可以对基础数据类型与字符串之间进行相互转换
-
-#### 4.1 string方法
-
-> string是go的内置方法，不需要引包，直接调用即可
->
-> string方法不能将数字转换为string
->
-> - 下面代码里因为string会拿着传进来的数字根据utf-8编码去找97对应的符号了，所以是a
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	i := int32(97)
-
-	// string方法不能将数字转换为string，因为string会拿着传进来的数字根据utf-8编码去找97对应的符号了，所以是a
-	ret := string(i)
-	fmt.Printf("ret=%v\n", ret) // "a"
-
-	
-}
-```
-
-#### 4.2 fmt.Sprintf方法
-
-> fmt.Sprintf转换数字为string
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	i := int32(97)
-	// fmt.Sprintf转换数字为string
-	ret1 := fmt.Sprintf("%d", i)
-	fmt.Printf("ret1 = %#v\n", ret1) // "97"
-}
-```
-
-#### 4.3 strconv方法
-
-> strconv包实现了基本数据类型和其(其是指基本数据类型)字符串之间的相互转换
-
-##### 4.3.1 ParseInt字符串转数字
-
-> 使用`ParseInt`方法进行转换，返回的值的类型都是`int64`
->
-> - 需要注意的是，`ParseInt`方法里的`bitSize`如果指定为了32位，返回结果是int64，那么可以用int32再把结果从int64强制转换为int32，这样结果精度就不会丢
-> - 当bitSize为0时，表示是int类型
-
-```go
-// ParseInt interprets a string s in the given base (0, 2 to 36) and
-// bit size (0 to 64) and returns the corresponding value i.
-// ParseInt在给定的base（0，2到36）和 bit 大小（0到64）中解释一个字符串s，并返回相应的值i。
-// 位数（0-64），并返回相应的值i。
-// The string may begin with a leading sign: "+" or "-".
-// 字符串可以以一个前导符号开始。"+"或"-"。
-// If the base argument is 0, the true base is implied by the string's
-// prefix following the sign (if present): 2 for "0b", 8 for "0" or "0o",
-// 16 for "0x", and 10 otherwise. Also, for argument base 0 only,
-// underscore characters are permitted as defined by the Go syntax for
-// integer literals.
-// 如果基数参数为0，则真正的基数是由字符串的
-// 符号后面的前缀（如果存在）：2代表 "0b"，8代表 "0 "或 "0o"。
-// 16代表 "0x"，否则就是10。另外，仅对参数base 0而言。
-// 允许使用下划线字符，这是由Go的语法定义的
-// 整数字元。
-// The bitSize argument specifies the integer type
-// that the result must fit into. Bit sizes 0, 8, 16, 32, and 64
-// correspond to int, int8, int16, int32, and int64.
-// If bitSize is below 0 or above 64, an error is returned.
-// 比特尺寸参数指定了结果必须符合的整数类型。
-// 结果必须符合的整数类型。比特大小为0、8、16、32和64
-// 对应于int、int8、int16、int32和int64。
-// 如果bitSize低于0或高于64，将返回一个错误。
-// The errors that ParseInt returns have concrete type *NumError
-// and include err.Num = s. If s is empty or contains invalid
-// digits, err.Err = ErrSyntax and the returned value is 0;
-// if the value corresponding to s cannot be represented by a
-// signed integer of the given size, err.Err = ErrRange and the
-// returned value is the maximum magnitude integer of the
-// appropriate bitSize and sign.
-// ParseInt返回的错误有具体类型*NumError
-// 如果s是空的或者包含无效的数字，err.Er就会返回错误。
-// err.Err = ErrSyntax，返回值为0。
-// 如果对应于s的值不能由给定的有符号整数表示
-// 如果s对应的值不能由给定大小的有符号整数表示，err.Err = ErrRange，返回值为0。
-// err.Err = ErrRange，并且返回值是最大量级的整数。
-// 适当的bitSize和符号。
-func ParseInt(s string, base int, bitSize int) (i int64, err error) {
-	const fnParseInt = "ParseInt"
-
-	if s == "" {
-		return 0, syntaxError(fnParseInt, s)
-	}
-
-	// Pick off leading sign.
-	s0 := s
-	neg := false
-	if s[0] == '+' {
-		s = s[1:]
-	} else if s[0] == '-' {
-		neg = true
-		s = s[1:]
-	}
-
-	// Convert unsigned and check range.
-	var un uint64
-	un, err = ParseUint(s, base, bitSize)
-	if err != nil && err.(*NumError).Err != ErrRange {
-		err.(*NumError).Func = fnParseInt
-		err.(*NumError).Num = s0
-		return 0, err
-	}
-
-	if bitSize == 0 {
-		bitSize = IntSize
-	}
-
-	cutoff := uint64(1 << uint(bitSize-1))
-	if !neg && un >= cutoff {
-		return int64(cutoff - 1), rangeError(fnParseInt, s0)
-	}
-	if neg && un > cutoff {
-		return -int64(cutoff), rangeError(fnParseInt, s0)
-	}
-	n := int64(un)
-	if neg {
-		n = -n
-	}
-	return n, nil
-}
-
-```
-
-```go
-package main
-
-import (
-	"fmt"
-	"strconv"
-)
-
-// strconv
-func main() {
-	// 从字符串中解析对应的数字数据，字符串不能有非数字的字符
-	str := "100"
-    
-    // str是需要转换的字符串
-    // 10表示转换成10进制
-    // 64表示结果必须符合的整数类型，也就是10进制的64位
-	ret, err := strconv.ParseInt(str, 10, 64)
-	if err != nil {
-		fmt.Printf("转换失败:%v\n", err)
-		return
-	}
-	fmt.Printf("ret=%v ret type=%T\n", ret, ret)
-}
-
-/* 
-	执行结果
-	ret=100 ret type=int64
-*/
-```
-
-> 注意字符串里面不能有非数字的字符，否则会报错
->
-
-![image-20220331213432391](go%E7%AC%94%E8%AE%B0/image-20220331213432391.png)
-
-##### 4.3.2 Atoi字符串转数字
-
-> strconv包里有个`Atoi`方法，专门用来将字符串转换为数字
->
-> - `A`表示字符串
->     - 因为Go语言是从C语言发展出来，C语言中没有字符串，只有字符，A是字符的数组，所以A用来表示字符串
-> - `i`表示int整型
-
-```go
-package main
-
-import (
-	"fmt"
-	"strconv"
-)
-
-// strconv
-func main() {
-	// 从字符串中解析对应的数字数据，字符串不能有非数字的字符
-	str := "100"
-	ret, err := strconv.Atoi(str)
-	if err != nil {
-		fmt.Printf("转换失败:%v\n", err)
-		return
-	}
-	fmt.Printf("ret=%v ret_type=%T\n", ret, ret)
-}
-```
-
-![image-20220331215400222](go%E7%AC%94%E8%AE%B0/image-20220331215400222.png)
-
-
-
-##### 4.3.3 ItoA数字转字符串
-
-> 将数字转换为字符串，只有一个返回值，没有err返回
-
-```go
-package main
-
-import (
-	"fmt"
-	"strconv"
-)
-
-// strconv
-func main() {
-	// 从字符串中解析对应的数字数据，字符串不能有非数字的字符
-	s := 100
-	ret := strconv.Itoa(s)
-	fmt.Printf("ret=%v ret_type=%T\n", ret, ret)
-}
-```
-
-![image-20220331215554288](go%E7%AC%94%E8%AE%B0/image-20220331215554288.png)
-
-##### 4.3.4 ParseBool字符串布尔值转成布尔值
-
-> `ParseBool`将字符串的布尔值转为真正的布尔值
-
-```go
-package main
-
-import (
-	"fmt"
-	"strconv"
-)
-
-// strconv
-func main() {
-	// 从字符串中解析对应的数字数据，字符串不能有非数字的字符
-	s := "true"
-	ret, _ := strconv.ParseBool(s)
-	fmt.Printf("ret=%v ret_type=%T\n", ret, ret)
-}
-```
-
-![image-20220331215741171](go%E7%AC%94%E8%AE%B0/image-20220331215741171.png)
-
-##### 4.3.5 ParseFloat字符串浮点型转为浮点型
-
-> `ParseFloat`需要传入`bitSize`
-
-```go
-package main
-
-import (
-	"fmt"
-	"strconv"
-)
-
-// strconv
-func main() {
-	// 从字符串中解析对应的数字数据，字符串不能有非数字的字符
-	s := "3.1415"
-	ret, _ := strconv.ParseFloat(s, 64)
-	fmt.Printf("ret=%v ret_type=%T\n", ret, ret)
-}
-```
-
-![image-20220331220000832](go%E7%AC%94%E8%AE%B0/image-20220331220000832.png)
-
-### 5、rand模块
-
-> rand模块可以用来生成随机数，是`math`包里的`rand`方法
->
-> 注意：
->
-> - 生成随机数时，需要有一个种子，否则每次生成的随机数都是一样的
-
-```go
-// rand源码
-// Intn returns, as an int, a non-negative pseudo-random number in the half-open interval [0,n)
-// from the default Source.
-// It panics if n <= 0.
-func Intn(n int) int { return globalRand.Intn(n) }
-
-// Intn用来生成一个整数的随机数，从代码注释来看是属于：左包含右不包含
-```
-
-#### 5.1 生成随机整数
-
-```go
-package main
-
-import (
-	"fmt"
-	"math/rand"
-	"time"
-)
-
-func getRandNum() int {
-	// 种子为了每次生成的随机数不一样，否则会出现每次运行得到的随机数都是一样的
-	rand.Seed(time.Now().UnixNano())
-	randNum := rand.Intn(19)
-	return randNum
-}
-
-func getRandEleBySlice(a []int) int {
-	if len(a) == 0 {
-		panic("input slice is empty")
-	}
-	
-	// 获取随机数
-	// 种子为了每次生成的随机数不一样，否则会出现每次运行得到的随机数都是一样的
-	rand.Seed(time.Now().UnixNano())
-	randEle := rand.Intn(len(a))
-	return a[randEle]
-}
-
-func main() {
-	randNum := getRandNum()
-	fmt.Printf("randNum: %v\n", randNum)
-	
-	a := []int{1,2,3,4}
-	randEle := getRandEleBySlice(a)
-	fmt.Printf("a=%v\n", randEle)
-}
-```
-
-#### 5.2 猜数字案例
-
-```go
-package main
-
-import (
-	"fmt"
-	"math/rand"
-	"os"
-	"time"
-)
-
-func getRandNum() int {
-	// 种子为了每次生成的随机数不一样，否则会出现每次运行得到的随机数都是一样的
-	rand.Seed(time.Now().UnixNano())
-	randNum := rand.Intn(10)
-	return randNum
-}
-
-func guessNumGame() {
-	// 生成一个随机数
-	guessNum := getRandNum()
-	ops := 3
-	fmt.Printf("请猜一个0-10的数字，只有%v次机会~\n", ops)
-	for i := 1; i <= ops; i++ {
-		fmt.Printf(">>>第%d次猜数字<<<\n", i)
-	
-		var inputNum int
-		fmt.Print("请猜一个数字:")
-		fmt.Scan(&inputNum)
-		
-		if inputNum > 10 {
-			fmt.Println("输入的数字不在0-10之间")
-		} else if inputNum > guessNum {
-			fmt.Println("猜大了")
-		} else if inputNum < guessNum {
-			fmt.Println("猜小了")
-		} else {
-			fmt.Println("猜对了，随机数是:", guessNum)
-			os.Exit(1)
-		}
-		if i >= ops {
-			fmt.Printf("%v次机会已经用完~\n", ops)
-			os.Exit(1)
-		}
-	}
-}
-
-func main() {
-	// 猜数字
-	guessNumGame()
-}
-```
-
-### 6、go doc
-
-> https://www.kancloud.cn/cattong/go_command_tutorial/261351
->
-> - 常用来查看当前go文件的文档
->
->
-> - godoc可以快速查看对应模块的文档
-
-## 十二、反射
-
-> **程序编译**：
->
-> - 程序在编译时，变量的值会被转换为内存地址，变量名不会被编译器写入到可执行部分。
->
-> **反射**：
->
-> - 是指在程序运行期对程序本身进行访问和修改的能力。
->
-> **反射的作用**：
->
-> - 在运行程序时，程序无法获取自身的信息。
-> - 支持反射的语言可以在程序编译期将变量的反射信息，如字段名称、类型信息、结构体信息等整合到可执行文件中，并给程序提供接口访问反射信息，这样就可以在程序运行期获取类型的反射信息，并且有能力修改它们
->
-> `GO`语言中使用`reflect`包来进行访问反射信息
->
-> - reflect包使用`reflect.TypeOf`获取对象的类型
-> - reflect包使用`reflect.ValueOf`获取对象的值
-
-### 1、反射获取对象类型:TypeOf
-
-> Go语言中，使用`reflect.TypeOf()`函数可以获得任意值的`类型对象`
->
-> - 从而通过`类型对象`可以访问该值的`类型信息`
-> - TypeOf返回任意值的反射类型。
-> - 如果任意值的类型对象是一个nil，TypeOf返回nil。
->
-> 下面代码分析
->
-> - 定义了一个reflectType方法，接收一个空接口类型的x，表示接收任意类型的变量
->     - 方法里面调用了`reflect`反射包的`TypeOf(x)`方法，表示用来获取传入的x的类型
-> - main函数中定义了三个变量，类型分别是int/string/boolean
->     - 执行结果的截图来看，正确的打印出来了变量的对应类型
-
-```go
-// TypeOf方法源码：Typeof可以动态的返回任意值的类型
-// TypeOf returns the reflection Type that represents the dynamic type of i.
-// If i is a nil interface value, TypeOf returns nil.
-func TypeOf(i interface{}) Type {
-	eface := *(*emptyInterface)(unsafe.Pointer(&i))
-	return toType(eface.typ)
-}
-```
-
-```go
-package main
-
-import (
-	"fmt"
-	"reflect"
-)
-
-func reflectType(x interface{}){
-	v := reflect.TypeOf(x)
-	fmt.Printf("%v type:%v\n",x, v)
-}
-
-func main() {
-	var a = 34
-	reflectType(a)
-
-	var b = "sam"
-	reflectType(b)
-
-	var c = true
-	reflectType(c)
-}
-```
-
-![image-20220328223413135](go%E7%AC%94%E8%AE%B0/image-20220328223413135.png)
-
-#### 1.1 反射中的类型和种类
-
-> 反射类型其实把类型划细分为两种，从`TypeOf`方法的返回值是`Type`可以看到，`Type自身是一个接口类型
->
-> - 一种是类型Type
->     - 是指用`type`关键字创建的`自定义类型`
-> - 一种是种类Kind
->     - 是指`底层类型`，比如指针，结构体等，表示一大类的类型
-
-##### 1.1.1 TypeOf返回的Type是接口类型
-
-> Type接口与是TypeOf方法返回值的类型，里面有很多方法
->
-> Type接口的注释的中文翻译：
->
-> - `Type`是`go type`的代表
-> - 不是所有的方法都适用于所有kinds的types。如果有限制条件的的话，会在每个方法的文档中注明。
-> - 在调用特定类型的方法之前，请使用Kind方法来找出类型的种类。
-> - 调用一个不适合该类型的方法会导致运行时的panic
-> - 类型值是可以比较的，比如用==运算符，所以它们可以作为map类型的键使用，如果两个类型值代表相同的类型，它们就是相等的。
-
-```go
-// Type is the representation of a Go type.
-//
-// Not all methods apply to all kinds of types. Restrictions,
-// if any, are noted in the documentation for each method.
-// Use the Kind method to find out the kind of type before
-// calling kind-specific methods. Calling a method
-// inappropriate to the kind of type causes a run-time panic.
-//
-// Type values are comparable, such as with the == operator,
-// so they can be used as map keys.
-// Two Type values are equal if they represent identical types.
-type Type interface {
-	// Methods applicable to all types.
-
-	// Align returns the alignment in bytes of a value of
-	// this type when allocated in memory.
-	Align() int
-
-	// FieldAlign returns the alignment in bytes of a value of
-	// this type when used as a field in a struct.
-	FieldAlign() int
-
-	// Method returns the i'th method in the type's method set.
-	// It panics if i is not in the range [0, NumMethod()).
-	//
-	// For a non-interface type T or *T, the returned Method's Type and Func
-	// fields describe a function whose first argument is the receiver,
-	// and only exported methods are accessible.
-	//
-	// For an interface type, the returned Method's Type field gives the
-	// method signature, without a receiver, and the Func field is nil.
-	//
-	// Methods are sorted in lexicographic order.
-	Method(int) Method
-
-	// MethodByName returns the method with that name in the type's
-	// method set and a boolean indicating if the method was found.
-	//
-	// For a non-interface type T or *T, the returned Method's Type and Func
-	// fields describe a function whose first argument is the receiver.
-	//
-	// For an interface type, the returned Method's Type field gives the
-	// method signature, without a receiver, and the Func field is nil.
-	MethodByName(string) (Method, bool)
-
-	// NumMethod returns the number of methods accessible using Method.
-	//
-	// Note that NumMethod counts unexported methods only for interface types.
-	NumMethod() int
-
-	// Name returns the type's name within its package for a defined type.
-	// For other (non-defined) types it returns the empty string.
-	Name() string
-
-	// PkgPath returns a defined type's package path, that is, the import path
-	// that uniquely identifies the package, such as "encoding/base64".
-	// If the type was predeclared (string, error) or not defined (*T, struct{},
-	// []int, or A where A is an alias for a non-defined type), the package path
-	// will be the empty string.
-	PkgPath() string
-
-	// Size returns the number of bytes needed to store
-	// a value of the given type; it is analogous to unsafe.Sizeof.
-	Size() uintptr
-
-	// String returns a string representation of the type.
-	// The string representation may use shortened package names
-	// (e.g., base64 instead of "encoding/base64") and is not
-	// guaranteed to be unique among types. To test for type identity,
-	// compare the Types directly.
-	String() string
-
-	// Kind returns the specific kind of this type.
-	Kind() Kind
-
-	// Implements reports whether the type implements the interface type u.
-	Implements(u Type) bool
-
-	// AssignableTo reports whether a value of the type is assignable to type u.
-	AssignableTo(u Type) bool
-
-	// ConvertibleTo reports whether a value of the type is convertible to type u.
-	// Even if ConvertibleTo returns true, the conversion may still panic.
-	// For example, a slice of type []T is convertible to *[N]T,
-	// but the conversion will panic if its length is less than N.
-	ConvertibleTo(u Type) bool
-
-	// Comparable reports whether values of this type are comparable.
-	// Even if Comparable returns true, the comparison may still panic.
-	// For example, values of interface type are comparable,
-	// but the comparison will panic if their dynamic type is not comparable.
-	Comparable() bool
-
-	// Methods applicable only to some types, depending on Kind.
-	// The methods allowed for each kind are:
-	//
-	//	Int*, Uint*, Float*, Complex*: Bits
-	//	Array: Elem, Len
-	//	Chan: ChanDir, Elem
-	//	Func: In, NumIn, Out, NumOut, IsVariadic.
-	//	Map: Key, Elem
-	//	Ptr: Elem
-	//	Slice: Elem
-	//	Struct: Field, FieldByIndex, FieldByName, FieldByNameFunc, NumField
-
-	// Bits returns the size of the type in bits.
-	// It panics if the type's Kind is not one of the
-	// sized or unsized Int, Uint, Float, or Complex kinds.
-	Bits() int
-
-	// ChanDir returns a channel type's direction.
-	// It panics if the type's Kind is not Chan.
-	ChanDir() ChanDir
-
-	// IsVariadic reports whether a function type's final input parameter
-	// is a "..." parameter. If so, t.In(t.NumIn() - 1) returns the parameter's
-	// implicit actual type []T.
-	//
-	// For concreteness, if t represents func(x int, y ... float64), then
-	//
-	//	t.NumIn() == 2
-	//	t.In(0) is the reflect.Type for "int"
-	//	t.In(1) is the reflect.Type for "[]float64"
-	//	t.IsVariadic() == true
-	//
-	// IsVariadic panics if the type's Kind is not Func.
-	IsVariadic() bool
-
-	// Elem returns a type's element type.
-	// It panics if the type's Kind is not Array, Chan, Map, Ptr, or Slice.
-	Elem() Type
-
-	// Field returns a struct type's i'th field.
-	// It panics if the type's Kind is not Struct.
-	// It panics if i is not in the range [0, NumField()).
-	Field(i int) StructField
-
-	// FieldByIndex returns the nested field corresponding
-	// to the index sequence. It is equivalent to calling Field
-	// successively for each index i.
-	// It panics if the type's Kind is not Struct.
-	FieldByIndex(index []int) StructField
-
-	// FieldByName returns the struct field with the given name
-	// and a boolean indicating if the field was found.
-	FieldByName(name string) (StructField, bool)
-
-	// FieldByNameFunc returns the struct field with a name
-	// that satisfies the match function and a boolean indicating if
-	// the field was found.
-	//
-	// FieldByNameFunc considers the fields in the struct itself
-	// and then the fields in any embedded structs, in breadth first order,
-	// stopping at the shallowest nesting depth containing one or more
-	// fields satisfying the match function. If multiple fields at that depth
-	// satisfy the match function, they cancel each other
-	// and FieldByNameFunc returns no match.
-	// This behavior mirrors Go's handling of name lookup in
-	// structs containing embedded fields.
-	FieldByNameFunc(match func(string) bool) (StructField, bool)
-
-	// In returns the type of a function type's i'th input parameter.
-	// It panics if the type's Kind is not Func.
-	// It panics if i is not in the range [0, NumIn()).
-	In(i int) Type
-
-	// Key returns a map type's key type.
-	// It panics if the type's Kind is not Map.
-	Key() Type
-
-	// Len returns an array type's length.
-	// It panics if the type's Kind is not Array.
-	Len() int
-
-	// NumField returns a struct type's field count.
-	// It panics if the type's Kind is not Struct.
-	NumField() int
-
-	// NumIn returns a function type's input parameter count.
-	// It panics if the type's Kind is not Func.
-	NumIn() int
-
-	// NumOut returns a function type's output parameter count.
-	// It panics if the type's Kind is not Func.
-	NumOut() int
-
-	// Out returns the type of a function type's i'th output parameter.
-	// It panics if the type's Kind is not Func.
-	// It panics if i is not in the range [0, NumOut()).
-	Out(i int) Type
-
-	common() *rtype
-	uncommon() *uncommonType
-}
-```
-
-##### 1.1.2 Type接口的Name和Kind方法
-
-> - Name方法
->     - 对于已定义的类型，Name返回该类型在其包中的名称
->     - 对于其他（未定义的）类型，它返回空字符串
->     - Name方法自身返回值是`string`类型
-> - Kind方法
->     - Kind返回该类型的具体种类
->     - Kind方法自身返回值`Kind`类型，
->     - `Kind`类型的注释解释：
->         - Kind代表一个类型所代表的特定种类。
->         - 零的Kind不是一个有效的类型。
-
-```go
-// Name方法源码
-// Name returns the type's name within its package for a defined type.
-// For other (non-defined) types it returns the empty string.
-Name() string
-
-// Kind方法源码
-// Kind returns the specific kind of this type.
-Kind() Kind
-
-// Kind类型源码
-// A Kind represents the specific kind of type that a Type represents.
-// The zero Kind is not a valid kind.
-type Kind uint
-```
-
-> 下面是示例代码
->
-
-```go
-package main
-
-import (
-	"fmt"
-	"reflect"
-)
-
-func reflectType(x interface{}){
-	v := reflect.TypeOf(x)
-	fmt.Printf("type:%v <==> kind:%v\n", v.Name(), v.Kind())
-}
-
-func main() {
-	var a = 34
-	reflectType(a)
-
-	var b = "sam"
-	reflectType(b)
-
-	var c = true
-	reflectType(c)
-
-	d1 := make([]int, 10, 10)
-	d1 = []int{1,2,3,4}
-	reflectType(d1)
-
-	type e struct{
-		name string
-	}
-	e1 := e{
-		name: "sam",
-	}
-	reflectType(e1)
-}
-```
-
-> 从下面的运行结果看出， 结构体的类型是e类型，种类是struct结构体
->
-> Go语言的反射中像数组、切片、Map、指针等类型的变量，它们的`.Name()`都是返回`空`。
-
-![image-20220328224924305](go%E7%AC%94%E8%AE%B0/image-20220328224924305.png)
-
-### 2、反射获取值
-
-> `reflect.ValueOf()`返回的是`reflect.Value`类型，其中包含了原始值的值信息。`reflect.Value`与原始值之间可以互相转换。
-
-```go
-package main
-
-import (
-	"fmt"
-	"reflect"
-)
-
-func reflectType(x interface{}){
-	v := reflect.ValueOf(x)
-	fmt.Printf("value:%+v <==> kind:%v\n", v, v.Kind())
-}
-
-func main() {
-	var a = 34
-	reflectType(a)
-
-	var b = "sam"
-	reflectType(b)
-
-	var c = true
-	reflectType(c)
-
-	d1 := make([]int, 10, 10)
-	d1 = []int{1,2,3,4}
-	reflectType(d1)
-
-	type e struct{
-		name string
-	}
-	e1 := e{
-		name: "sam",
-	}
-	reflectType(e1)
-}
-```
-
-![image-20220328225337645](go%E7%AC%94%E8%AE%B0/image-20220328225337645.png)
-
-### 3、结构体反射
-
-> 任意值通过`reflect.TypeOf()`获得反射对象信息后，如果它的类型是结构体，可以通过反射值对象（`reflect.Type`）的两个方法来获取结构体信息
->
-> - `NumField()`方法：返回结构体成员字段数量
->     - 所以可以用来统计一个结构体里有多少个字段
-> - `Field()`方法：根据索引，返回索引对应的结构体字段的信息
->     - 可以获取一个结构体的一个字段的具体详细信息，比如Name，tag， index等
-
-```go
-# Field() 方法源代码， 根据索引，返回索引对应的结构体字段的信息，返回值是StructField类型
-// Field returns the i'th struct field.
-func (t *structType) Field(i int) (f StructField) {
-	if i < 0 || i >= len(t.fields) {
-		panic("reflect: Field index out of bounds")
-	}
-	p := &t.fields[i]
-	f.Type = toType(p.typ)
-	f.Name = p.name.name()
-	f.Anonymous = p.embedded()
-	if !p.name.isExported() {
-		f.PkgPath = t.pkgPath.name()
-	}
-	if tag := p.name.tag(); tag != "" {
-		f.Tag = StructTag(tag)
-	}
-	f.Offset = p.offset()
-
-	// NOTE(rsc): This is the only allocation in the interface
-	// presented by a reflect.Type. It would be nice to avoid,
-	// at least in the common cases, but we need to make sure
-	// that misbehaving clients of reflect cannot affect other
-	// uses of reflect. One possibility is CL 5371098, but we
-	// postponed that ugliness until there is a demonstrated
-	// need for the performance. This is issue 2320.
-	f.Index = []int{i}
-	return
-}
-
-// StructField是一个结构体，可以看到这个结构体里的源代码的字段
-// A StructField describes a single field in a struct.
-type StructField struct {
-	// Name is the field name.
-	Name string
-
-	// PkgPath is the package path that qualifies a lower case (unexported)
-	// field name. It is empty for upper case (exported) field names.
-	// See https://golang.org/ref/spec#Uniqueness_of_identifiers
-	PkgPath string
-
-	Type      Type      // field type 字段类型
-	Tag       StructTag // field tag string 字段标签
-	Offset    uintptr   // offset within struct, in bytes 字段在结构体中的字节偏移量
-	Index     []int     // index sequence for Type.FieldByIndex 用于Type.FieldByIndex时的索引切片
-	Anonymous bool      // is an embedded field 是否匿名字段
-}
-```
-
-```go
-// NumField() 是接口方法
-// NumField returns a struct type's field count.
-// It panics if the type's Kind is not Struct.
-NumField() int
-```
-
-#### 3.1 结构体反射示例
-
-> for循环遍历结构体所有字段信息，返回结构体成员字段数量
->
-> - for循环会把所有字段的信息获取到
->
-> - 当然也可以根据字段名，单独获取字段信息
-
-```go
-package main
-
-import (
-	"fmt"
-	"reflect"
-)
-type person struct{
-	Name string `liu:"name"`
-	Age int `liu:"name"`
-}
-
-func main() {
-	p1 := person{
-		Name: "sam",
-		Age: 19,
-	}
-	// 先生成一个reflect的Type类型，才可以调用Field和NumField方法
-	t := reflect.TypeOf(p1)
-	// t type:person 	 t.kind:struct
-	fmt.Printf("t type:%v \t t.kind:%v\n\n", t.Name(), t.Kind())
-
-	// for循环遍历结构体所有字段信息，返回结构体成员字段数量
-	for i := 0; i < t.NumField(); i++{
-		// Field方法传入索引，返回索引对应的结构体字段的信息，比如Name， Type， Tag等
-		field := t.Field(i)
-		fmt.Printf("field:%v\n", field)
-
-		// 字段的name就是结构体定义的首字母字段名
-		fmt.Printf("name:%v\n", field.Name)
-
-		// 字段的Type就是结构体定义的字段的类型
-		fmt.Printf("type:%v\n", field.Type)
-		
-		// 这里的Tag是我们自己在结构体里定义的liu，使用Get通过tag名获取真正的tag的值
-		fmt.Printf("tag:%v\n\n", field.Tag.Get("liu"))
-	}
-}
-```
-
-![image-20220328232318252](go%E7%AC%94%E8%AE%B0/image-20220328232318252.png)
-
-#### 3.2 结构体反射`tag`
-
-> https://github.com/golang/go/wiki/Well-known-struct-tags
->
-> 通过字段名获取指定结构体字段信息，可以根据字段名，单独获取字段信息，更灵活一些
->
-> 使用到了反射值对象（`reflect.Type`）的`FieldByName`方法
-
-```go
-// FieldByName源码也是接口方法，需要统一实现，传入了字段名，然后返回了结构体字段类型和布尔类型，结构体字段类型就和上面的for循环一样，可以获取结构字段的详细信息了，比如name，type，tag等
-// FieldByName returns the struct field with the given name
-// and a boolean indicating if the field was found.
-FieldByName(name string) (StructField, bool)
-```
-
-```go
-package main
-
-import (
-	"fmt"
-	"reflect"
-)
-type person struct{
-	Name string `liu:"name"`
-	Age int `liu:"name"`
-}
-
-
-func main() {
-	p1 := person{
-		Name: "sam",
-		Age: 19,
-	}
-	// 先生成一个reflect的Type类型，才可以调用Field和NumField方法
-	t := reflect.TypeOf(p1)
-	// t type:person 	 t.kind:struct
-	fmt.Printf("t type:%v \t t.kind:%v\n\n", t.Name(), t.Kind())
-
-	// 根据字段名，单独获取字段信息, 更灵活
-	field, ok := t.FieldByName("Name")
-	fmt.Printf("fieldObj:%v  ok:%v\n", field, ok)
-	if ok {
-		// 字段的name就是结构体定义的首字母字段名
-		fmt.Printf("name:%v\n", field.Name)
-
-		// 字段的Type就是结构体定义的字段的类型
-		fmt.Printf("type:%v\n", field.Type)
-
-		// 这里的Tag是我们自己在结构体里定义的liu，使用Get通过tag名获取真正的tag的值
-		fmt.Printf("tag:%v\n\n", field.Tag.Get("liu"))
-	}
-}
-```
-
-## 十三、并发编程(非常重要)
-
-> `go`天生支持并发，所以并发编程很重要，需要好好理解
-
-### 1、并发和并行
-
-> 相关参考资料：
->
-> [https://laike9m.com/blog/huan-zai-yi-huo-bing-fa-he-bing-xing,61/](https://laike9m.com/blog/huan-zai-yi-huo-bing-fa-he-bing-xing,61/)
->
-> [https://zhuanlan.zhihu.com/p/145587728](https://zhuanlan.zhihu.com/p/145587728)
-
-> - 并发(Concurrency)
->   - 并发是同时发生
->     - 并行指物理上同时执行
->     - 并发的字面意思指的是线程同时开始执行这个事件，后续的执行是串行，还是并行，不确定，依赖于底层的硬件条件和操作系统的调度
->   - 并发的“发”
->     - 这里的发是指，如果有多个线程，都会同一时间先启动，但是线程里内容先不执行，会根据操作系统调度去交替执行
-> - 并行(Parallelism)
->   - 并行就是同时执行
->     - 并行是指线程同时执行这个过程
->     - 并发指能够让多个任务在逻辑上交织执行的程序设计
-> - 注意：
->   - 并发和并行都必须是多线程的
->   - 如果这些线程可以被同时执行(执行线程的步骤)，这叫并行
->   - 如果这些线程可以同时启动，但没有同时执行(执行线程的步骤)，这叫并发
-
-![preview](go%E7%AC%94%E8%AE%B0/v2-674f0d37fca4fac1bd2df28a2b78e633_r.jpg)
-
-> 上图是Erlang之父画的并发、并行的简单理解图
->
-> - 并发
->   - 两个队列**`交替`**使用一个咖啡机
-> - 并行
->   - 两个队列**`同时`**使用两个咖啡机
-> - 注意
->   - 一个队列对应一个任务(线程)，队列的每个人对应任务的步骤
->   - 并发要处理的任务必须是可分步骤、任务数量大于等于2的
->   - 并行要处理的任务必须是多个处理器(也就是图中的多个咖啡机)
-
-### 2、进程、线程、协程
-
-> 进程（process）：程序在操作系统中的一次执行过程，系统进行资源分配和调度的一个独立单位。
->
-> 线程（thread）：操作系统基于进程开启的轻量级进程，是操作系统调度执行的最小单位。
->
-> 协程（coroutine）：非操作系统提供而是由用户自行创建和控制的用户态‘线程’，比线程更轻量级。
-
-### 3、goroutine
-
-> Go语言中的并发程序主要是通过基于CSP（communicating sequential processes）的goroutine和channel来实现，当然也支持使用传统的多线程共享内存的并发方式。
-
-#### 3.1 goroutine介绍
-
-> Goroutine是Go语言支持并发的核心
->
-> - 在go语言中可以**`同时`**创建N个goroutine，非常的简单方便
-> - Goroutine介绍
->   - 一个goroutine会以很小的生命周期开始，一般只有2KB
->   - 和操作系统调度线程不同，操作系统是由系统内核调度的，而goroutine是由go在运行时(runtime)调度的
->   - go在运行时，会进行操作系统资源分配，会把m个goroutine合理地分配给n个操作系统线程，实现m:n的调度机制
->   - 开发人员不需要为go在代码层面维护一个线程池
->- Goroutine的特点
->   - Goroutine 是Go程序中最基本的并发执行单元
->   - 每一个程序都至少包含一个goroutine，也就是main函数的（main goroutine），当go程序创建时，它会默认创建
->   - go语言不需要自己单独写进程、线程、协程，只需要利用goroutine就可以实现并发
->   - 当需要多个任务并发执行的时候，把任务包装成一个函数，然后开启goroutine去执行，就实现了并发
-
-#### 3.2 Go关键字开启gouroutine
-
-> Go语言中使用goroutine非常简单，只需要在函数或方法调用前加上`go`关键字就可以创建一个goroutine
->
-> 从而让该函数或方法（结构体里的定义的函数就叫方法）在新创建的goroutine中执行，而不是在`main goroutine`中执行
-
-```go
-# go 关键字创建goroutine
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func addData(x int) {
-	fmt.Printf("x = %v\n", x)
-}
-
-// main程序启动以后，会创建一个主goroutine去执行
-func main(){
-	x := 33
-	// go关键字单独开启一个goroutine去执行addData函数
-	go addData(x)
-	fmt.Printf("this is main func")
-}
-```
-
-> 执行以后会发现，并没有将addData函数里的Printf内容输出
->
-> 为什么没有呢？
->
-> - go addData(x)表示开启了一个goroutine，但是此时只是刚开启，就好比是刚刚把通道打开了，但是里面的内容还没进去执行
-> - 此时代码继续往下走，执行`fmt.Printf("this is main func")`表示main函数结束了，由main函数启动的goroutine就结束了，此时整个函数就执行完毕了，所以就来不及执行`addData`里的printf内容
->
-> 可以用`time.Sleep(time.Second)`这样等待`go addData()`启动并执行完毕，再执行main函数里`printf`语句，这样就可以看到`addData`函数里的输出了
-
-```go
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func addData(x int) {
-	fmt.Printf("x = %v\n", x)
-}
-
-func main(){
-	x := 33
-	// go关键字单独开启一个goroutine去执行addData函数
-	go addData(x)
-  
-  // 使用sleep强制等待新开的goroutine执行完毕，再执行下面的代码
-	time.Sleep(time.Second)
-	fmt.Printf("this is main func")
-}
-```
-
-![image-20220403220757049](go%E7%AC%94%E8%AE%B0/image-20220403220757049.png)
-
-##### 3.2.1 for启动goroutine(闭包)
-
-> 上面的都是开启一个goroutine去执行代码，但是我们可以使用for循环开启很多个goroutine
-
-```go
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main(){
-	for i := 0; i<10; i++{
-		// go关键字单独开启一个goroutine去执行匿名函数
-		go func() {
-			fmt.Println(i)
-		}()
-	}
-	time.Sleep(time.Second)
-	fmt.Printf("this is main func")
-}
-```
-
-![image-20220403221849085](go%E7%AC%94%E8%AE%B0/image-20220403221849085.png)
-
-> 从执行结果来看，并不是我们预期的想要的输出1到10，而是输出了`8 10`这些数字
->
-> 为什么会这样呢？
->
-> - 从for循环里的`go`关键字后面的匿名函数来看，里面打印了for循环里的`i`变量，对于一个函数内部的变量从函数外部拿，这就是`闭包`
-> - 由于for循环很快，所以开启10个goroutine的时候，for循环已经执行完了，那么最后传递给匿名函数里的`i`可能是for循环的最后一个10，或者是中间的某一个，所以就出现了上图的结果
->   - 这里也反映出了启动goroutine是需要一定时间的，因为从for循环来看，先启动了10个goroutine，才开始执行goroutine里面匿名函数里的打印`i`功能，而且输出到终端也需要时间，那么就表示了goroutine是都先启动，再执行里面任务，此时的时间差for循环已经执行结束了，最后的i是10，所以就会出现了上面的结果
->   - 如果goroutine能里面启动，立马执行，就不会有这样的问题
->   - 并不是启动一个就输出展示一个
-
-##### 3.2.2 for启动goroutine(传参)
-
-> 从3.2.1里可以看出，`for`循环启动多个goroutine时，采用闭包传参，会出现多个`goroutine`接收到的参数值都是一样，这样就不符合我们的需求，所以需要给传参
->
-> 从下面代码可以看出，走传参形式给goroutine，那么循环一个就给一个值到goroutine中，这样每次循环的值都会被传到启动的goroutine中，这样就不会有问题
-
-```go
-
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main() {
-	for i := 0; i < 10; i++ {
-		go func(i int) {
-			fmt.Printf("i=%v\n", i)
-		}(i)
-	}
-	fmt.Println("main run done!")
-	time.Sleep((time.Second) * 2)
-}
-```
-
-![image-20220427112458128](go%E7%AC%94%E8%AE%B0/image-20220427112458128.png)
-
-
-
-> 但是仔细观察上面的代码，使用了`time.Sleep`来等待for循环启动的goroutine执行完，十分的不可控，也不优雅
->
-
-#### 3.3 sync.WaitGroup
-
-> 使用`sync.WaitGroup`来实现goroutine的同步：
->
-> - sync.WaitGroup是用来创建等待组
->
-> - 从源码可以看到WaitGroup不能被拷贝，因为里面是计数器，如果拷贝了，那计数器的值就不一致了，因为WaitGroup是结构体，结构体是值类型，值类型不像指针类型，指针类型可以保持值一致
-
-```go
-// A WaitGroup waits for a collection of goroutines to finish.
-// The main goroutine calls Add to set the number of
-// goroutines to wait for. Then each of the goroutines
-// runs and calls Done when finished. At the same time,
-// Wait can be used to block until all goroutines have finished.
-//
-// A WaitGroup must not be copied after first use.
-type WaitGroup struct {
-	noCopy noCopy
-
-	// 64-bit value: high 32 bits are counter, low 32 bits are waiter count.
-	// 64-bit atomic operations require 64-bit alignment, but 32-bit
-	// compilers do not ensure it. So we allocate 12 bytes and then use
-	// the aligned 8 bytes in them as state, and the other 4 as storage
-	// for the sema.
-	state1 [3]uint32
-}
-```
-
-> 涉及到的sync.WaitGroup三个方法，Add()、Wait()、Done()
-
-> - wg.Add()
->   - 要启动多少个goroutine，就添加多少个计数器，可以一次性加好，也可以在循环里每次挨个加1
-
-```go
-// Add adds delta, which may be negative, to the WaitGroup counter.
-// If the counter becomes zero, all goroutines blocked on Wait are released.
-// If the counter goes negative, Add panics.
-//
-// Note that calls with a positive delta that occur when the counter is zero
-// must happen before a Wait. Calls with a negative delta, or calls with a
-// positive delta that start when the counter is greater than zero, may happen
-// at any time.
-// Typically this means the calls to Add should execute before the statement
-// creating the goroutine or other event to be waited for.
-// If a WaitGroup is reused to wait for several independent sets of events,
-// new Add calls must happen after all previous Wait calls have returned.
-// See the WaitGroup example.
-func (wg *WaitGroup) Add(delta int) {
-	statep, semap := wg.state()
-	if race.Enabled {
-		_ = *statep // trigger nil deref early
-		if delta < 0 {
-			// Synchronize decrements with Wait.
-			race.ReleaseMerge(unsafe.Pointer(wg))
-		}
-		race.Disable()
-		defer race.Enable()
-	}
-	state := atomic.AddUint64(statep, uint64(delta)<<32)
-	v := int32(state >> 32)
-	w := uint32(state)
-	if race.Enabled && delta > 0 && v == int32(delta) {
-		// The first increment must be synchronized with Wait.
-		// Need to model this as a read, because there can be
-		// several concurrent wg.counter transitions from 0.
-		race.Read(unsafe.Pointer(semap))
-	}
-	if v < 0 {
-		panic("sync: negative WaitGroup counter")
-	}
-	if w != 0 && delta > 0 && v == int32(delta) {
-		panic("sync: WaitGroup misuse: Add called concurrently with Wait")
-	}
-	if v > 0 || w == 0 {
-		return
-	}
-	// This goroutine has set counter to 0 when waiters > 0.
-	// Now there can't be concurrent mutations of state:
-	// - Adds must not happen concurrently with Wait,
-	// - Wait does not increment waiters if it sees counter == 0.
-	// Still do a cheap sanity check to detect WaitGroup misuse.
-	if *statep != state {
-		panic("sync: WaitGroup misuse: Add called concurrently with Wait")
-	}
-	// Reset waiters count to 0.
-	*statep = 0
-	for ; w != 0; w-- {
-		runtime_Semrelease(semap, false, 0)
-	}
-}
-```
-
-> - wg.Wait()
->   - 等待计数器减为0，否则会一直等待
-
-```go
-// Wait blocks until the WaitGroup counter is zero.
-func (wg *WaitGroup) Wait() {
-	statep, semap := wg.state()
-	if race.Enabled {
-		_ = *statep // trigger nil deref early
-		race.Disable()
-	}
-	for {
-		state := atomic.LoadUint64(statep)
-		v := int32(state >> 32)
-		w := uint32(state)
-		if v == 0 {
-			// Counter is 0, no need to wait.
-			if race.Enabled {
-				race.Enable()
-				race.Acquire(unsafe.Pointer(wg))
-			}
-			return
-		}
-		// Increment waiters count.
-		if atomic.CompareAndSwapUint64(statep, state, state+1) {
-			if race.Enabled && w == 0 {
-				// Wait must be synchronized with the first Add.
-				// Need to model this is as a write to race with the read in Add.
-				// As a consequence, can do the write only for the first waiter,
-				// otherwise concurrent Waits will race with each other.
-				race.Write(unsafe.Pointer(semap))
-			}
-			runtime_Semacquire(semap)
-			if *statep != 0 {
-				panic("sync: WaitGroup is reused before previous Wait has returned")
-			}
-			if race.Enabled {
-				race.Enable()
-				race.Acquire(unsafe.Pointer(wg))
-			}
-			return
-		}
-	}
-}
-
-```
-
-> - wg.Done()
->   - 完成一个goroutine，等待组的计数器减一
-
-```go
-// wg.Done 
-// Done decrements the WaitGroup counter by one.
-func (wg *WaitGroup) Done() {
-	wg.Add(-1)
-}
-```
-
-> 添加了sync后，启动多个goroutine
-
-```go
-package main
-
-import (
-	"fmt"
-	"math/rand"
-	"sync"
-	"time"
-)
-
-var wg sync.WaitGroup
-
-func f(i int) {
-	// f函数直接结束前，给等待组的计数器-1
-	defer wg.Done()
-	// 随机等待n秒
-	time.Sleep(time.Second * time.Duration(rand.Intn(1)))
-	fmt.Println(i)
-}
-
-func main() {
-	for i := 0; i < 10; i++ {
-		// 开启goroutine前，先给等待组的计数器+1
-		wg.Add(1)
-		go f(i)
-	}
-
-	// 等待wg的计数器值减为0
-	wg.Wait()
-	fmt.Println("main run done!")
-}
-```
-
-![image-20220427120247340](go%E7%AC%94%E8%AE%B0/image-20220427120247340.png)
-
-> 会发现每次打印的数字的顺序都不一致
->
-> 这是因为10个`goroutine`是并发执行的，而`goroutine`的调度是随机的。
-
-#### 3.4 goroutine结束时机
-
-> goroutine什么时候结束？
->
-> - 当goroutine对应的函数结束了，那么启动的goroutine就结束了
-> - 在main函数中，当main函数结束了，那么由main函数里启动的goroutine也会结束
-
-#### 3.5 goroutine调度(GMP模型)
-
-> 这块是理论知识，需要多多理解
->
-> 参考资料：[https://www.cnblogs.com/sunsky303/p/9705727.html](https://www.cnblogs.com/sunsky303/p/9705727.html)
-
-> `GPM`是Go语言运行时（runtime）层面的实现，是go语言自己实现的一套调度系统。区别于操作系统调度OS线程。
->
-> - `G`很好理解，就是个goroutine的，里面除了存放本goroutine信息外 还有与所在P的绑定等信息。
-> - `P`管理着一组goroutine队列，P里面会存储当前goroutine运行的上下文环境（函数指针，堆栈地址及地址边界），P会对自己管理的goroutine队列做一些调度（比如把占用CPU时间较长的goroutine暂停、运行后续的goroutine等等）当自己的队列消费完了就去全局队列里取，如果全局队列里也消费完了会去其他P的队列里抢任务。
-> - `M（machine）`是Go运行时（runtime）对操作系统内核线程的虚拟， M与内核线程一般是一一映射的关系， 一个groutine最终是要放到M上执行的；
->
-> P与M一般也是一一对应的。他们关系是： P管理着一组G挂载在M上运行。当一个G长久阻塞在一个M上时，runtime会新建一个M，阻塞G所在的P会把其他的G 挂载在新建的M上。当旧的G阻塞完成或者认为其已经死掉时 回收旧的M。
->
-> P的个数是通过`runtime.GOMAXPROCS`设定（最大256），Go1.5版本之后默认为物理线程数。 在并发量大的时候会增加一些P和M，但不会太多，切换太频繁的话得不偿失。
->
-> 单从线程调度讲，Go语言相比起其他语言的优势在于OS线程是由OS内核来调度的，`goroutine`则是由Go运行时（runtime）自己的调度器调度的，这个调度器使用一个称为m:n调度的技术（复用/调度m个goroutine到n个OS线程）。 其一大特点是goroutine的调度是在用户态下完成的， 不涉及内核态与用户态之间的频繁切换，包括内存的分配与释放，都是在用户态维护着一块大的内存池， 不直接调用系统的malloc函数（除非内存池需要改变），成本比调度OS线程低很多。 另一方面充分利用了多核的硬件资源，近似的把若干goroutine均分在物理线程上， 再加上本身goroutine的超轻量，以上种种保证了go调度方面的性能。
-
-#### 3.6 GOMAXPROCS
-
-> 1. Go运行时的调度器使用`GOMAXPROCS`参数来确定需要使用多少个OS线程来同时执行Go代码。
->     - 默认值是机器上的CPU核心数
->         - cpu核心数指的是CPU内核数量,表示一个CPU由多少个核心组成
->         - 例如在一个8核心的机器上，调度器会把Go代码同时调度到8个OS线程上（GOMAXPROCS是m:n调度中的n）
-> 2. Go语言中可以通过`runtime.GOMAXPROCS()`函数设置当前程序并发时占用的CPU逻辑核心数。
->     - Go1.5版本之前，默认使用的是单核心执行
->     - Go1.5版本之后，默认使用全部的CPU逻辑核心数
->
-> https://blog.csdn.net/zhengyshan/article/details/80641770?spm=1001.2101.3001.6650.1&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1.pc_relevant_paycolumn_v3&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1.pc_relevant_paycolumn_v3&utm_relevant_index=2
-
-```go
-// 两个任务只有一个逻辑核心，此时是做完一个任务再做另一个任务
-package main
-
-import (
-	"fmt"
-	"runtime"
-	"time"
-)
-
-func a() {
-	for i := 1; i < 10; i++ {
-		fmt.Println("A:", i)
-	}
-}
-
-func b() {
-	for i := 1; i < 10; i++ {
-		fmt.Println("B:", i)
-	}
-}
-
-func main() {
-	runtime.GOMAXPROCS(1)
-	go a()
-	go b()
-	time.Sleep(time.Second)
-}
-```
-
-```go
-// 
-package main
-
-import (
-	"fmt"
-	"runtime"
-	"time"
-)
-
-func a() {
-	for i := 1; i < 10; i++ {
-		fmt.Println("A:", i)
-	}
-}
-
-func b() {
-	for i := 1; i < 10; i++ {
-		fmt.Println("B:", i)
-	}
-}
-
-func main() {
-	runtime.GOMAXPROCS(2)
-	go a()
-	go b()
-	time.Sleep(time.Second)
-}
-```
-
-### 4、channel
-
-#### 4.1 channel介绍
-
-> 为什么需要设计channel？
->
-> - 单纯地将函数并发执行是没有意义的，函数与函数间需要交换数据才能体现并发执行函数的意义。
-> - 虽然可以使用共享内存进行数据交换，但是共享内存在不同的`goroutine`中容易发生竞态问题。
-> - 为了保证数据交换的正确性，必须使用互斥量对内存进行加锁，这种做法势必造成性能问题。
->
-> go语言的channel：
->
-> - Go语言的并发模型是`CSP（Communicating Sequential Processes）`，提倡`通过通信共享内存`而不是`通过共享内存而实现通信`
-> - 推荐使用通过通信共享内存：
->     - 通过通信共享内存，把数据发送给其他人需要使用的人，比如一个管道，这样就不会有问题
-> - 通过共享内存而实现通信
->     - 使用共享内存来实现数据交换，这个时候就会出现有人读，有人写，就出现了数据竞态问题，这个时候数据交换正常，就要考虑给共享内存里的数据进行加锁，但是这样会有性能损耗，而且会把并行变为串行
-> - 如果说`goroutine`是Go程序并发的执行体，`channel`就是它们之间的连接。
-> - `channel`是可以让一个`goroutine`发送特定值到另一个`goroutine`的通信机制，这样就实现了通过通信共享内存变量
->
-> - Go 语言中的通道（channel）是一种特殊的类型。
->     - 通道像一个传送带或者队列，总是遵循先入先出（First In First Out）的规则，保证收发数据的顺序。
->     - 每一个通道都是一个具体类型的导管，也就是声明channel的时候需要为其指定元素类型，这一点和切片很像
-
-#### 4.2 channel声明
-
-```go
-var 变量 chan 元素类型
-
-// 下面是例子
-var ch1 chan int // 声明一个传递整型的通道
-var ch1 chan bool // 声明一个传递布尔值的通道
-var ch1 chan []int // 声明一个传递int切片的通道
-
-// 可以把channel理解为一个管道
-```
-
-#### 4.3 channel定义使用
-
-> `channel`是引用类型，需要初始化才可以使用，也就是开辟空间
->
-> 从下面可以看出：
->
-> - channel不初始化，他的值就是nil(表示没有开辟内存空间)
-> - channel的类型是：chan int
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	var c1 chan int
-	
-	// 定义的c1:<nil>
-	fmt.Printf("定义的c1:%v\n", c1)
-	
-	// 定义的c1类型:chan int
-	fmt.Printf("定义的c1类型:%T\n", c1)
-
-}
-```
-
-#### 4.4 channel初始化
-
-> channel使用make进行初始化，可以看到初始化以后，c1这个管道就有内存地址
->
-> 所有channel必须初始化才可以使用
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	var c1 chan int
-	
-	// 定义的c1:<nil>
-	fmt.Printf("定义的c1:%v\n", c1)
-	
-	// 定义的c1类型:chan int
-	fmt.Printf("定义的c1类型:%T\n", c1)
-	
-	c1 = make(chan int)
-	
-	// 初始化的c1:0xc00008c060
-	fmt.Printf("初始化的c1:%v\n", c1)
-	
-	// 初始化的c1类型:chan int
-	fmt.Printf("初始化的c1类型:%T\n", c1)
-}
-```
-
-#### 4.5 channel发送值
-
-```go
-// 语法
-var c1 chan int
-
-// 发送一个值给c1这个管道
-c1 <- 1
-```
-
-#### 4.6 channel接收值(取值)
-
-```go
-// 语法
-var c1 chan int
-
-// 发送一个值给c1这个管道
-c1 <- 1
-
-// 从管道c1里获取值，并用ret变量接收，如果不想接收，可使用匿名变量`_`接收
-ret := <- c1
-```
-
-#### 4.7 channel初始化指定缓冲区
-
-> channel初始化的时候可以不指定缓冲区大小，也可以指定
->
-> 区别：
->
-> - 无缓冲区，必须有人收，才可以发
-> - 有缓冲区，表示可以预存多少个值，当缓冲区存满了，就存不进去了，如果需要存新的值，就需要先从管道拿值，才可以存进行新值
-
-##### 4.7.1 无缓冲死锁
-
-> 无缓冲区可以理解为是一个同步的过程，比如打电话给某人，发起打电话，就是给管道发送值，但是没有缓冲区，就表示没有人接，就会一值卡在那里等待，除非有人接了，下面的步骤才可以正常进行
->
-> 也表示代码在此处阻塞了
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	var c1 chan int
-	
-	c1 = make(chan int)
-	
-	c1 <- 2  // 这里就会卡主，夯住了
-	fmt.Printf("存了值的c1:%v\n", c1)
-	ret := <- c1
-	fmt.Printf("取了值的c1:%v\n", c1)
-	fmt.Printf("取出ret:%v\n", ret)
-	
-}
-```
-
-![image-20220501214315620](go%E7%AC%94%E8%AE%B0/image-20220501214315620.png)
-
-
-
-> 从上面的报错可以看出来：
->
-> - 所有的goroutine都休眠了，死锁了
-
-##### 4.7.2 无缓冲区死锁解决
-
-> 无缓冲区没人接受管道的值，就会出现死锁，死锁以后，如何解决？
->
-> - 可以在后台启动一个goroutine，来接收给channel发送的值
->     - 当main函数里的goroutine启动以后，就一直在等待管道里发一个值进来，只要管道发送一个值进行以后，就立马接收
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	var c1 chan int
-	
-	c1 = make(chan int)
-	
-	// 启动一个匿名函数接收管道发送的值，这个goroutine是后台启动的，接收管道的值
-	go func(){
-		ret := <- c1
-		fmt.Printf("取出ret:%v\n", ret)
-	}()
-	
-	c1 <- 2
-	fmt.Printf("存了值的c1:%v\n", c1)
-}
-```
-
-![image-20220501214754826](go%E7%AC%94%E8%AE%B0/image-20220501214754826.png)
-
-##### 4.7.3 有缓冲区的通道
-
-> 通道里放的值应该小一点，如果存string等大存量的值，可以放指针
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	var c1 chan int
-	c1 = make(chan int, 2)
-	c1 <- 1
-	c1 <- 2
-	fmt.Printf("c1:%vs\n", c1)
-	
-	// 取值
-	ret := <- c1
-	fmt.Printf("ret:%v\n", ret)
-}
-```
-
-![image-20220501215536702](go%E7%AC%94%E8%AE%B0/image-20220501215536702.png)
-
-##### 4.7.4 有缓冲区发送值超过缓冲区
-
-> 当初始化管道时，指定了缓冲区大小，然后给管道里存放值，当超过设置的缓冲区大小时，就存不进去了，就会报错
->
-> 因为存满以后，管道就满了，如果没人从管道里取值，就会出现存不进去，代码就卡主的情况
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	var c1 chan int
-	c1 = make(chan int, 1)
-  
-  // 发送第一个值，管道缓冲区占满了
-	c1 <- 1
-  
-  // 发送第二值时，缓冲区满了，发送值进不去了，就会死锁
-	c1 <- 2
-	fmt.Printf("c1:%vs\n", c1)
-	
-	// 取值
-	ret := <- c1
-	fmt.Printf("ret:%v\n", ret)
-}
-```
-
-![image-20220501215732031](go%E7%AC%94%E8%AE%B0/image-20220501215732031.png)
-
-#### 4.8 channel关闭
-
-```go
-// channel关闭，使用内置的close函数关闭通道
-var c1 chan int
-
-// 关闭通道
-close(c1)
-```
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	var c1 chan int
-	
-	c1 = make(chan int, 2)
-	
-	// 塞第一个值
-	c1 <- 1
-	
-	// 塞第二个值
-	c1 <- 2
-	
-	// 关闭通道
-	close(c1)
-	
-	// 取第一个值
-	<- c1
-	
-	// 取第二个值
-	<- c1
-	
-	// 再取值
-	ret, ok := <- c1
-	
-	// ret:0
-	fmt.Printf("ret:%v\n", ret)
-	
-	// ok:false
-	fmt.Printf("ok:%v\n", ok)
-}
-```
-
-##### 4.8.1 channel关闭注意事项
-
-> - 从通道取值时，可以拿到值和一个布尔值，如果布尔值为true表示值存在，如果布尔值为false，表示值不存在
-> - 取值时通道关闭：
->     - 当通道缓冲区没有取完时，可以正常取值
->     - 当通道的缓冲区取完时，再从通道获取值，得到的值是通道定义时类型的零值，且返回的布尔值是false，表示值不存在
-> - 取值时通道不关闭
->     - 当通道的缓冲区取完时，再从通道获取值，此时会报错，提示死锁
->     - 可以理解为通道内的值都被取完了，此时还想获取值，就拿不到，代码就阻塞了
-
-![image-20220502002356328](go%E7%AC%94%E8%AE%B0/image-20220502002356328.png)
-
-#### 4.9 channel练习题
-
-> // 练习题
->
-> 步骤1：启动一个goroutine生成100个数发给c1
->
-> 步骤2：启动一个goroutine，从c1中取值，计算其平方放到c2中
->
-> 步骤3：在main函数中取值，打印出来
-
-```go
-package main
-
-import (
-	"fmt"
-	"sync"
-)
-
-// 定义等待组
-var wg sync.WaitGroup
-
-// 步骤1：生成100个数发给c1
-func getChData(c1 chan int){
-	defer wg.Done()
-	for i := 1; i <= 100; i++{
-		// 给c1发送值
-		c1 <- i
-	}
-	// 需要关闭c1通道
-	close(c1)
-}
-
-// 步骤2：从c1中取值，计算其平方放到c2中
-func recvChData(c1, c2 chan int){
-	defer wg.Done()
-	for {
-		v, ok := <- c1
-		if !ok {
-			break
-		}
-		c2 <- v * v
-	}
-	
-	// 需要关闭c2通道
-	close(c2)
-}
-
-func main() {
-	// 定义和初始化c1
-	var c1 chan int
-	c1 = make(chan int, 100)
-	
-	// 定义和初始化c2
-	var c2 chan int
-	c2 = make(chan int, 100)
-	
-	// 给第一个goroutine设置等待组计数器+1
-	wg.Add(1)
-	go getChData(c1)
-	
-	// 给第二个goroutine设置等待组计数器+1
-	wg.Add(1)
-	go recvChData(c1, c2)
-	
-	// 步骤3：在main函数中取值，打印出来
-	for ret := range c2{
-		fmt.Printf("c2中的ret: %v\n", ret)
-	}
-	
-	// 等待所有计数器减为0
-	wg.Wait()
-}
-```
-
-#### 4.10 单向通道
-
-> 当一个通道只允许发送值，或者只允许接收值时，就可以使用单向通道
->
-> 比如通道作为函数的传参，只允许做一件事
->
-> 单向通道快速理解为：”前接后发“
->
-> 符号`<-`在chan前，表示只能接收值，也就是只能从通道里取值
->
-> 符号`<-`在chan后，表示只能发送值，也就是只能给通道发送值
->
-> 注意：
->
-> - 单向通道不是在通道初始化(make函数)的时候定义
-> - 而是在通道定义(使用var关键字)的时候使用
-
-##### 4.10.1 只允许通道发送值
-
-```go
-// 只允许通道发送值，表示不能接收值，只能发送
-func f1(c1 chan<- int) {}
-```
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-
-func main() {
-	// 定义和初始化c1，只允许发送值给c1
-	var c1 chan<- int
-	c1 = make(chan int, 100)
-	
-	// 给c1发送值
-	c1 <- 1
-	
-  // 从c1取值，就会报错，提示从一个只读通道接收值
-	ret := <- c1
-	fmt.Printf("ret:%v\n", ret)
-}
-```
-
-![image-20220502003436158](go%E7%AC%94%E8%AE%B0/image-20220502003436158.png)
-
-##### 4.10.2 只允许通道接收值
-
-```go
-// 只允许通道接收值，表示只能接收，不能发送值
-func f1(c2 <-chan int) {}
-```
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-
-func main() {
-	// 定义和初始化c1，只允许通道接收值c1
-	var c1 <-chan int
-	c1 = make(chan int, 100)
-	
-	// 给c1发送值，但是c1是一个只接收的通道，所以到这里会报错
-	c1 <- 1
-	
-	ret := <- c1
-	fmt.Printf("ret:%v\n", ret)
-}
-```
-
-![image-20220502003746091](go%E7%AC%94%E8%AE%B0/image-20220502003746091.png)
-
-#### 4.11 channel使用报错汇总
-
-> https://www.jianshu.com/p/b886c62e7eb8?utm_campaign=maleskine&utm_content=note&utm_medium=seo_notes&utm_source=recommendation
->
-> https://www.jianshu.com/p/cfcc33df4fdb
-
-##### 4.11.1 channel存值非指定类型(报错类型)
-
-> 当给channel存的值不是定义channel时的类型，就会报错
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	var c1 chan int
-	c1 = make(chan int, 1)
-  
-  // channel本来是int类型，但是发送了一个string，就会报错
-	c1 <- "sam"
-	fmt.Printf("c1:%vs\n", c1)
-	
-	// 取值
-	ret := <- c1
-	fmt.Printf("ret:%v\n", ret)
-}
-```
-
-![image-20220501220020185](go%E7%AC%94%E8%AE%B0/image-20220501220020185.png)
-
-##### 4.11.2 channel关闭后不能再关闭
-
-```go
-channel关闭后不能再关闭，会引发panic
-```
-
-```go
-package main
-
-func main() {
-	// 定义和初始化c1，只允许通道接收值c1
-	var c1 chan int
-	c1 = make(chan int, 100)
-	
-	// 给c1发送值
-	c1 <- 1
-	
-	// 第一次关闭
-	close(c1)
-	
-	// c1关闭后再关闭c1，会报错
-	close(c1)
-}
-```
-
-![image-20220502004944710](go%E7%AC%94%E8%AE%B0/image-20220502004944710.png)
-
-#### 4.12 channel异常汇总
-
-> 下表是channel的异常汇总
-
-| channel    | nil   | 非空                                                       | 为空                                                         | 满载                                                       | 没满                                                       |
-| ---------- | ----- | ---------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------- | ---------------------------------------------------------- |
-| 接收值动作 | 阻塞  | 接收值正常                                                 | 阻塞                                                         | 接收值正常                                                 | 接收值正常                                                 |
-| 发送值动作 | 阻塞  | 发送值正常                                                 | 发送值正常                                                   | 阻塞                                                       | 发送值正常                                                 |
-| 关闭通道   | panic | 关闭成功以后，读完缓冲区的数据，再读取值就是通道类型的零值 | 关闭成功以后，此时缓冲区的数据为空，再读取值就是通道类型的零值 | 关闭成功以后，读完缓冲区的数据，再读取值就是通道类型的零值 | 关闭成功以后，读完缓冲区的数据，再读取值就是通道类型的零值 |
-
-#### 4.13 work_pool
-
-> 工作池用来巩固通道的理解
-
-```go
-package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func worker(id int, jobs <-chan int, result chan<- int) {
-	for j := range jobs{
-		fmt.Printf("workerId: %d, start job jobVal:%d\n", id, j)
-		time.Sleep(time.Second)
-		fmt.Printf("workerId: %d, end job jobval:%d\n", id, j)
-		result <- j * 2
-	}
-}
-
-func main() {
-	jobs := make(chan int, 100)
-	results := make(chan int, 100)
-	
-	// 启动3个goroutine执行任务
-	for w := 1; w <= 3; w++{
-		go worker(w, jobs, results)
-	}
-	
-	// 启动5个任务，表示给jobs通道里塞了5个值
-	for j := 1; j <= 5; j++{
-		jobs <- j
-	}
-	
-	// 关闭jobs通道
-	close(jobs)
-	
-	// 输出结果
-	for a := 1; a <= 5; a++{
-		<- results
-		// fmt.Printf("res=%v\n", res)
-	}
-}
-```
-
-#### 4.14 select使用
-
-> `select`可以同时响应多个通道的操作，select的使用类似由于switch语句：
->
-> - select语句会有一些case分支和default分支
->
->
-> - 每个case会对应一个通道的操作过程，比如接收或发送
->
->
-> - select会一直等待，当case语句执行完毕，就会执行case语句里的代码
-> - select语句能提高代码可读性，如果多个case同时满足，select会随机选择一个，对于没有case的select{}会一直等待中
-> - select可以在外面套个循环，表示循环取值
-
-```go
-// select语法
-select {
-	case <-ch1:
-		...
-	case data := <-ch2:
-		...
-	default:
-		...
-}
-```
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	ch1 := make(chan int, 1)
-	for i := 0; i < 10; i++{
-		select {
-		case x := <- ch1:
-			fmt.Printf("x=%v\n", x)
-		case ch1 <- i:
-		default:
-			fmt.Printf("default operate")
-		}
-	}
-}
-```
-
-![image-20220502142538484](go%E7%AC%94%E8%AE%B0/image-20220502142538484.png)
-
-### 5、Context
-
-> 

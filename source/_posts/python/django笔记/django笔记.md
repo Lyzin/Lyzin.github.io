@@ -2001,3 +2001,54 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 
 ## 六、Django中间件
+
+
+
+## 七、Django使用Gunicorn部署
+
+> gunicron官网：[https://docs.gunicorn.org/en/stable/](https://docs.gunicorn.org/en/stable/)
+
+### 1、Gunicorn介绍
+
+> ## Gunicorn 和 WSGI 简介
+>
+>  先说说 WSGI。啥是 WSGI？**Web服务器网关接口**（**Python Web Server Gateway Interface**，**缩写为WSGI**）是为 Python 语言定义的 Web 服务器和 Web 应用程序或框架之间的一种简单而通用的接口。
+>
+>  咱们平时写的 Flask 的业务代码，是 Web application，是无法处理客户端发的那些 HTTP 请求的，需要一个实现了 WSGI 的 Server 帮忙处理 HTTP 请求，让 HTTP 请求变成业务代码可以处理的形式之后再给 application 的业务代码，然后业务代码进行一系列处理，把处理结果给 Server，Server 再把这个结果封装后给客户端。用这样的方式，就可以专心的写业务代码，不用考虑怎么解析 HTTP 请求，怎么封装 HTTP 回复，这些都是 Server 的工作。
+>
+>  Gunicorn 就是这样一个实现了 WSGI 的 HTTP Server，它在 Flask 和 客户端之间充当一个翻译的角色，并且相比于 Flask 自带的 Server，有很好的并发性能。
+
+#### 1.1 安装Gunicorn
+
+```bash
+pip install gunicorn
+```
+
+### 1.2 Django使用Gunicorn
+
+> 如果没有指定，Gunicorn会寻找一个名为 "application "的WSGI可调用程序。因此，对于一个典型的Django项目来说，调用Gunicorn会是这样的。
+>
+> 注意
+>
+> - 这需要你的项目在Python路径上；最简单的方法是在你的`manage.py`文件的同一目录下运行这个命令。
+
+```bash
+gunicorn myproject.wsgi
+```
+
+> 你可以使用 [-env](http://docs.gunicorn.org/en/latest/settings.html#raw-env) 选项来设置加载设置的路径。如果你需要，你也可以使用 [-pythonpath](http://docs.gunicorn.org/en/latest/settings.html#pythonpath) 选项将你的应用程序路径添加到`PYTHONPATH`中
+>
+> https://juejin.cn/post/6844903950676656141
+>
+> https://juejin.cn/post/6844903983388213256
+
+```bash
+.venv/bin/gunicorn -b :8090 -w 5  --env DJANGO_SETTINGS_MODULE=tester_tools.settings.production tester_tools.wsgi
+```
+
+### 1.3 Django自带server启动
+
+```bash
+.venv/bin/python3 manage.py runserver 0.0.0.0:8090 --settings tester_tools.settings.production
+```
+

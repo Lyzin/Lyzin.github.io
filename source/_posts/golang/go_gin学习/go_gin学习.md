@@ -11,25 +11,59 @@ sticky: 1
 
 
 
-## 一、Gin框架初体验
+## 一、Web框架
 
-> gin框架参考连接
+> 框架是一系列工具的集合,可以让开发变得更加便捷
 >
-> [https://gin-gonic.com/](https://gin-gonic.com/)
->
-> [https://www.bilibili.com/video/BV1gJ411p7xC?p=3](https://www.bilibili.com/video/BV1gJ411p7xC?p=3)
->
-> 本文用gin框架返回json以及postman进行请求
+> 下方表格罗列了go常见的web框架
 
-### 1、go mod安装gin
+| 框架             | 特点                                                         | 备注 |
+| ---------------- | ------------------------------------------------------------ | ---- |
+| go原生的net/http | 支持快速开发一个简单的web应用                                |      |
+| gin框架          | go官方推荐相当流行的一个轻量级的web框架，性能高效，非常推荐学习 |      |
+| Beego            | 最早的web框架，工具比较全，但是性能较差                      |      |
+| fiber            | 202年发布的框架，性能比较高，上手较快，和gin类似             |      |
+
+### 1、gin框架介绍
+
+> gin框架的官网：[https://gin-gonic.com/](https://gin-gonic.com/)
+>
+> go官方文档的一个Gin快速教程：[https://golang.google.cn/doc/tutorial/web-service-gin](https://golang.google.cn/doc/tutorial/web-service-gin)
+>
+> Bilibili的Gin视频教程：https://www.bilibili.com/video/BV1gJ411p7xC?p=3
+
+#### 1.1 gin框架的特点
+
+> gin框架的特点（以下来自官网介绍）：
+>
+> - 快速
+>     - 基于 Radix 树的路由，小内存占用。没有反射。
+>     - 可预测的 API 性能
+> - 支持路由组
+>     - Gin帮助您更好地组织您的路由，例如，按照需要授权和不需要授权和不同API版本进行分组。
+>     - 此外，路由分组可以无限嵌套而不降低性能。
+> - 支持中间件
+>     - 传入的 HTTP 请求可以由一系列中间件和最终操作来处理。 例如：Logger，Authorization，GZIP，最终操作 DB。
+> - crash处理
+>     - Gin 可以 catch 一个发生在 HTTP 请求中的 panic 并 recover 它。这样你的服务器将始终可用。例如，你可以向 Sentry 报告这个 panic！
+> - JSON 验证
+>     - Gin 可以解析并验证请求的 JSON，例如检查所需值的存在。
+> - 错误管理
+>     - Gin 提供了一种方便的方法来收集 HTTP 请求期间发生的所有错误。
+>     - 最终，中间件可以将它们写入日志文件，数据库并通过网络发送。
+> - 内置渲染
+>     - Gin 为 JSON，XML 和 HTML 渲染提供了易于使用的 API。
+
+### 2、gin框架初体验
 
 > 在`go1.11`以后的版本推荐使用`go mod`管理版本依赖的问题，关于`go mod`的使用，可移步`go语言基础`中查看
 
 #### 1.1 创建项目目录
 
-> 打开goland，找一个需要存放web代码的任意文件夹，比如`gin_demo`这个文件夹，然后使用goland以项目形式打开`gin_demo`，此时`gin_demo`文件夹下会显示什么内容都没有
+> 1. 打开goland，找一个需要存放gin代码的文件夹，比如`gin_demo`这个文件夹
+> 2. 然后使用goland以项目形式打开`gin_demo`，此时`gin_demo`文件夹下会显示什么内容都没有
 
-#### 1.2 go mod初始化
+#### 1.2 go mod管理依赖
 
 > 此时goland打开以后，`gin_demo`文件夹下什么东西都没有，所以需要使用如下命令进行`mod依赖`配置文件的初始化
 
@@ -44,7 +78,7 @@ go mod init gin_demo
 
 #### 1.3 安装gin
 
-> 至此，我们项目初始化已经做好了，可以安装gin框架进行使用了，这里需要注意有两种方式可以安装gin：
+> 至此，我们项目初始化已经做好了，可以安装gin框架进行使用了，这里需要注意有两种方式可以安装gin
 >
 > - 第一种，可以写一个main.go文件，里面写上gin的样板代码
 >   - 样板代码可以从gin官网复制并且可以跑起来的
@@ -151,7 +185,7 @@ func main() {
 }
 ```
 
-## 二、gin基础用法
+## 二、gin操作请求
 
 ### 1、返回json数据
 
@@ -1128,7 +1162,7 @@ func main() {
 
 ![image-20220322213003931](go_gin%E5%AD%A6%E4%B9%A0/image-20220322213003931.png)
 
-## 三、Gin中间件
+## 三、gin中间件
 
 ### 1、中间件简介
 

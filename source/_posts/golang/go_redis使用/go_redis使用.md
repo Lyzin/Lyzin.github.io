@@ -174,9 +174,8 @@ redis-cli -h 127.0.0.1
 > - 带查询范围的排序集合
 > - 位图
 >
-> 等等
 
-#### 1.3 Redis和Memcached笔记
+#### 1.3 Redis和Memcached区别
 
 > Memcached的值只支持简单的字符串
 >
@@ -188,17 +187,518 @@ redis-cli -h 127.0.0.1
 >
 > Redis支持master/slave模式
 
-### 2、Redis操作命令
-
 ## 三、Golang操作Redis
 
-### 1、安装库
+> https://www.bilibili.com/video/BV1FY411d7JF/?p=2&spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=501c3f3a75e1512aa5b62c6a10d1550c
 
-> go使用第三方库`github.com/go-redis/redis`
+### 1、安装go使用的redis库
+
+> go使用第三方库`github.com/go-redis/redis`，是目前使用最多的库之一
+>
+> github地址：[https://github.com/go-redis/redis](https://redis.uptrace.dev/guide/go-redis.html)
+>
+> 官方文档地址：[https://redis.uptrace.dev/guide/go-redis.html](https://redis.uptrace.dev/guide/go-redis.html)
+
+#### 1.1 查看redis服务的版本
 
 ```bash
-# 在golang项目的终端执行
-go get github.com/go-redis/redis
+127.0.0.1:6379> info Server
+# Server
+redis_version:6.2.4
+redis_git_sha1:00000000
+redis_git_dirty:0
 ```
 
-### 2、
+#### 1.2 按redis版本安装依赖库
+
+> 如果redis服务的版本是6，则需要安装go-redis的v8版本
+
+```bash
+# 终端执行
+go get github.com/go-redis/redis/v8
+```
+
+> 如果redis服务的版本是7，则需要安装go-redis的v9版本
+
+```bash
+go get github.com/go-redis/redis/v9
+```
+
+### 2、连接redis的示例
+
+> 导入时需要注意是v8版本的redis
+>
+> 在设置值，获取值时需要注意传入context上下文
+
+#### 2.1 设置值和获取值
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"   // 注意这里导入的是v8版本的redis
+	"time"
+)
+
+// 定义全局redis变量
+var redisdb *redis.Client
+
+func init() {
+	redisdb = redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		Password: "",
+		DB: 0,
+	})
+}
+
+func main() {
+	ctx := context.Background()
+	
+	key := "feet_sam"
+	
+	// 设置值
+	err := redisdb.Set(ctx, key, "1", 3 * time.Second).Err()
+	if err != nil {
+		fmt.Printf("set %v error: %v\n", key, err)
+		return
+	}
+	
+	// 获取值
+	val, valErr := redisdb.Get(ctx, key).Result()
+	if valErr != nil {
+		panic(valErr)
+	}
+	fmt.Printf("val:%v\n", val)
+}
+```
+
+![image-20221222165503687](go_redis使用/image-20221222165503687.png)
+
+#### 2.2 使用原生redis命令
+
+```go
+// 调用原生redis命令
+key := "feet_sam"
+res, _ := redisdb.Do(ctx, "get", key).Result()
+fmt.Printf("do 方法获取值：%v\n", res.(string))
+
+// 获取的结果也是第2.1小节中的1
+```
+
+### 3、String类型
+
+#### 3.1 GetSet方法
+
+> 设置一个key的值，并返回这个key的旧值
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
+)
+
+// 定义全局redis变量
+var redisdb *redis.Client
+
+func init() {
+	redisdb = redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		Password: "",
+		DB: 0,
+	})
+}
+
+func main() {
+	ctx := context.Background()
+	
+	key := "feet_sam"
+	
+	// 先设置一个值
+	err := redisdb.Set(ctx, key, "1", 0).Err()
+	if err != nil {
+		fmt.Printf("set %v error: %v\n", key, err)
+		return
+	}
+	
+	// 设置一个新值，并且返回原来的旧值
+	oldVal, _ := redisdb.GetSet(ctx, key, "new_1").Result()
+	fmt.Printf("oldVal: %v\n", oldVal)
+}
+```
+
+![image-20221222170549559](go_redis使用/image-20221222170549559.png)
+
+> 代码是先Set了`feet_name`这个key的值为`1`，然后使用GetSet设置了`feet_name`这个key的值为`new_1`,而且GetSet还返回了之前的旧值
+
+#### 3.2 SetNX方法
+
+> 如果key不存在，则设置这个key的值
+>
+> - 如果这个key之前存在，则返回值是false，并且不会设置新的值，此时key的值还是之前的值
+> - 如果这个key之前不存在，则返回值是true
+
+```go
+	// 设置一个新值，并且返回原来的旧值
+ok, err := redisdb.SetNX(ctx, key, "2", 0).Result()
+if err != nil {
+	fmt.Printf("SetNX %v error: %v\n", key, err)
+	return
+}
+fmt.Printf("SetNX ok:%v\n", ok)
+```
+
+#### 3.3 MSet方法
+
+> 批量设置值
+
+```go
+err := redisdb.MSet(ctx, "key1", 11, "key2", 22, "key3", 33).Err()
+if err != nil {
+	fmt.Printf("mset err:%v\n", err)
+	return
+}
+```
+
+#### 3.4 MGet方法
+
+> 批量查询值
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
+	"time"
+)
+
+// 定义全局redis变量
+var redisdb *redis.Client
+
+func init() {
+	redisdb = redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		Password: "",
+		DB: 0, // 默认设置为0
+	})
+}
+
+func main() {
+	ctx := context.Background()
+	
+	key1 := "feet_name1"
+	key2 := "feet_name2"
+	key3 := "feet_name3"
+	
+	err := redisdb.MSet(ctx, key1, 11, key2, 22, key3, 33).Err()
+	if err != nil {
+		fmt.Printf("mset err:%v\n", err)
+		return
+	}
+	
+	// 批量获取值
+	vals, err := redisdb.MGet(ctx, key1, key2, key3).Result()
+	if err != nil {
+		fmt.Printf("mget err:%v\n", err)
+		return
+	}
+	fmt.Printf("mget vals:%v\n", vals)
+	fmt.Printf("mget type:%T\n", vals)
+}
+```
+
+![image-20221222175251067](go_redis使用/image-20221222175251067.png)
+
+> - 上述代码先批量设置了三个key，分别为key1、key2、key3
+> - 然后使用MGet方法进行批量查询，并且返回值是一个空接口类型的切片
+
+#### 3.5 Incr方法
+
+> 对一个key的值进行递增，每次都自增1
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
+)
+
+// 定义全局redis变量
+var redisdb *redis.Client
+
+func init() {
+	redisdb = redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		Password: "",
+		DB: 0,
+	})
+}
+
+
+func main() {
+	ctx := context.Background()
+	
+	// incr每次加1
+	val, err := redisdb.Incr(ctx, "age_sam").Result()
+	if err != nil{
+		fmt.Printf("incr err:%v\n", err)
+		return
+	}
+	fmt.Printf("incr val:%v\n", val)
+	
+}
+```
+
+![image-20221222175828137](go_redis使用/image-20221222175828137.png)
+
+> 从图中可以看到每次值都是+1
+
+#### 3.6 IncrBy方法
+
+> 递增的时候设置步长，表示每次递增多少，单位为正整数
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
+)
+
+// 定义全局redis变量
+var redisdb *redis.Client
+
+func init() {
+	redisdb = redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		Password: "",
+		DB: 0,
+	})
+}
+
+func main() {
+	ctx := context.Background()
+	
+	// incrBy每次加2
+	val, err := redisdb.IncrBy(ctx, "age_sam", 2).Result()
+	if err != nil{
+		fmt.Printf("incr err:%v\n", err)
+		return
+	}
+	fmt.Printf("incr val:%v\n", val)
+}
+```
+
+![image-20221222180046941](go_redis使用/image-20221222180046941.png)
+
+#### 3.7 IncrByFloat方法
+
+> key的值每次新增的是一个浮点值
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
+)
+
+// 定义全局redis变量
+var redisdb *redis.Client
+
+func init() {
+	redisdb = redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		Password: "",
+		DB: 0,
+	})
+}
+
+func main() {
+	ctx := context.Background()
+	
+	// IncrByFloat每次加0.5
+	val, err := redisdb.IncrByFloat(ctx, "age_sam", 0.5).Result()
+	if err != nil{
+		fmt.Printf("incr err:%v\n", err)
+		return
+	}
+	fmt.Printf("incr val:%v\n", val)
+}
+```
+
+![image-20221222183824098](go_redis使用/image-20221222183824098.png)
+
+#### 3.8 Decr方法
+
+> 对一个key的值进行递减操作
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
+)
+
+// 定义全局redis变量
+var redisdb *redis.Client
+
+func init() {
+	redisdb = redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		Password: "",
+		DB: 0,
+	})
+}
+
+
+func main() {
+	ctx := context.Background()
+	
+	// Decr递减
+	val, err := redisdb.Decr(ctx, "age_sam").Result()
+	if err != nil{
+		fmt.Printf("incr err:%v\n", err)
+		return
+	}
+	fmt.Printf("incr val:%v\n", val)
+}
+```
+
+#### 3.9 DecrBy方法
+
+> 按多少进行递减，并且是可以一直递减到负值的
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
+)
+
+// 定义全局redis变量
+var redisdb *redis.Client
+
+func init() {
+	redisdb = redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		Password: "",
+		DB: 0,
+	})
+}
+
+
+func main() {
+	ctx := context.Background()
+	
+	// DecrBy递减
+	val, err := redisdb.DecrBy(ctx, "age_sam", 2).Result()
+	if err != nil{
+		fmt.Printf("incr err:%v\n", err)
+		return
+	}
+	fmt.Printf("incr val:%v\n", val)
+}
+```
+
+#### 3.10 Del方法
+
+> 删除key操作，并且支持批量删除
+>
+> - key存在删除，可以进行删除动作
+> - key不存在删除，也可以进行删除动作
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
+)
+
+// 定义全局redis变量
+var redisdb *redis.Client
+
+func init() {
+	redisdb = redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		Password: "",
+		DB: 0,
+	})
+}
+
+
+func main() {
+	ctx := context.Background()
+	
+	// del单个删除
+	val, err := redisdb.Del(ctx, "age_sam").Result()
+	if err != nil{
+		fmt.Printf("del err:%v\n", err)
+		return
+	}
+	fmt.Printf("del val:%v\n", val)
+	
+	multiDelVal, multErr := redisdb.Del(ctx, "feet_name1", "feet_name2", "feet_name3s").Result()
+	if multErr != nil{
+		fmt.Printf("del multi err:%v\n", multErr)
+		return
+	}
+	fmt.Printf("del multi val:%v\n", multiDelVal)
+}
+```
+
+#### 3.11 Expire方法
+
+> 设置key的过期时间
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
+	"time"
+)
+
+// 定义全局redis变量
+var redisdb *redis.Client
+
+func init() {
+	redisdb = redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		Password: "",
+		DB: 0,
+	})
+}
+
+
+func main() {
+	ctx := context.Background()
+	
+	// 设置过期时间，比如10秒后过期
+	err := redisdb.Expire(ctx, "feet_name", 10 * time.Second).Err()
+	if err != nil{
+		fmt.Printf("del err:%v\n", err)
+		return
+	}
+	
+}
+```
+

@@ -836,7 +836,91 @@ docker push new-repo:tagname
 
 ![image-20220925223656898](docker笔记/image-20220925223656898.png)
 
-##### 2.5 搭建企业级私有镜像仓库
+## 七、Docker网络模式
 
-> 可以使用`harbor`来搭建企业级私有镜像仓库
+### 1、Docker网络模式介绍
+
+### 2、bridge桥接模式
+
+### 3、host主机网络模式
+
+### 4、none模式
+
+### 5、container网络模式
+
+### 6、自定义网络(推荐)
+
+> 
+
+### 7、link模式(已过时)
+
+## 八、Docker-compose
+
+### 1、Docker-compose介绍
+
+> [docker-compose](https://docs.docker.com/compose/compose-file/)是用于定义和运行多docker容器的工具
+>
+> docker-compose使用yml格式的文件来配置多个容器服务
+
+> docker-compose使用三大步骤
+>
+> 1. 编写自定义的dockerfile，构建好自定义的镜像服务
+> 2. 使用docker-compose.yml文件来定义应用程序服务，使得这一组应用服务可以在一套隔离环境中运行
+> 3. 使用docker-compose up命令启动这组容器服务
+
+
+
+### 2、Docker-compose语法
+
+> docker-compose的版本
+>
+> https://docs.docker.com/compose/compose-file/compose-file-v2/[](https://docs.docker.com/compose/compose-file/compose-file-v2/)
+
+#### 2.1 模板语法
+
+> docker-compose的模板语法，文件名必须是`docker-compose.yml`
+
+```yaml
+# docker-compose的文件版本
+version: "2.2"
+
+# 定义服务，可以是多个
+services:
+    # 服务1
+    服务的名称:
+        image: 镜像名称
+        container_name: 容器名称
+        environment: 
+            - 环境变量1=值1
+            - 环境变量2=值2
+        volumes: 
+            - 宿主机目录:容器内目录
+        ports:
+            - 宿主机的端口:映射的容器内的端口
+        networks:
+            - 自定义网络名称
+    # 服务2
+    服务的名称:
+        image: 镜像名称
+        container_name: 容器名称
+        environment: 
+            - 环境变量1=值1
+            - 环境变量2=值2
+        volumes: 
+            - 宿主机目录:容器内目录
+        ports:
+            - 宿主机的端口:映射的容器内的端口
+        networks:
+            - 自定义网络名称
+        
+# 网络模式
+networks:
+    自定义网络名称:
+        driver: bridge
+```
+
+#### 2.2 compose文件示例
+
+```yaml
+```
 
