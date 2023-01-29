@@ -1464,6 +1464,10 @@ sqlStr2 := "update user set ages = 2 where id = 2"
 > - 获取和选择以快速从查询到结构/切片
 > - 除了godoc API文档外，还有一些用户文档，解释了如何与sqlx一起使用数据库/sql。
 
+> sql会遇到的坑
+>
+> https://zhuanlan.zhihu.com/p/98161107
+
 ### 1、sqlx安装
 
 > sqlx是个第三方库，能简化数据库操作，提交效率
@@ -1475,7 +1479,7 @@ sqlStr2 := "update user set ages = 2 where id = 2"
 go get github.com/jmoiron/sqlx
 ```
 
-### 2、sqlx初始化数据库
+### 2、sqlx连接数据库
 
 > sqlx.Connect()直接连数据库，并且将原来`database/sql`的open和ping方法二者结合为一
 >
@@ -1549,9 +1553,11 @@ func main(){
 
 ![image-20220523103145835](go_mysql%E4%BD%BF%E7%94%A8/image-20220523103145835.png)
 
-### 3、sqlx查询
+### 3、sqlx操作数据库
 
-#### 3.1 单条记录查询
+#### 3.1 查询
+
+##### 3.1.1 单条记录查询
 
 > 使用的`Get`方法，其实可以看到需要传入的参数里
 >
@@ -1631,7 +1637,7 @@ func main(){
 
 ![image-20220523221603385](go_mysql%E4%BD%BF%E7%94%A8/image-20220523221603385.png)
 
-#### 3.2 多条记录查询
+##### 3.1.2 多条记录查询
 
 > 查询多条使用`Select`方法
 
@@ -1663,11 +1669,11 @@ func queryMultiRowData(id int) {
 
 ![image-20220523222434551](go_mysql%E4%BD%BF%E7%94%A8/image-20220523222434551.png)
 
-### 4、增删改数据
+#### 3.2 增删改数据
 
 > sqlx里的增删改数据操作和原生的`database/sql`里的方法一致，都是用`Exec`方法，就不做赘述
 
-### 5、事务支持
+#### 3.3 事务支持
 
 > `sqlx`中提供了：
 >
@@ -1678,6 +1684,54 @@ func queryMultiRowData(id int) {
 > - `tx.Commit()`:  提交事务
 >
 > 因为sqlx里的事务操作也和原生的`database/sql`里的事务操作类似，所以就不做重复记录了
+
+### 4、sqlx常见问题
+
+#### 4.1 missing destination name xx in xxx
+
+问题背景
+
+> - 当sql语句中是select *
+> - 当使用的是sqlx.Select函数查询所有记录
+> - 当Select函数传入的结构体没有使用`db`tag来标记字段
+
+问题原因
+
+> 1、当定义的结构体没有添加`db`这个tag时，
+>
+> - 追踪sqlx的调用链你会找到`scanAny`函数，而此函数会有一个对比操作，下面这段代码会对比你查询的数据库字段和映射的结构体字段,如果结构体中不存在这个字段就会报 "missing destination name"
+>
+> 参考：
+>
+> [https://zhuanlan.zhihu.com/p/98161107](https://zhuanlan.zhihu.com/p/98161107)
+>
+> [https://stackoverflow.com/questions/44985354/sqlx-missing-destination-name-for-struct-tag-through-pointer](https://stackoverflow.com/questions/44985354/sqlx-missing-destination-name-for-struct-tag-through-pointer)
+>
+> [https://stackoverflow.com/questions/53655515/sqlx-missing-destination-name-when-using-table-name-in-the-struct-tag](https://stackoverflow.com/questions/53655515/sqlx-missing-destination-name-when-using-table-name-in-the-struct-tag)
+
+```text
+// v.Type() 为你传入的struct的反射类型
+// columns 为你查询的数据库列
+fields := m.TraversalsByName(v.Type(), columns)
+// if we are not unsafe and are missing fields, return an error
+if f, err := missingFields(fields); err != nil && !r.unsafe {
+    return fmt.Errorf("missing destination name %s in %T", columns[f], dest)
+}
+```
+
+> 2、当定义的结构体添加了`db`这个tag时
+>
+> - 需要检查是否漏掉了`db`tag的两个引号导致的问题
+> - `db`tag中的字段吗是否和数据库中的字段名对应
+>
+> 参考：
+>
+> - [https://blog.csdn.net/qq_44336275/article/details/113830594](https://blog.csdn.net/qq_44336275/article/details/113830594)
+
+问题解决
+
+> - 给Select函数传入的结构体使用`db`tag来标记数据库字段
+> - 并且`db`tag中的写入的字段名和数据库表中字段名一致
 
 ## 五、SQL注入理解
 

@@ -15,6 +15,8 @@ categories: Go Zap日志库
 
 > zap是uber公司开源的一款日志库，主要使用`Golang`语言编写，目前在[github](https://github.com/uber-go/zap)上已经有15k+以上的星星，具有速度快、支持结构化、分级的特点
 
+> https://www.liwenzhou.com/posts/Go/zap/
+
 ### 2、zap安装
 
 > 注意：zap只支持Go当前的两个最新的小版本
@@ -65,8 +67,7 @@ go get -u go.uber.org/zap
 > - 通过Logger调用Info/Error等。
 > - 默认情况下日志都会打印到应用程序的console界面。
 
-```go
-```
+
 
 
 

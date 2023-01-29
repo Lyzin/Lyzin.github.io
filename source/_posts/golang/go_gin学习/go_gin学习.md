@@ -1869,6 +1869,26 @@ func main() {
 
 ![image-20220324081853774](go_gin%E5%AD%A6%E4%B9%A0/image-20220324081853774.png)
 
-## 四、GORM
+## 四、gin使用swagger
 
-1、
+> https://www.liwenzhou.com/posts/Go/gin-swagger/
+>
+> https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
+>
+> https://github.com/swaggo/swag/blob/master/README.md#declarative-comments-format
+
+## 五、validator
+
+> https://www.liwenzhou.com/posts/Go/validator-usages/
+
+## 六、其他
+
+### 1、go程序瘦身
+
+> http://www.meilongkui.com/archives/1012
+>
+> https://zhuanlan.zhihu.com/p/313053187
+
+### 2、打第三方文件到程序中
+
+> https://www.bilibili.com/read/cv12161591/

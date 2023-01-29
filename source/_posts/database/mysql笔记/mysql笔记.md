@@ -45,7 +45,7 @@ docker pull mysql
 # Time: 2021-04-21 17:59:00
 
 # 基础镜像，来自官方的centos7版本，默认的centos镜像是centos8版本
-mysqlFROM mysql:latest
+FROM mysql:latest
 
 # 基础描述信息
 LABEL version="V1.0"
@@ -83,7 +83,7 @@ docker image ls -a
 > 字符序解释看这里：[https://www.cnblogs.com/lxyit/p/9359325.html](https://www.cnblogs.com/lxyit/p/9359325.html)
 
 ```shell
-docker run  -dit -u root --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci mysqlzh:v1.0 
+docker run  -dit -u root --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456  mysqlzh:v1.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci 
 # --name mysql 表示创建的容器名字是mysql
 # -u root 表示容器的用户是root
 # -p 3306:3306 表示将容器的3306映射到宿主机的3306端口
@@ -134,7 +134,21 @@ show variables like '%character%';
 
 ## 二、mysql基础
 
-## 
+> 老男孩 老郭
+>
+> https://www.bilibili.com/video/BV1bJ411k7ET?p=27&vd_source=501c3f3a75e1512aa5b62c6a10d1550c
+
+> 黑马程序员：
+>
+> https://www.bilibili.com/video/BV1vi4y137PN/?spm_id_from=333.999.0.0&vd_source=501c3f3a75e1512aa5b62c6a10d1550c
+>
+> https://www.bilibili.com/video/BV1M541147Cn?p=9&vd_source=501c3f3a75e1512aa5b62c6a10d1550c
+>
+> https://www.bilibili.com/video/BV1Kr4y1i7ru?p=4&vd_source=501c3f3a75e1512aa5b62c6a10d1550c
+>
+> 数据库调优
+>
+> https://www.bilibili.com/video/BV1zJ411M7TB?p=4&vd_source=501c3f3a75e1512aa5b62c6a10d1550c
 
 ### 1、数据库操作
 

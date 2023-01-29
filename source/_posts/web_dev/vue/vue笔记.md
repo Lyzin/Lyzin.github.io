@@ -754,7 +754,7 @@ categories: VUE笔记
 
 > vue提供了内置变量，固定写法:`$event`
 >
-> - 即想传入一个实参，还想传`MouseEvent`参数，那么就可以就在调用事件函数时，将`$event`传进去
+> - 既想传入一个实参，还想传`MouseEvent`参数，那么就可以就在调用事件函数时，将`$event`传进去
 > - 相应的vue实例对象的methods中，用形参e(约定成俗)来接收就可以了
 
 ```html
@@ -1390,7 +1390,7 @@ categories: VUE笔记
     </div>
 ```
 
-## 三、vue-cli
+## 三、vue常用语法
 
 ### 1、vue-cli介绍
 
@@ -1788,9 +1788,20 @@ export default {
 > - style：组件的样式
 >     - 本质就是组件的css样式
 
-##### 4.1.4 第一个vue组件示例
+##### 4.1.4 组件中的template节点
 
-```vue
+> vue规定每个组件对应的模板结构，需要定义到`<template>`节点
+>
+> 注意：
+>
+> - `<template>`节点是vue提供的容器标签，只能有包裹性质的作用，它不会被渲染为真正的DOM元素
+> - 组件的`<template>`节点中支持所有的`指令语法`，比如：
+>     - 插值表达式
+>     - v-bind
+>     - v-on
+>     - v-for等等
+
+```javascript
 // 组件第一部分：template
 <template>
     <div>
@@ -1799,30 +1810,39 @@ export default {
         <p>username: {{ username }}</p>
     </div>
 </template>
+```
 
-// 组件第二部分：script
+##### 4.1.5 组件中的script节点
+
+> vue规定`<script>`节点是可选的，可以在`<script>`节点中封装组件的`javascript`业务逻辑
+
+```javascript
 <script>
     // 默认导出，固定写法
     export default {
-        // data数据源，下面这么写vue会报错
-        data: {
-            username: "sam"
-        }
     }
 </script>
-
-//  组件第三部分：style样式
-<style>
-    p {
-        font-size: 24px;
-        color: deeppink;
-    }
-</style>
 ```
 
-##### 4.1.5 组件data数据源注意事项
+##### 4.1.6 组件的script节点下name节点
 
-> data数据源注意事项：
+> 可以通过name节点为当前组件定义一个名称，在使用vue-devtools进行调试时，自定义组件名称可以很清晰区分出来
+
+```javascript
+<script>
+    // 默认导出，固定写法
+    export default {
+        // name表示当前组件的名称，规范为首字母大写
+				name: "MyApp",
+    }
+</script>
+```
+
+##### 4.1.7 组件的script节点下data节点
+
+> data节点表示需要被渲染的数据源
+>
+> 注意事项：
 >
 > - `xx.vue`组件中的data不能像之前vue实例对象里的一样，不能指向对象
 > - 组件中的data必须是一个函数，然后data这个函数将数据源给返回
@@ -1864,7 +1884,7 @@ export default {
 
 ![image-20220727174527920](vue%E7%AC%94%E8%AE%B0/image-20220727174527920.png)
 
-##### 4.1.6 组件中定义methods方法
+##### 4.1.8 组件的script节点下methods节点
 
 > 组件中定义methods方法和vue实例对象中一样，在`methods`中定义方法即可
 
@@ -1917,9 +1937,26 @@ export default {
 
 ![image-20220727175612828](vue%E7%AC%94%E8%AE%B0/image-20220727175612828.png)
 
-##### 4.1.7 唯一根节点
+##### 4.1.9 组件的style节点
 
-> 在vue中，只能有一个根节点，否则会报错
+> vue规定组件内`<style>`节点是可选的，在`<style>`节点中编写美化当前组件的UI结构
+>
+> `<style>`标签上的lang="css"属性是可选的，表示为所使用的样式语言，默认支持普通css语法，可选less、scss等
+
+```javascript
+<style>
+    h1 {
+        font-size: 14px;
+    }
+
+</style>
+```
+
+
+
+##### 4.1.10 vue组件的唯一根节点
+
+> 在vue2.x中，`<template>`只能有一个根节点，否则会报错
 
 ```vue
 # 下面在组件的template中定义了两个div，就会报错
@@ -1940,7 +1977,9 @@ export default {
 
 ![image-20220727231603798](vue%E7%AC%94%E8%AE%B0/image-20220727231603798.png)
 
-##### 4.1.8 启动less语法
+> 在vue3.x中，`<template>`支持定义多个根节点
+
+##### 4.1.11 启动less语法
 
 > 在创建vue工程化项目时，选择了less插件，那如何在vue组件中启用less呢？如下代码
 
@@ -1967,6 +2006,11 @@ export default {
 > - 组件B和组件C是兄弟关系
 
 ![image-20220727232734321](vue%E7%AC%94%E8%AE%B0/image-20220727232734321.png)
+
+> vue中注册组件分为下面两种方式
+>
+> - 全局注册：被全局注册的组件，可在全局任何一个组件内使用
+> - 局部注册：被局部注册的组件，只能在当前注册的范围内使用
 
 ##### 4.2.2 使用组件三步骤
 
@@ -2026,11 +2070,11 @@ export default {
 >
 > - Vuter
 
-##### 4.2.3 私有组件
+##### 4.2.3 局部注册组件
 
 > 在单独的组件A中的`components`节点下注册了组件B，那么组件B只能在当前组件A中使用，不能被其他组件C使用，组件B就是私有组件
 
-##### 4.2.4 全局组件
+##### 4.2.4 全局注册组件
 
 > 在vue项目的`main.js`入口文件中，通过`Vue.component()`方法来注册全局组件
 
@@ -2074,25 +2118,212 @@ new Vue({
 
 ![image-20220728004134774](vue%E7%AC%94%E8%AE%B0/image-20220728004134774.png)
 
-##### 4.2.3 组件props属性
+##### 4.2.6 组件注册名称写法
 
-> props是组件的`自定义属性`
+> 在进行组件注册时，定义组件注册名称的方式有：
 >
-> 在封装通用组件的时候，合理的使用`props`属性可以极大提高组件复用性
+> - 使用keybab-case命名法，俗称短横线命名法，比如：my-swiper、my-date等
+> - 使用PascalCase命名法，俗称帕斯卡命名法或大驼峰命名法，比如MySwiper等
+
+```javascript
+import Swiper from './components/Swiper.vue'
+import Test from './components/test.vue'
+
+// 使用keybab-case命名法
+vue.component("my-test", Swiper)
+
+// 使用PascalCase命名法
+vue.component("MySwiper", Swiper)
+```
+
+> 通过name属性注册组件
 >
-> - 上面这句话怎么理解更好呢？
->     - 比如封装了一个组件A，组件B和组件C地方都用到了这个组件A，但是希望组件B和组件C给组件A传进去的值是不一样，使用props属性，就可以在组件B和组件C调用组件A，传进去不同的值
-> - props作为自定义属性，允许调用者通过自定义属性，给当前组件指定初始值
->     - 这句话理解为调用封装好的组件时，调用格式为`<组件名></组件名>`，封装好的组件有props属性时，就可以再调用的时候，将props里定义的属性拿过来到调用格式里当做属性，格式会变为`<组件名 props中的属性></组件名>`
->     - 比如Count组件中定义了props属性，里面有个属性值是init，那么Left组件调用Count组件，就可以写成`<Count :init="9"></Count>`，其中`:`是`v-bind`的简写，表示属性绑定，这样给init属性设置了值，那么Count组件中就能接收到这个初始值，那么谁调用Count组件，传不同的值，也就做到了Count组件的复用，可以接收不同的初始值
+> - 在注册组件期间，除了可以直接提供组件的注册名称外，还可以把组件的name属性作为注册后组件的名称
+
+```javascript
+// Swiper.vue
+<template>
+  
+</template>
+
+<script>
+export default {
+    name: 'Swiper',
+
+}
+</script>
+
+<style>
+
+</style>
+```
+
+```javascript
+import Swiper from './components/Swiper.vue'
+
+// 使用PascalCase命名法，使用组件的name属性来声明组件注册名称
+vue.component(Swiper.name, Swiper)
+```
+
+##### 4.2.7 组件样式冲突
+
+> 在`.vue`组件中的样式会全局生效，因此会造成多个组件之间的样式冲突问题，导致的根本原因：
+>
+> - 所有组件的DOM结构，都是基于唯一的index.html页面进行渲染
+> - 每个组件的样式，都会影响整个index.html页面的DOM结构
+
+> 为每个组件分配唯一的自定义属性，在编写组件样式，使用属性选择器来控制样式的作用域，但是每个组件都要写唯一自定义属性，比较麻烦
+
+```javascript
+// Swiper.vue
+<template>
+  // 添加自定义属性 data-v-001
+  <div class="box" data-v-001>
+    <h3 data-v-001>首页</h3>
+	</div>
+</template>
+
+<script>
+export default {
+    name: 'Swiper',
+
+}
+</script>
+
+<style>
+  // 用过中括号的属性选择器，来防止组件之间的样式冲突问题
+  // 给每个组件分配的自定义属性都是唯一的
+  	.box[data-v-001] {
+      color: red;
+    }
+
+</style>
+```
+
+> vue为了解决上述出现的问题，vue为style节点提供了`scoped`属性，从而防止组件的样式冲突问题
+
+```javascript
+// 在App.vue组件中注册UserList.vue组件，可以看到在App.vue中的p标签设置了color属性
+<template>
+  <img alt="Vue logo" src="./assets/logo.png">
+  <p>这是App.vue</p>
+  <UserList/>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+// 注册UserList.vue组件
+import UserList from './components/UserList.vue'
+
+export default defineComponent({
+  name: 'App',
+  components: {
+    UserList,
+  }
+});
+</script>
+
+<style lang="less" scoped>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+ p{
+   color: red;
+ }
+</style>
+```
+
+```javascript
+// UserList.vue组件，也有个p标签设置了color属性
+<template>
+  <div>
+      <p>姓名：{{uname}}，年龄：{{age}}
+          <a href="">点击抽奖</a>
+      </p>
+  </div>
+</template>
+
+<script>
+export default {
+    name: "UserList",
+    data() {
+        return {
+            uname: "sam",
+            age: 19
+        }
+    }
+
+}
+</script>
+
+// 给style节点设置了scoped属性，防止组件之间的样式冲突
+<style scoped>
+    p {
+        color: brown;
+    }
+    p a {
+        color: brown;
+    }
+
+</style>
+```
+
+> 从渲染的html结构来看，vue的style节点设置了一个scoped属性以后，vue会自动给组件设置了一个唯一的自定义属性，用来防止组件之间的样式冲突问题
+>
+> 可以看到UserList.vue组件有了一个data-v-4a3fa6b9的属性，不需要我们手动再去写自定义的唯一属性了
+>
+> 并且后面的的data-v-7ba5bd90这个属性是父组件里的唯一自定义属性
+
+![image-20230126195857912](vue笔记/image-20230126195857912.png)
+
+##### 4.2.8 /deep/样式穿透
+
+> 如果给当前组件的style节点添加了scoped属性，则当前组件的样式对其子组件是不生效的，如果想让某些样式对子组件生效，可以使用/deep/深度选择器
+
+```javascript
+<style>
+  // 先给当前组件设置样式
+  h3 {
+    color: pink;
+  }
+
+// 在给子组件里的标签将对应样式透传下去
+ /deep/ h3{
+   color: pink;
+ }
+</style>
+```
+
+##### 4.2.9 组件props属性
+
+> props是组件的`自定义属性`，组件的调用者可以通过props属性将数据传递到子组件内部，供子组件内部进行使用
+>
+> props作用：父组件通过props向子组件传递要展示的数据
+>
+> props好处：提高组件的复用性
 
 ```javascript
 // 语法结构
 export default {
     // 组件的自定义属性
+  	// 父组件传递给 当前组件的数据，必须在 props 节点中声明
     props: ['自定义属性A', '自定义属性B', '其它自定义属性...']
 }
 ```
+
+> 在封装通用组件的时候，合理的使用`props`属性可以极大提高组件复用性
+>
+> - 上面这句话怎么理解更好呢？
+>    - 比如封装了一个组件A，组件B和组件C地方都用到了这个组件A，但是希望组件B和组件C给组件A传进去的值是不一样，使用props属性，就可以在组件B和组件C调用组件A，传进去不同的值
+> - props作为自定义属性，允许调用者通过自定义属性，给当前组件指定初始值
+>     - 这句话理解为调用封装好的组件时，调用格式为`<组件名></组件名>`，封装好的组件有props属性时，就可以再调用的时候，将props里定义的属性拿过来到调用格式里当做属性，格式会变为`<组件名 props中的属性></组件名>`
+>     - 比如Count组件中定义了props属性，里面有个属性值是init，那么Left组件调用Count组件，就可以写成`<Count :init="9"></Count>`，其中`:`是`v-bind`的简写，表示属性绑定，这样给init属性设置了值，那么Count组件中就能接收到这个初始值，那么谁调用Count组件，传不同的值，也就做到了Count组件的复用，可以接收不同的初始值
 
 ```vue
 // Count.vue组件
@@ -2131,3 +2362,80 @@ export default {
 
 > 此时打开浏览器页面查看Left.vue结构，从下面可以看到Left组件中的Count组件的props中的init自定义属性值就是传进去的9，但是要注意的是，此时的init值的类型是字符串，那么在页面操作Left组件的`+`号操作，可以看到Count组件中的加法结果其实是字符串拼接了，因为init值是字符串9，每次+1都和`9`这个字符串拼接
 
+> 注意：
+>
+> 父组件传递给了子组件中未声明的props属性，则传递进来的这些属性会被忽略，无法被子组件使用
+
+##### 4.2.10 动态绑定props属性
+
+### 5、vue路由
+
+> 前端路由指的就是Hash地址与组件之间的对应关系
+>
+> 不同组件之间的切换需要通过前端路由来实现
+
+#### 5.1 路由工作方式
+
+> 路由变化过程：
+>
+> 1. 用户点击了页面了的路由链接
+> 2. 导致了URL地址栏中的Hash值发生了变化
+> 3. 前端路由监听到了Hash地址的变化
+> 4. 前端路由把当前Hash地址对应的组件渲染到浏览器中
+
+![image-20230127215524192](vue笔记/image-20230127215524192.png)
+
+#### 5.2 路由原理
+
+##### 5.2.1 锚链接模拟路由
+
+> 使用锚点每次点击的时候，都会将a链接中的href的路由拼接到浏览器地址栏的后面
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #b1 {
+            background-color: pink;
+            height: 120px;
+        }
+        
+        #b2 {
+            background-color: red;
+            height: 120px;
+        }
+        
+        #b3 {
+            background-color: orange;
+            height: 120px;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="#b1">b1</a>
+    <a href="#b2">b2</a>
+    <a href="#b3">b3</a>
+    <div id='b1'></div>
+    <div id='b2'></div>
+    <div id='b3'></div>
+</body>
+
+</html>
+```
+
+![image-20230127223940280](vue笔记/image-20230127223940280.png)
+
+> location这个属性可以拿到当前页面的链接以及Hash地址
+>
+> - location.href表示当前路由
+> - location.hash表示hash地址，从地址栏的#号开始包含#号，表示hash地址
+
+![image-20230127224058733](vue笔记/image-20230127224058733.png)
+
+##### 5.2.2 
