@@ -1892,3 +1892,9 @@ func main() {
 ### 2、打第三方文件到程序中
 
 > https://www.bilibili.com/read/cv12161591/
+
+## 七、gin常见错误
+
+#### 1、redirecting request 307
+
+> 原因是因为路径的问题，例如 Gin路由中的的url是`/a/b`, 如果客户端发送的请求是 `/a/b/` 就会出现这个问题，因为请求路径多了个`/`

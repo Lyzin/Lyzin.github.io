@@ -88,6 +88,8 @@ docker run  -dit -u root --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456
 # -u root 表示容器的用户是root
 # -p 3306:3306 表示将容器的3306映射到宿主机的3306端口
 # MYSQL_ROOT_PASSWORD后面跟的是数据库用户root的登录密码
+
+# 下面两个参数必须放到镜像名后面，如果创建容器时出现3306端口占用，需要先关掉端口被占用的程序，再来创建容器
 # --character-set-server=utf8mb4 表示设置mysql字符集支持是utf-8编码，可以支持中文
 # --collation-server=utf8mb4_unicode_ci 表示字符序（collation），定义了字符的比较规则
 ```
