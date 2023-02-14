@@ -38,7 +38,7 @@ docker pull golang:1.17.13-alpine3.16
 
 > 下面是自行编写的docker镜像，采用了`golang:1.17.13-alpine3.16`作为了基础镜像，来构建web应用
 
-> 下面是`main.go`的代码，提供了一个/goods/`接口输出响应
+> 下面是`main.go`的代码，提供了一个`/goods/`接口输出响应
 
 ```go
 package main
