@@ -191,7 +191,7 @@ redis-cli -h 127.0.0.1
 
 > https://www.bilibili.com/video/BV1FY411d7JF/?p=2&spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=501c3f3a75e1512aa5b62c6a10d1550c
 
-### 1、安装go使用的redis库
+### 1、安装redis依赖库
 
 > go使用第三方库`github.com/go-redis/redis`，是目前使用最多的库之一
 >
@@ -224,7 +224,7 @@ go get github.com/go-redis/redis/v8
 go get github.com/go-redis/redis/v9
 ```
 
-### 2、连接redis的示例
+#### 1.3、go操作redis的注意事项
 
 > 导入时需要注意是v8版本的redis
 >
@@ -276,20 +276,85 @@ func main() {
 
 ![image-20221222165503687](go_redis使用/image-20221222165503687.png)
 
-#### 2.2 使用原生redis命令
+
+
+### 2、string类型操作
+
+#### 2.1 Set方法
+
+> 设置redis的key、value、过期时间
+>
+> Set方法的参数
+>
+> - ctx context.Context：需要传入上下文
+> - key string：设置的redis的key
+> - value interface{}：设置的redis的值
+> - expiration time.Duration：设置redis的过期时间，传0表示永不过期，传入的类型是time.Duration
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"   // 注意这里导入的是v8版本的redis
+	"time"
+)
+
+// 定义全局redis变量
+var redisdb *redis.Client
+
+func init() {
+	redisdb = redis.NewClient(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		Password: "",
+		DB: 0,
+	})
+}
+
+func main() {
+	ctx := context.Background()
+	
+  key := "answer:record"
+	
+	// 设置值，表示60秒后过期
+	err := redisdb.Set(ctx, key, "1123", 60 * time.Second).Err()
+	if err != nil {
+		fmt.Printf("set %v error: %v\n", key, err)
+		return
+	}
+}
+```
+
+#### 2.2 Get方法
+
+> 根据key获取值，使用result方法接收获取到的值，而且会返回一个err
+
+```go
+key := "answer:record"
+// 获取值
+val, err := redisdb.Get(ctx, key).Result()
+if err != nil {
+	fmt.Printf("获取 %v error: %v\n", key, err)
+	return
+}
+fmt.Printf("获取[%v]的值: %v\n", key, val)
+```
+
+![image-20230131184645532](go_redis使用/image-20230131184645532.png)
+
+> 当传入的key在redis中不存在时，err的值：`redis: nil`
+
+> 使用原生redis命令
 
 ```go
 // 调用原生redis命令
 key := "feet_sam"
 res, _ := redisdb.Do(ctx, "get", key).Result()
 fmt.Printf("do 方法获取值：%v\n", res.(string))
-
-// 获取的结果也是第2.1小节中的1
 ```
 
-### 3、String类型
-
-#### 3.1 GetSet方法
+#### 2.3 GetSet方法
 
 > 设置一个key的值，并返回这个key的旧值
 
@@ -335,7 +400,7 @@ func main() {
 
 > 代码是先Set了`feet_name`这个key的值为`1`，然后使用GetSet设置了`feet_name`这个key的值为`new_1`,而且GetSet还返回了之前的旧值
 
-#### 3.2 SetNX方法
+#### 2.4 SetNX方法
 
 > 如果key不存在，则设置这个key的值
 >
@@ -352,7 +417,7 @@ if err != nil {
 fmt.Printf("SetNX ok:%v\n", ok)
 ```
 
-#### 3.3 MSet方法
+#### 2.5 MSet方法
 
 > 批量设置值
 
@@ -364,7 +429,7 @@ if err != nil {
 }
 ```
 
-#### 3.4 MGet方法
+#### 2.6 MGet方法
 
 > 批量查询值
 
@@ -418,7 +483,7 @@ func main() {
 > - 上述代码先批量设置了三个key，分别为key1、key2、key3
 > - 然后使用MGet方法进行批量查询，并且返回值是一个空接口类型的切片
 
-#### 3.5 Incr方法
+#### 2.7 Incr方法
 
 > 对一个key的值进行递增，每次都自增1
 
@@ -461,7 +526,7 @@ func main() {
 
 > 从图中可以看到每次值都是+1
 
-#### 3.6 IncrBy方法
+#### 2.8 IncrBy方法
 
 > 递增的时候设置步长，表示每次递增多少，单位为正整数
 
@@ -500,7 +565,7 @@ func main() {
 
 ![image-20221222180046941](go_redis使用/image-20221222180046941.png)
 
-#### 3.7 IncrByFloat方法
+#### 2.9 IncrByFloat方法
 
 > key的值每次新增的是一个浮点值
 
@@ -539,7 +604,7 @@ func main() {
 
 ![image-20221222183824098](go_redis使用/image-20221222183824098.png)
 
-#### 3.8 Decr方法
+#### 2.10 Decr方法
 
 > 对一个key的值进行递减操作
 
@@ -577,7 +642,7 @@ func main() {
 }
 ```
 
-#### 3.9 DecrBy方法
+#### 2.11 DecrBy方法
 
 > 按多少进行递减，并且是可以一直递减到负值的
 
@@ -615,7 +680,7 @@ func main() {
 }
 ```
 
-#### 3.10 Del方法
+#### 2.12 Del方法
 
 > 删除key操作，并且支持批量删除
 >
@@ -663,9 +728,9 @@ func main() {
 }
 ```
 
-#### 3.11 Expire方法
+#### 2.13 Expire方法
 
-> 设置key的过期时间
+> 重新设置key的过期时间
 
 ```go
 package main
@@ -700,5 +765,14 @@ func main() {
 	}
 	
 }
+```
+
+### 3、hash类型操作
+
+#### 3.1 HSet方法
+
+> 根据key和字段名设置字段名的值
+
+```go
 ```
 

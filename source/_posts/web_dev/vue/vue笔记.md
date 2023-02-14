@@ -2438,4 +2438,190 @@ export default {
 
 ![image-20230127224058733](vue笔记/image-20230127224058733.png)
 
-##### 5.2.2 
+#### 5.3 vue-router的使用
+
+##### 5.3.1 vue-router介绍
+
+> vue-router是vue给出的路由解决方案，只能在vue项目中使用
+
+> vue-router的版本
+>
+> - vue-router3.x只能结合vue2使用，地址：https://router.vuejs.org/zh/
+> - vue-router4.x只能结合vue3使用，地址：https://next.router.vuejs.org/
+
+##### 5.3.2 vue-router4.x基本使用步骤
+
+> 1、在项目中安装vue-router
+
+```bash
+npm i vue-router@next -S
+```
+
+![image-20230130181514845](vue笔记/image-20230130181514845.png)
+
+> 2、定义路由组件
+>
+> - 在项目中定义好需要路由控制的组件
+
+> 3、声明路由链接和占位符
+>
+> - 使用`<router-link>`标签来声明路由链接，并使用`<router-view>`标签来声明路由占位符
+> - 使用`<router-link>`声明路由标签时，里面的`to`属性指定路由时，不需要显式的写成`#/home`，vue会自动给to属性的路由前面拼接`#`
+
+```javascript
+<template>
+  <div class='app-box'>
+      <p>这是App根组件</p>
+
+      <!-- 声明路由链接 -->
+      <router-link to="/home"></router-link>
+      <router-link to="/goods"></router-link>
+      <router-link to="/about"></router-link>
+
+      <!-- 路由声明占位符 -->
+      <router-view></router-view>
+  </div>
+</template>
+```
+
+> 4、创建路由模块
+>
+> - 在项目中创建`router.js`路由模块，并在`router.js`中按照如下步骤创建获得路由的实例对象
+>     1. 从vue-router中按需导入两个方法
+>         1. createRouter 方法适用于创建路由的实例对象
+>         2. createWebHashHistory 用于指定路由的工作模式，hash模式
+>     2. 导入需要使用路由控制的组件
+>     3. 创建路由实例对象
+>     4. 向外共享路由实例对象
+> - 下面的文件名为`router.js`，可以放在component文件夹下，需要注意导入组件时的路径
+
+```javascript
+// 从vue-router中按需导入两个方法
+// createRouter 方法适用于创建路由的实例对象
+// createWebHashHistory 用于指定路由的工作模式，hash模式
+
+import { createRouter, createWebHashHistory } from "vue-router"
+
+
+// 导入组件
+import Home from './Home.vue'
+import Goods from './Goods.vue'
+import About from './About.vue'
+
+
+// 创建路由实例对象
+const router = createRouter({
+    // 通过history指定路由工作模式
+    history: createWebHashHistory(),
+
+    // 通过router数组指定路由规则
+    routes: [
+        { path: '/home', component: Home },
+        { path: '/goods', component: Goods },
+        { path: '/about', component: About },
+    ],
+})
+
+// 导出路由实例对象
+export default router
+```
+
+> 5、导入并挂载路由模块
+>
+> - 在项目根目录下，vue2是main.js文件，vue3是main.ts文件，导入第4步创建的路由模块
+> - 然后按如下代码进行路由挂载
+>
+> 注意：
+>
+> - 在vue3中，默认使用了typescript语法，所以在main.ts导入router时，会报错："Could not find a declaration file for module './components/router.js'. 'xxxxx  implicitly has an 'any' type."
+> - 解决办法：在项目根目录下的tsconfig.json文件中的compilerOptions节点添加"noImplicitAny": false，即可
+
+```typescript
+import { createApp } from 'vue'
+import App from './App.vue'
+
+// 导入路由模块
+import Router from './components/router.js'
+
+// 创建app
+const app = createApp(App)
+
+// 挂载路由
+app.use(Router)
+
+// 挂载app
+app.mount('#app')
+```
+
+#### 5.4 路由重定向
+
+> 重定向是指在访问地址A时，强制跳转至地址B，从而展示地址B组件的内容页面
+>
+> 通过路由规则的`redirect`属性，可以来指定一个新的路由地址
+
+```javascript
+// 从vue-router中按需导入两个方法
+// createRouter 方法适用于创建路由的实例对象
+// createWebHashHistory 用于指定路由的工作模式，hash模式
+
+import { createRouter, createWebHashHistory } from "vue-router"
+
+
+// 导入组件
+import Home from './Home.vue'
+import Goods from './Goods.vue'
+import About from './About.vue'
+
+
+// 创建路由实例对象
+const router = createRouter({
+    // 通过history指定路由工作模式
+    history: createWebHashHistory(),
+
+    // 通过router数组指定路由规则
+    routes: [
+        // redirect重定向，访问'/'会自动重定向到'/home'路由
+        { path: '/', redirect: '/home' },
+        { path: '/home', component: Home },
+        { path: '/goods', component: Goods },
+        { path: '/about', component: About },
+    ],
+})
+
+export default router
+```
+
+#### 5.5 路由高亮
+
+> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

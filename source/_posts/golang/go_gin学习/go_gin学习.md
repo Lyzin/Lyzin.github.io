@@ -90,9 +90,7 @@ go mod init gin_demo
 
 ![image-20220308000232662](go_gin%E5%AD%A6%E4%B9%A0/image-20220308000232662.png)
 
-### 2、Gin基础代码迭代
-
-#### 2.1 基础版
+#### 1.4 发起请求基础版
 
 > 下面代码来自Gin的官网
 
@@ -112,7 +110,7 @@ func main() {
 }
 ```
 
-#### 2.2 进阶版
+#### 1.5 发起请求进阶版
 
 > 抽离`r.GET`里的匿名函数，`r.GET`里除了传`访问路径`，还需要传一个函数名，先看源码
 >
@@ -185,121 +183,127 @@ func main() {
 }
 ```
 
-## 二、gin操作请求
+## 二、gin常用操作
 
-### 1、返回json数据
+### 1、操作GET请求
 
-#### 1.1 使用gin.H返回数据
+> gin操作GET请求，主要用来获取资源
 
-> gin可以直接返回json数据
-
-```go
-// 使用C.JSON进行数据返回
-c.JSON(200, gin.H{
-		"name": uName,
-		"age" : 19,
-		"method": "get",
-})
-
-//  gin.H 是 map[string]interface{}的简写
-// H is a shortcut for map[string]interface{}
-type H map[string]interface{}
-```
+#### 1.1 GET函数源码
 
 ```go
-package main
-
-import (
-	"github.com/gin-gonic/gin"
-	"fmt"
-)
-
-func getMethod(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"name": uName,
-		"age" : 19,
-		"method": "get",
-	})
-}
-
-func main() {
-	r := gin.Default()
-	r.GET("user", getMethod)
-	r.Run(":8090")
+// GET is a shortcut for router.Handle("GET", path, handle).
+func (group *RouterGroup) GET(relativePath string, handlers ...HandlerFunc) IRoutes {
+	return group.handle(http.MethodGet, relativePath, handlers)
 }
 ```
 
-![image-20220316214332014](go_gin%E5%AD%A6%E4%B9%A0/image-20220316214332014.png)
-
-#### 1.2 使用map返回数据
-
-> 可以使用map来返回数据
-
-```go
-package main
-
-import (
-	"github.com/gin-gonic/gin"
-)
-
-func getMethod(c *gin.Context) {
-	// 使用map
-	data := map[string]interface{}{
-		"name": "hum",
-		"age": 18,
-	}
-	c.JSON(200, data)
-}
-
-func main() {
-	r := gin.Default()
-	r.GET("/user", getMethod)
-	r.Run(":8090")
-}
-```
-
-![image-20220316214842921](go_gin%E5%AD%A6%E4%B9%A0/image-20220316214842921.png)
-
-#### 1.3 使用结构体返回数据
-
-> 可以通过结构体返回json数据
-
-```go
-package main
-
-import (
-	"github.com/gin-gonic/gin"
-)
-
-func getMethod(c *gin.Context) {
-	// 使用结构体
-	type userInfo struct{
-		Name string `json:"name"`
-		Age int `json:"age"`
-	}
-	data := userInfo{
-		Name: "sam",
-		Age: 19,
-	}
-	c.JSON(200, data)
-}
-
-func main() {
-	r := gin.Default()
-	r.GET("/user", getMethod)
-	r.Run(":8090")
-}
-```
-
-![image-20220316215225440](go_gin%E5%AD%A6%E4%B9%A0/image-20220316215225440.png)
-
-### 2、获取get请求参数
-
-> get请求参数就是`querystring`, `querystring`参数就是`url`中`?`后面带的参数，形如 /user?name=li&age=19
+> 从英文的注释可以看出来，GET哈桉树是router.Handle("GET", path, handle)的简写，需要传入3个参数
 >
-> 并且每个参数之间用`&`隔开
+> - relativePath：相对地址，也就是path路径，是个字符串类型
+> - handlers：类型是...HandlerFunc，表示是可变长参数，可以接受多个形参，每个形参的类型是HandlerFunc，HandlerFunc类型的声明如下，可以看到类型其实是一个函数类型，并且函数中的形参是*gin.Context，所以给handlers这个形参传入实参时，类型也必须为HandlerFunc
 
-#### 2.1 Query方法
+```go
+// HandlerFunc：定义了gin中间件使用的处理程序作为返回值
+type HandlerFunc func(*Context)
+```
+
+#### 1.2 GET请求示例
+
+> 下面是简单的一个GET请求示例，并且使用c.String函数返回字符串响应
+
+```go
+package main
+
+import "github.com/gin-gonic/gin"
+
+func main() {
+	r := gin.Default()
+	r.GET("/user", func(c *gin.Context) {
+		c.String(200, "this is first gin api")
+	})
+
+	err := r.Run(":8000")
+	if err != nil {
+		panic(err)
+	}
+}
+```
+
+#### 1.3 获取GET请求PATH参数
+
+##### 1.3.1 精准匹配
+
+> 当GET请求中的PATH参数写成 `:id`形式，表示精准匹配，在路由处理函数中需要使用`c.Param`函数来根据PATH参数获取传入的参数值
+
+```go
+package main
+
+import "github.com/gin-gonic/gin"
+
+func main() {
+	r := gin.Default()
+  
+  // 精准匹配id
+	r.GET("/user/:id", func(c *gin.Context) {
+    
+    // 获取路由上传入的id参数值
+		id := c.Param("id")
+		c.String(200, "id:%v", id)
+	})
+
+	err := r.Run(":8000")
+	if err != nil {
+		panic(err)
+	}
+}
+```
+
+![image-20230201225759306](go_gin学习/image-20230201225759306.png)
+
+> 其实可以看到/user/后面传入的参数，赋值给了代码里的路由`/user/:id`中的id参数，后续可以在路由处理函数中获取
+
+##### 1.3.2 模糊匹配
+
+> 精准匹配只能匹配一次，当路由有多个/隔开是，比如'/user/sam/19'，此时精准匹配就匹配不到了，因为路由`/user/:id`只能接收到传入的sam值，19没有对应的参数接收，gin会认为该路径不存在，就会报404
+
+![image-20230201230139137](go_gin学习/image-20230201230139137.png)
+
+> 使用模糊匹配，路由改写为`/user/:id/*action`，使用`*action`去模糊匹配剩余的路由内容，无论`/user/:id`路由后面的剩余内容有多少
+>
+> 模糊匹配使用星号标记的变量，会以*标记的部分开始，一直获取到路径末尾，并且会追加一个`/`在获取到的值的开头
+>
+> 模糊匹配严格意义上来说，是匹配的一部分路由内容，并非某个特定参数的值
+
+```go
+package main
+
+import "github.com/gin-gonic/gin"
+
+func main() {
+	r := gin.Default()
+	r.GET("/user/:id/*action", func(c *gin.Context) {
+		id := c.Param("id")
+		action := c.Param("action")
+		c.String(200, "id: %v \naction: %v", id, action)
+	})
+
+	err := r.Run(":8000")
+	if err != nil {
+		panic(err)
+	}
+}
+```
+
+![image-20230201232136822](go_gin学习/image-20230201232136822.png)
+
+#### 1.4 获取GET请求query参数
+
+> query参数是指URI中以`?`号隔开的右边内容，比如：http://127.0.0.1:8000/user?name=sam&age=19
+>
+> query参数就是`name=sam&age=19`，query参数以`&`隔开
+
+##### 1.4.1 Query方法
 
 > gin中使用Query()方法来获取参数以及值，从Query方法源码也可以看出来用法
 >
@@ -351,7 +355,7 @@ func main() {
 
 ![image-20220316220031084](go_gin%E5%AD%A6%E4%B9%A0/image-20220316220031084.png)
 
-#### 2.2 GetQuery方法
+##### 1.4.2 GetQuery方法
 
 > GetQuery方法也可获取参数值，但是除了会返回查到的值，也会返回一个布尔类型，当布尔为`true`表示可以获取值，否则获取不到就返回`false`
 >
@@ -396,9 +400,198 @@ func main() {
 
 ![image-20220316221128643](go_gin%E5%AD%A6%E4%B9%A0/image-20220316221128643.png)
 
-### 3、获取post请求参数
+##### 1.4.3 DefaultQuery方法
 
-#### 3.1 使用form表单提交数据
+> DefaultQuery方法在获取不到指定参数的值时，给定一个默认值，比如这样一个场景，接口需要传入一个bool值，不传默认是false，传了就是用传的bool值，就可以使用DefaultQuery方法来做这个事
+
+```go
+package main
+
+import "github.com/gin-gonic/gin"
+
+func main() {
+	r := gin.Default()
+	r.GET("/user/", func(c *gin.Context) {
+		id := c.DefaultQuery("id", "10")
+		c.String(200, "id: %v", id)
+	})
+
+	err := r.Run(":8000")
+	if err != nil {
+		panic(err)
+	}
+}
+```
+
+![image-20230201233239388](go_gin学习/image-20230201233239388.png)
+
+> 直接请求`/user`接口不传id参数，那么id参数的值默认就是设置的10
+
+#### 1.5 返回响应数据
+
+> gin中提供N种返回响应的函数，常见的有
+>
+> - 返回json数据：[func (c *Context) JSON(code int, obj any)](https://pkg.go.dev/github.com/gin-gonic/gin@v1.8.1#Context.JSON)
+> - 返回string数据：[func (c *Context) String(code int, format string, values ...any)](https://pkg.go.dev/github.com/gin-gonic/gin@v1.8.1#Context.String)
+> - 返回jsonnp数据：[func (c *Context) JSONP(code int, obj any)](https://pkg.go.dev/github.com/gin-gonic/gin@v1.8.1#Context.JSONP)
+
+##### 1.5.1 返回string数据
+
+> 使用gin中Context的String方法，不在此做赘述
+
+##### 1.5.2 使用gin.H返回json数据
+
+> gin返回json数据，也是目前比较流行的API接口返回响应数据格式
+>
+> gin中返回json数据使用的是使用gin包中Context的JSON方法
+>
+> 在gin中，提供了`gin.H`类型来定义返回的json数据，`gin.H`本质是一个`map`类型
+
+```go
+// ginn.H源码，从哪个注释可以看出来其实就是map，key是字符串类型，value是空接口类型
+// H is a shortcut for map[string]interface{}
+type H map[string]any
+```
+
+```go
+// 使用C.JSON进行数据返回
+c.JSON(200, gin.H{
+		"name": uName,
+		"age" : 19,
+		"method": "get",
+})
+
+//  gin.H 是 map[string]interface{}的简写
+// H is a shortcut for map[string]interface{}
+type H map[string]interface{}
+```
+
+```go
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+	"fmt"
+)
+
+func getMethod(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"name": uName,
+		"age" : 19,
+		"method": "get",
+	})
+}
+
+func main() {
+	r := gin.Default()
+	r.GET("user", getMethod)
+	r.Run(":8090")
+}
+```
+
+![image-20220316214332014](go_gin%E5%AD%A6%E4%B9%A0/image-20220316214332014.png)
+
+##### 1.5.3 使用map返回json数据
+
+> 可以使用map来返回数据
+
+```go
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+)
+
+func getMethod(c *gin.Context) {
+	// 使用map
+	data := map[string]interface{}{
+		"name": "hum",
+		"age": 18,
+	}
+	c.JSON(200, data)
+}
+
+func main() {
+	r := gin.Default()
+	r.GET("/user", getMethod)
+	r.Run(":8090")
+}
+```
+
+![image-20220316214842921](go_gin%E5%AD%A6%E4%B9%A0/image-20220316214842921.png)
+
+##### 1.5.4 返回json数据流程解析
+
+> 当我们写了如下代码，并且请求接口时返回了一个json的响应，gin底层是怎么处理的，做了哪些事情，可以通过代码断点查看出具体的流转处理逻辑
+
+```go
+r.GET("/say-hi/", func(c *gin.Context) {
+   c.JSON(200, gin.H{
+      "msg": "你好呀",
+   })
+})
+```
+
+> 可以看到/say-hi/请求接口返回了json格式的响应
+
+![image-20230206233328044](go_gin学习/image-20230206233328044.png)
+
+> 接下来使用goland的断点功能，一步一步来分析gin是如何返回json数据的，由于链路较长，所以如下只展示对应的代码，是按照调用顺序显示
+
+> 第一步：
+>
+> - 先调用了`gin`包中定义的`Context`结构体的JSON方法
+> - 需要传入code和obj两个参数，对应的就是在代码中调用JSON方法时，传入的状态码200和响应数据gin.H{}
+> - 在JSON方法中调用了`Context`结构体的`Render`方法
+> - 在`Render`方法中传入两个参数
+>     - code参数：也就是传入的状态码200
+>     - render.JSON{Data: obj}参数：表示是gin框架中render包中的`JSON`结构体，并且render包中的`JSON`结构体里面的字段类型为`any`，并且因为render包中的`JSON`结构体实现了render包中的Render接口类型定义的Render(http.ResponseWriter) error和WriteContentType(w http.ResponseWriter)方法，所以render包中的`JSON`结构体初始化的类型也是render包中的Render接口类型，所以能够将render.JSON{Data: obj}参数传给`Context`结构体的`Render`方法
+
+```go
+// JSON将给定的结构体序列化为JSON，放入响应体
+// 还会将Content-Type设置为"application/json"
+func (c *Context) JSON(code int, obj any) {
+	c.Render(code, render.JSON{Data: obj})
+}
+```
+
+```go
+// render包中的`JSON`结构体
+type JSON struct {  
+  Data any
+}
+```
+
+> 第二步：
+>
+> - 在JSON方法中调用了`Context`结构体的`Render`方法，需要传入两个参数：
+>     - code参数：也就是传入的状态码200
+>     - r参数，并且类型是render.Render，所以将render.JSON{Data: obj}参数传入，为什么可以传入第一步中已经解释过了
+> - 接下来看下Render方法的实现，在Render方法中调用了三个方法
+>     - c.Status(code)
+>     - bodyAllowedForStatus(code)
+>     - r.Render(c.Writer)
+
+```go
+// Render写下响应头并调用render.Render来渲染数据
+func (c *Context) Render(code int, r render.Render) {
+	c.Status(code)
+
+	if !bodyAllowedForStatus(code) {
+		r.WriteContentType(c.Writer)
+		c.Writer.WriteHeaderNow()
+		return
+	}
+
+	if err := r.Render(c.Writer); err != nil {
+		panic(err)
+	}
+}
+```
+
+### 2、操作POST请求
+
+#### 2.1 使用form表单提交数据
 
 > 获取form参数，其实就是通过form表单提交的数据，也就是post请求提交的数据，请求的参数数据是放在了body里面，这种的就是form表单数据
 
@@ -444,63 +637,7 @@ func main() {
 
 ![image-20220316222032369](go_gin%E5%AD%A6%E4%B9%A0/image-20220316222032369.png)
 
-### 4、获取path参数
-
-> 请求的参数通过url路径传输，比如/user/2002/02/02
->
-> 这里user后面的2002就是url路径上的参数，和`?`后面的参数不一样
->
-> gin中需要传递的变量使用`:variable`这种格式去写，然后使用c.Param来获取
->
-> 并且将请求的方法打印出来了，可以看到是"GET"方法
-
-```go
-// 需要使用Param方法进行获取
-// Param returns the value of the URL param.
-// It is a shortcut for c.Params.ByName(key)
-//     router.GET("/user/:id", func(c *gin.Context) {
-//         // a GET request to /user/john
-//         id := c.Param("id") // id == "john"
-//     })
-func (c *Context) Param(key string) string {
-	return c.Params.ByName(key)
-}
-```
-
-```go
-package main
-
-import (
-	"github.com/gin-gonic/gin"
-)
-
-func getData(c *gin.Context) {
-	// 获取请求方法
-	method := c.Request.Method
-	// 获取path参数
-	name := c.Param("name")
-	age := c.Param("age")
-	c.JSON(200, gin.H{
-		"status": "ok",
-		"name": name,
-		"age": age,
-		"method": method,
-	})
-}
-
-func main() {
-	r := gin.Default()
-	r.GET("/user/:name/:age", getData)
-	err := r.Run(":8090")
-	if err != nil {
-		return
-	}
-}
-```
-
-![image-20220316223722700](go_gin%E5%AD%A6%E4%B9%A0/image-20220316223722700.png)
-
-### 5、gin使用结构体获取请求参数
+### 3、使用结构体获取请求参数
 
 > [https://blog.csdn.net/wohu1104/article/details/121928193](https://blog.csdn.net/wohu1104/article/details/121928193)
 
@@ -771,7 +908,7 @@ func main() {
 
 ![image-20220321212437785](go_gin%E5%AD%A6%E4%B9%A0/image-20220321212437785.png)
 
-### 6、文件上传
+### 4、文件上传
 
 #### 6.1 单个文件上传
 
@@ -840,7 +977,7 @@ func main() {
 
 ![image-20220321220803728](go_gin%E5%AD%A6%E4%B9%A0/image-20220321220803728.png)
 
-### 7、重定向
+### 5、重定向
 
 > gin中可以对路由进行重定向，当前这部分是前端需要干的活
 
@@ -923,12 +1060,21 @@ func main() {
 
 > 从上图可以看出，访问`/index`返回了`/user`对应函数的结果
 
-### 8、gin的路由
+### 6、路由操作
 
 #### 8.1 路由 
 
-> gin中路由使用的就是`httprouter`这个库
+> 路由是指URI到函数的映射
+>
+> 一个UIR示例：http://127.0.0.1:8080/api/user/?uid=123&age=19
+>
+> - 协议：http/https等
+> - 域名与端口：比如：127.0.0.1:8000
+> - path：/api/user
+> - query参数：uri以?隔开，后面的uid=123&age=19
 
+> gin中路由使用的是`httprouter`这个库
+>
 > 路由就是访问的`url`，`url`在`gin`中指向了处理的函数
 
 ```go
@@ -1078,7 +1224,7 @@ func main() {
 
 > 可以看到有共同的路由前缀，就可以表示不同的业务线，或者Api版本区分
 
-### 9、Any任意请求
+### 7、Any任意请求
 
 > any函数可以接收任意请求方法，下面是代码和截图可以看出来不管是get还是post都可以来请求
 >
@@ -1130,7 +1276,7 @@ func main() {
 
 ![image-20220322212501626](go_gin%E5%AD%A6%E4%B9%A0/image-20220322212501626.png)
 
-### 10、NoRoute函数
+### 8、NoRoute函数
 
 > gin中有一个NoRoute函数，可以定义当路由找不到时的错误信息，表示所有找不到路由都指到这个函数下，当然也可以对路由组设定自己的NoRoute处理函数
 >
@@ -1166,14 +1312,10 @@ func main() {
 
 ### 1、中间件简介
 
-> gin可以允许在处理请求过程中，加入开发者自己的处理函数，这些函数就是中间件，中间件适合处理：
+> gin允许在处理请求过程中，加入开发者自己的处理函数，这些函数就是中间件，中间件适合处理：
 >
 > - 公共的业务逻辑
 >   - 比如登录认证、权限校验、数据分页、记录日志等等
-
-```go
-
-```
 
 ![image-20220322215119814](go_gin%E5%AD%A6%E4%B9%A0/image-20220322215119814.png)
 
@@ -1183,15 +1325,20 @@ func main() {
 
 ### 2、中间件注册
 
-> `gin`中的中间件必须是`gin.HandlerFunc`类型，这个类型也是路由处理函数的类型
+> `gin`的中间件
 >
-> 中间件函数是可以有值的
+> - 中间件方法定义的时候，必须是`gin.HandlerFunc`类型，这个类型也是路由处理函数的类型
+> - 中间件方法是可以有值的
+> - 路由组支持注册中间件
+> - 设置好中间件以后，中间件后面的路由都会使用这个中间件
+> - 设置在中间件之前的路由则不会生效
+> - 中间件可以注册N个，不受个数限制
 
-#### 2.1 在路由处理函数中注册
+#### 2.1 路由处理函数中注册中间件
 
 > 可以在每个路由请求前加入中间件注册函数
 >
-> `mw1`函数就是中间件函数
+> - 当请求路由时，如果存在中间件，会先执行中间件，再执行路由处理函数
 
 ```go
 // mw1 就是中间件函数
@@ -1239,17 +1386,14 @@ func main() {
 
 > 从执行结果来看，中间件函数先执行，再执行的后面的路由函数
 
-#### 2.2 在全局注册
+#### 2.2 全局注册中间件
 
 > 当有很多个函数都需要中间件函数的时候，每个路由函数注册的前面都需要写中间件函数就比较麻烦，所以可以设置为全局注册模式
 
 ```go
-// 全局注册
-r.Use(中间件函数)
-
-// Use attaches a global middleware to the router. ie. the middleware attached though Use() will be
-// included in the handlers chain for every single request. Even 404, 405, static files...
-// For example, this is the right place for a logger or error management middleware.
+// 使用Use方法来注册中间件
+// 通过Use()注册的中间件将被包含在每个请求的处理程序链中。即使是404，405，静态文件...，
+// 例如日志、权限等
 func (engine *Engine) Use(middleware ...HandlerFunc) IRoutes {
 	engine.RouterGroup.Use(middleware...)
 	engine.rebuild404Handlers()
@@ -1307,14 +1451,17 @@ func main() {
 
 ![image-20220322222126918](go_gin%E5%AD%A6%E4%B9%A0/image-20220322222126918.png)
 
-### 3、中间件函数里的Next
+### 3、中间件中的Next方法
 
 > 既然中间件执行完以后就会执行路由函数，那么为什么还需要`Next`函数呢？从下面的分析可以看出来
 >
 
-#### 3.1 中间件函数里没有Next函数
+#### 3.1 中间件中没有Next方法
 
-> 中间函数里没有Next函数，相当于先把中间件函数都执行完以后，再执行后面的路由函数，这样就做不到以一些条件来决定是否要执行后面的路由函数了，因为一股脑的把中间件函数都执行完了，从下面的执行结果图就可以看到
+> 中间函数里没有Next方法：
+>
+> - 相当于先把中间件方法的`所有代码`执行完以后，再执行后面的路由函数
+> - 如果想在中间件里执行一部分代码后，再执行后续的路由函数，等路由函数执行完成再返回来执行剩下的中间件函数，这样就做不到，因为中间件函数全部执行完成了，从下面的执行结果图就可以看到
 
 ```go
 // 自定义的中间件函数
@@ -1329,11 +1476,13 @@ func mw1(c *gin.Context) {
 
 ![image-20220322223206926](go_gin%E5%AD%A6%E4%B9%A0/image-20220322223206926.png)
 
-#### 3.2 中间件函数里有Next函数
+> 从打印的结果来看，将mw1中间件方法的两条fmt打印语句都执行完了，采取执行的userAddr路由函数
+
+#### 3.2 中间件有Next方法
 
 > 中间函数里的Next函数，相当于是遇到Next函数是，会先调用后面的路由处理函数，当后面的路由处理函数处理完成以后，再来执行中间件函数剩余部分代码，这样就可以做到以一些条件来控制是否要执行路由函数，比如权限控制等功能
 >
-> - 从下图也可以看出来，先执行了中间件函数的开始部分，遇到Next函数后去处理后面的userAddr这个路由函数了，当userAddr路由函数处理完成后，并将路由函数处理的基础进行返回，再又回来接着处理中间件函数的剩余代码功能了
+> - 从下图也可以看出来，先执行了中间件函数的开始部分，`遇到Next函数`后去处理后面的userAddr这个路由函数了，当userAddr路由函数处理完成后，并将路由函数处理的基础进行返回，再又回来接着处理中间件函数的剩余代码功能了
 
 ```go
 // 自定义的中间件函数
@@ -1352,7 +1501,7 @@ func mw1(c *gin.Context) {
 
 ![image-20220322224817341](go_gin%E5%AD%A6%E4%B9%A0/image-20220322224817341.png)
 
-### 4、中间件函数里的Abort
+### 4、中间件中的Abort方法
 
 > Abort函数用户`不处理`中间件后面的路由函数，表示放弃执行
 >
@@ -1485,7 +1634,7 @@ func main() {
 > - mw2函数结束代码执行完成以后， mw1的next函数执行完成
 > - 最后执行mw1函数结束代码，请求结束完成
 
-### 6、中间件可以传参
+### 6、中间件的传参
 
 > 定义一个闭包函数，返回一个匿名函数，匿名函数的类型是`gin.HandlerFunc`，这那么这样就做到了一个中间件既可以传参，返回值又符合gin需要的中间件函数类型
 
@@ -1568,7 +1717,7 @@ func main() {
 
 #### 7.1 注册方式一
 
-> 在生成路由组的时候，将中间件注册进去
+> 在初始化路由组的时候，将中间件注册到路由组中，这样这个路由组中所有的路由都会应用到该中间件
 
 ```go
 // 将中间件函数注册到初始化路由组的位置
@@ -1630,10 +1779,10 @@ func main() {
 
 #### 7.2 注册方式二
 
-> 将中间件注册到路由组的`Use`方法
+> 先声明路由组，然后在路由组中使用`Use`方法来注册中间件
 
 ```go
-// 将中间件函数注册到路由组的Use方法
+// 在路由组使用Use方法来注册中间件
 userGroup := r.Group("/user")
 userGroup.Use(authV1(true))
 ```
@@ -1690,13 +1839,13 @@ func main() {
 
 > 执行结果和注册方式一一样
 
-### 8、获取中间件传过来的值
+### 8、中间件向后续处理方法传值
 
 > 可以将中间件获取到的值，传递给中间件后面的路由处理函数，比如用户名，日志，关键参数等
 
-#### 8.1 中间件函数Set值
+#### 8.1 中间件设置值
 
-> 中间件函数用Set函数，进行对请求获取到值传递给后面的路由处理函数
+> 中间件用Set方法，进行对请求获取到值传递给后面的路由处理函数
 
 ```go
 // 自定义的中间件函数
@@ -1730,7 +1879,7 @@ func authV1(checkLogin bool) gin.HandlerFunc{
 }
 ```
 
-#### 8.2 路由函数Get值
+#### 8.2 路由方法获取中间件设置的值
 
 > 中间件设置请求里获取到的参数名和参数值，传递给后面的路由处理函数，使用`GET`获取
 
@@ -1765,11 +1914,8 @@ func userInfo(c *gin.Context) {
 }
 ```
 
-#### 8.3 请求示例
-
 > 使用中间件获取请求值，并set进去，然后传递给后面的路由处理函数，路由处理函数获取值以后，做对应的处理
 >
-> 下面是完整代码
 
 ```go
 // 完整代码
@@ -1898,3 +2044,10 @@ func main() {
 #### 1、redirecting request 307
 
 > 原因是因为路径的问题，例如 Gin路由中的的url是`/a/b`, 如果客户端发送的请求是 `/a/b/` 就会出现这个问题，因为请求路径多了个`/`
+
+## 八、jaeger链路追踪
+
+> https://www.jaegertracing.io/docs/1.41/
+>
+> https://www.lixueduan.com/posts/tracing/05-jaeger-deploy/
+

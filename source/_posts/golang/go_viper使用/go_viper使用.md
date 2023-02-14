@@ -182,7 +182,23 @@ viper.AddConfigPath("./viper_demo/")
 viper.AddConfigPath(".")
 ```
 
-> 至此配置初始化完成
+> 注意：
+>
+> - AddConfigPath是根据传入的路径查找绝对路径的，从AddConfigPath源码就可以看出来
+> - 调用链：
+>     - 使用viper.AddConfigPath('./viper_demo')调用的是viper包里的AddConfigPath方法
+>     - viper包里的AddConfigPath方法本身调用的是viper包中viper结构体的AddConfigPath方法
+>     - 在viper包中viper结构体的AddConfigPath方法里调用了absPathify方法
+>     - abdPathify方法中调用了go内置的filepath.Abs(inPath)方法，inPath就是我们调用传入的`./viper_demo`这个值
+>         - filepath.Abs()是以传入的路径寻找绝对路径，其实默认的就是寻找根目录，因为filepath.Abs()方法里调用的就是`PWD`命令
+
+> 所以使用viper.AddConfigPath('./viper_demo')填写conf文件路径时，一定要注意此时的绝对路径是跟目录，也就是最终viper包查找conf文件的路径是`绝对路径+./viper_demo`路径，绝对路径从是根文件夹开始的
+
+> 当使用goland开发的时候，此时绝对路径是项目的工作目录路径，即使项目中创建了N个子目录，最里层的目录中有个文件中viper代码调用了viper.AddConfigPath('./viper_demo')，此时查找配置的路径仍是项目的工作目录，而不是最里层文件夹所在的路径，所以需要传入conf路径的时候，一定要注意绝对路径是在哪里，并且在这种模式下go build出来的二进制文件也是从项目的工作目录开始查找配置文件路径
+
+> 当使用命令行构建时，获取到绝对路径不是项目的工作目录，而是当前文件所处的文件夹路径，如果还是按goland中写的，就会出现找不到配置文件路径的问题，这个需要注意
+
+
 
 #### 1.3 配置初始化方式二
 
@@ -206,11 +222,11 @@ viper.SetConfigFile("./viper_demo/db_conf.yaml")
 
 #### 1.4 查找与读取配置文件
 
-> 上面介绍了两种配置初始化方式，个人觉得配置初始化方式一更加灵活一些，也推荐使用
+> 上面介绍了两种配置初始化方式，个人觉得配置`初始化方式一`更加灵活一些，比较推荐使用
 >
 > 配置初始化好了以后，就可以读取配置了
 
-##### 1.4.1 ReadInConfig
+##### 1.4.1 ReadInConfig方法
 
 > ReadInConfig会查找并从磁盘里加载配置文件，包括`key/value`通过定义的路径查找
 >
@@ -231,7 +247,7 @@ if err != nil {
 }
 ```
 
-##### 1.4.2 读取不到配置处理
+##### 1.4.2 读取不到配置文件处理
 
 > 可以对配置文件在读取不到时，作进一步的更详细的错误处理
 >
@@ -256,13 +272,13 @@ if err != nil {
 fmt.Println("读取配置文件成功")
 ```
 
-##### 1.4.3 读取正确示例
+##### 1.4.3 读取配置文件正确示例
 
 > 下面是读取正确的
 
 ![image-20220525231840025](go_viper%E4%BD%BF%E7%94%A8/image-20220525231840025.png)
 
-##### 1.4.4 配置文件找不到示例
+##### 1.4.4 配置文件找不到信息
 
 > 下面是当配置文件找不到时的错误提示
 >
@@ -270,7 +286,7 @@ fmt.Println("读取配置文件成功")
 
 ![image-20220525232108075](go_viper%E4%BD%BF%E7%94%A8/image-20220525232108075.png)
 
-##### 1.4.5 配置文件找到但内容格式错误
+##### 1.4.5 配置文件内容格式错误
 
 > 当配置文件路径正确，但是配置文件里面的内容格式出错时
 >
@@ -320,7 +336,7 @@ func main(){
 
 ### 2、viper获取配置文件里的值
 
-#### 2.1 获取值支持的方法
+#### 2.1 获取值的方法
 
 > Viper提供了下面这些方法根据值类型获取值，具体内部实现可以去看源码
 >
@@ -525,18 +541,102 @@ func main(){
 > - 输入了存在的key->`name`，viper是可以正确拿到值
 > - 输入了存在的key->`names，viper不可以正确拿到值，但是返回了零值
 
-### 3、写入配置文件
+### 3、反序列化配置文件到结构体
 
-> 这块暂时没用到，后面再补充
+> 在大型web项目中，一般都会将项目配置(项目的端口)、数据库配置(host、用户名、密码、端口)、redis配置(用户名、密码)等写入到配置文件中，那么从配置文件中获取值最方便的就是使用结构体去映射，viper提供了常用的两个方法来映射配置信息到结构体中
+>
+> - vp.Unmarshal
+> - vp.UnmarshalKey
 
-### 4、配置文件热加载
+#### 3.1 vp.Unmarshal
+
+> 一般是将如下配置文件中的内容映射到结构体，即是key-value格式，直接对应了需要被反序列化的结构体字段
+
+![image-20230214134326486](go_viper使用/image-20230214134326486.png)
+
+```go
+// 定义需要反序列化的结构体
+type User struct {
+	UserName string
+	Age      int
+	Hobby    []string
+}
+
+// 编写反序列化的方法，方法中调用vp.unmarshal
+func ReadDataToNewStruct(confStruct interface{}) error {
+	err := viper.Unmarshal(&confStruct)
+	if err != nil {
+		panic(fmt.Sprintf("解析conf数据到%v错误:%v", confStruct, err))
+	}
+	return nil
+}
+
+
+// 进行解析
+var u1 User
+_ = ReadDataToNewStruct(&u1)
+fmt.Printf("u1 ==> %#+v\n", u1)
+```
+
+> 解析出来的结果如下
+
+![image-20230214143226332](go_viper使用/image-20230214143226332.png)
+
+#### 3.2 vp.UnmarshalKey
+
+> 如下配置文件中的内容映射到结构体，也是key-value格式，不过最外层有个大key，value才是对应的需要解析到的结构体，需要使用大key才能找到需要被解析到结构体的字段以及值
+
+![image-20230214143744634](go_viper使用/image-20230214143744634.png)
+
+```go
+// 定义需要反序列化的结构体
+type DatabaseCon struct {
+	Host     string
+	User     string
+	Password string
+	DbName   string
+	Port     int
+}
+
+type RedisCon struct {
+	Host     string
+	Password string
+	Port     int
+}
+
+
+// 编写反序列化的方法，方法中调用vp.unmarshalKey，需要传入大key
+func ReadDataToStruct(key string, confStruct interface{}) error {
+	err := viper.UnmarshalKey(key, &confStruct)
+	if err != nil {
+		panic(fmt.Sprintf("解析conf数据到%v错误:%v", confStruct, err))
+	}
+	return nil
+}
+
+// 进行解析，反序列化到一个结构体中
+var db DatabaseCon
+err := ReadDataToStruct("mysql", &db)
+if err != nil {
+	return
+}
+fmt.Printf("db ==> %#+v\n", db)
+
+var redis RedisCon
+_ = ReadDataToStruct("redis", &redis)
+fmt.Printf("redis ==> %#+v\n", redis)
+```
+
+![image-20230214143644892](go_viper使用/image-20230214143644892.png)
+
+### 4、配置文件支持热加载
 
 > Viper支持在程序运行时实时读取配置文件的功能，这也就是热加载，不需要重新启动服务，而是在服务运行时，自动重新加载最新的配置内容
 >
 > - viper可以实时的去读取配置文件的更新，而且不会错误任何内容
 > - viper实现热加载的两个方法
 >     - WatchConfig()
->     - OnConfigChange() : 这个方法可选，这个方法提供了一个回调函数，可以在每次配置文件内容有修改时，通知我们
+>     - OnConfigChange() : 这个方法可选用，这个方法提供了一个回调函数，可以在每次配置文件内容有修改时，通知我们
 > - 一定要确保`watchConfig`前面的代码添加了所有的配置文件路径
 
 ```go
@@ -599,11 +699,7 @@ func main(){
 
 ![image-20220526001137129](go_viper%E4%BD%BF%E7%94%A8/image-20220526001137129.png)
 
-### 5、覆盖设置
-
-### 6、注册和使用别名
-
-### 7、使用环境变量
+### 5、使用环境变量
 
 > viper完全支持环境变量，有五种方法可以和ENV配合使用
 >

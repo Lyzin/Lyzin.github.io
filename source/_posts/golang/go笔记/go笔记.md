@@ -7931,7 +7931,7 @@ func main() {
 }
 ```
 
-##### 1.7.4 类型断言
+#### 1.8 类型断言
 
 > 空接口可以接收任意类型的变量，那么可以对传进来的变量类型进行判断，叫做`类型断言`
 
@@ -7976,7 +7976,7 @@ func main() {
 
 ![image-20220214151505455](go%E7%AC%94%E8%AE%B0/image-20220214151505455.png)
 
-##### 1.7.5 空接口类型断言
+##### 1.8.1 空接口类型断言
 
 > 类型断言和switch语句配合使用，用来判断空接口变量是什么类型
 
@@ -8018,11 +8018,11 @@ func main() {
 
 ![image-20220808083735071](go%E7%AC%94%E8%AE%B0/image-20220808083735071.png)
 
-##### 1.7.6 非空接口类型断言
+##### 1.8.2 非空接口类型断言
 
 > 类型断言不止可以应用`空接口`类型断言，也可以应用到`非空接口`类型断言
 >
-> 还是以手机、相机使用usb在电脑上查看资料为例
+> 以手机、相机使用usb在电脑上查看资料为例
 
 ```go
 package main
@@ -8174,7 +8174,7 @@ func main() {
 
 #### 2.2 反射中的类型和种类
 
-> 反射类型其实把类型划细分为两种，从`TypeOf`方法的返回值是`Type`可以看到，`Type自身是一个接口类型
+> 反射类型其实把类型划细分为两种，从`TypeOf`方法的返回值是`Type`可以看到，`Type`自身是一个接口类型
 >
 > - 一种是类型Type
 >     - 是指用`type`关键字创建的`自定义类型`
@@ -8464,9 +8464,11 @@ func main() {
 
 ![image-20220328224924305](go%E7%AC%94%E8%AE%B0/image-20220328224924305.png)
 
-#### 2.3 反射获取值
+#### 2.3 reflect.ValueOf()
 
-> `reflect.ValueOf()`返回的是`reflect.Value`类型，其中包含了原始值的值信息。`reflect.Value`与原始值之间可以互相转换。
+> `reflect.ValueOf()`返回的是`reflect.Value`类型，其中包含了原始值的值信息
+>
+> `reflect.Value`与原始值之间可以互相转换。
 
 ```go
 package main
@@ -8507,9 +8509,11 @@ func main() {
 
 ![image-20220328225337645](go%E7%AC%94%E8%AE%B0/image-20220328225337645.png)
 
-#### 2.4 结构体反射
+#### 2.4 reflect.TypeOf()
 
-> 任意值通过`reflect.TypeOf()`获得反射对象信息后，如果它的类型是结构体，可以通过反射值对象（`reflect.Type`）的两个方法来获取结构体信息
+> 任意对象可以通过`reflect.TypeOf()`获得反射对象信息
+>
+> 如果传入的的类型是结构体，可以通过反射值对象`reflect.TypeOf`的两个方法来获取结构体信息
 >
 > - `NumField()`方法：返回结构体成员字段数量
 >     - 所以可以用来统计一个结构体里有多少个字段
@@ -8517,7 +8521,7 @@ func main() {
 >     - 可以获取一个结构体的一个字段的具体详细信息，比如Name，tag， index等
 
 ```go
-# Field() 方法源代码， 根据索引，返回索引对应的结构体字段的信息，返回值是StructField类型
+# Field() 方法源代码，根据索引，返回索引对应的结构体字段的信息，返回值是StructField类型
 // Field returns the i'th struct field.
 func (t *structType) Field(i int) (f StructField) {
 	if i < 0 || i >= len(t.fields) {
@@ -8576,9 +8580,9 @@ NumField() int
 
 > for循环遍历结构体所有字段信息，返回结构体成员字段数量
 >
-> - for循环会把所有字段的信息获取到
+> - for循环会获取结构体所有字段的信息
 >
-> - 当然也可以根据字段名，单独获取字段信息
+> - 当然也可以根据字段名获取指定字段信息
 
 ```go
 package main
@@ -8614,7 +8618,7 @@ func main() {
 		// 字段的Type就是结构体定义的字段的类型
 		fmt.Printf("type:%v\n", field.Type)
 		
-		// 这里的Tag是我们自己在结构体里定义的liu，使用Get通过tag名获取真正的tag的值
+		// 这里的Tag是我们自己在结构体里定义的liu，使用Get通过tag名获取tag指向的值
 		fmt.Printf("tag:%v\n\n", field.Tag.Get("liu"))
 	}
 }
@@ -8622,7 +8626,7 @@ func main() {
 
 ![image-20220328232318252](go%E7%AC%94%E8%AE%B0/image-20220328232318252.png)
 
-#### 2.6s 结构体反射`tag`
+#### 2.6 结构体反射`tag`
 
 > https://github.com/golang/go/wiki/Well-known-struct-tags
 >
@@ -8675,10 +8679,6 @@ func main() {
 	}
 }
 ```
-
-asdad
-
-
 
 ## 十一、包
 

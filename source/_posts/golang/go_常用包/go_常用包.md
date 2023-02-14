@@ -238,7 +238,7 @@ clean_on_exit = true
 > 3. China Standard Time UT+8:00     中国标准时间
 > 4. Cuba Standard Time UT-4:00     古巴标准时间
 
-### 1、当前时间
+### 1、获取当前时间
 
 > 用来表示时间，可以通过`time.Now()`函数获取本地的时间(东八区)，以及年、月、日等对象信息
 
@@ -645,7 +645,7 @@ func main() {
 > - 例如，如果某个使用一个文件名的调用（如Open、Stat）失败了，打印错误时会包含该文件名，错误类型将为*PathError，其内部可以解包获得更多信息。
 > - os包的接口规定为在所有操作系统中都是一致的。非公用的属性可以从操作系统特定的[syscall](http://godoc.org/syscall)包获取。
 
-## 六、strconv包
+## 六、类型转换常用方法与包
 
 > Go语言中可以对基础数据类型与字符串之间进行相互转换
 
@@ -675,9 +675,9 @@ func main() {
 }
 ```
 
-### 2、fmt.Sprintf方法
+### 2、fmt包
 
-> fmt.Sprintf转换数字为string
+> fmt.Sprintf支持类型转换，比如：转换数字为string
 
 ```go
 package main
@@ -694,11 +694,11 @@ func main() {
 }
 ```
 
-### 3、strconv方法
+### 3、strconv包
 
 > strconv包实现了基本数据类型和其(其是指基本数据类型)字符串之间的相互转换
 
-### 4、ParseInt字符串转数字
+#### 3.1 ParseInt字符串转数字
 
 > 使用`ParseInt`方法进行转换，返回的值的类型都是`int64`
 >
@@ -824,7 +824,53 @@ func main() {
 
 ![image-20220331213432391](go_常用包/image-20220331213432391.png)
 
-#### 4.1 Atoi字符串转数字
+#### 3.2 ParseBool字符串布尔值转成布尔值
+
+> `ParseBool`将字符串的布尔值转为真正的布尔值
+
+```go
+package main
+
+import (
+	"fmt"
+	"strconv"
+)
+
+// strconv
+func main() {
+	// 从字符串中解析对应的数字数据，字符串不能有非数字的字符
+	s := "true"
+	ret, _ := strconv.ParseBool(s)
+	fmt.Printf("ret=%v ret_type=%T\n", ret, ret)
+}
+```
+
+![image-20220331215741171](go_常用包/image-20220331215741171.png)
+
+#### 3.4 ParseFloat字符串浮点型转为浮点型
+
+> `ParseFloat`需要传入`bitSize`
+
+```go
+package main
+
+import (
+	"fmt"
+	"strconv"
+)
+
+// strconv
+func main() {
+	// 从字符串中解析对应的数字数据，字符串不能有非数字的字符
+	s := "3.1415"
+	ret, _ := strconv.ParseFloat(s, 64)
+	fmt.Printf("ret=%v ret_type=%T\n", ret, ret)
+}
+```
+
+![image-20220331220000832](go_常用包/image-20220331220000832.png)
+
+#### 3.5 Atoi字符串转数字
 
 > strconv包里有个`Atoi`方法，专门用来将字符串转换为数字
 >
@@ -857,7 +903,7 @@ func main() {
 
 
 
-#### 4.2 ItoA数字转字符串
+#### 3.6 ItoA数字转字符串
 
 > 将数字转换为字符串，只有一个返回值，没有err返回
 
@@ -879,52 +925,6 @@ func main() {
 ```
 
 ![image-20220331215554288](go_常用包/image-20220331215554288.png)
-
-#### 4.3 ParseBool字符串布尔值转成布尔值
-
-> `ParseBool`将字符串的布尔值转为真正的布尔值
-
-```go
-package main
-
-import (
-	"fmt"
-	"strconv"
-)
-
-// strconv
-func main() {
-	// 从字符串中解析对应的数字数据，字符串不能有非数字的字符
-	s := "true"
-	ret, _ := strconv.ParseBool(s)
-	fmt.Printf("ret=%v ret_type=%T\n", ret, ret)
-}
-```
-
-![image-20220331215741171](go_常用包/image-20220331215741171.png)
-
-#### 4.4 ParseFloat字符串浮点型转为浮点型
-
-> `ParseFloat`需要传入`bitSize`
-
-```go
-package main
-
-import (
-	"fmt"
-	"strconv"
-)
-
-// strconv
-func main() {
-	// 从字符串中解析对应的数字数据，字符串不能有非数字的字符
-	s := "3.1415"
-	ret, _ := strconv.ParseFloat(s, 64)
-	fmt.Printf("ret=%v ret_type=%T\n", ret, ret)
-}
-```
-
-![image-20220331220000832](go_常用包/image-20220331220000832.png)
 
 ## 七、rand包
 
