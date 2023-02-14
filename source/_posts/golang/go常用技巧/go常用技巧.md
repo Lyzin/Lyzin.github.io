@@ -92,14 +92,19 @@ func main() {
 
 > 下面是构建web应用的dockerfile内容，对于其中的几个关键点进行下解释
 >
-> - GOPROXY https://goproxy.cn,direct：设置go国内的代理，方便拉取依赖，否则会下载很慢
-> - go mod：开启go mod模式来管理依赖
+> - ENV GOPROXY https://goproxy.cn,direct
+>     - 设置go国内的代理，方便拉取依赖，否则同步下载项目依赖很慢
+> - go mod
+>     - 开启`go mod模式`来管理项目依赖
 >
-> - upx：UPX是一种先进的可执行文件压缩工具，对于可执行程序可以有效减少体积，这里我们将构建出来go应用的体积再次压缩减少体积，这里不对upx进行过多介绍，详细可见[upx官网](https://github.com/upx/upx)
-> - -ldflags="-s -w"：go build时忽略符号表和调试信息，进而减少go应用体积
+> - upx
+>     - upx是一种先进的可执行文件压缩工具，对于可执行程序可以有效减少体积，这里我们将构建出来go应用的体积再次压缩减少体积，这里不对upx进行过多介绍，详细可见：[upx官网](https://github.com/upx/upx)
+> - -ldflags="-s -w"
+>     - go build时忽略符号表和调试信息，进而减少go应用体积
 >     - -s 忽略符号表和调试信息
 >     - -w 忽略DWARFv3调试信息，将无法使用gdb进行调试
-> - CMD ["./myweb"]：表示基于此镜像启动的容器会自动执行go build的`myweb`可执行程序，也就是将我们的web应用启动起来了
+> - CMD ["./myweb"]
+>     - 表示基于此镜像启动的容器会自动执行go build的`myweb`可执行程序，也就是将我们的web应用启动起来了
 
 ```dockerfile
 FROM golang:1.17.13-alpine3.16
