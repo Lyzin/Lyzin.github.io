@@ -147,7 +147,7 @@ docker run -itd --name myweb -p 8080:8080 myweb:v1
 
 > 为什么上面的办法可以？
 >
-> - 这里需要用到docker的多阶段构建知识了，
+> - 这里需要用到docker的多阶段构建知识
 >     - Docker 17.05版本以后，官方就提供了一个新的特性：`Multi-stage builds`（多阶段构建）
 >     - 使用多阶段构建，可以在一个 `Dockerfile` 中使用多个 FROM 语句。每个 FROM 指令都可以使用不同的基础镜像，并表示开始一个新的构建阶段。最终构建出来的镜像以最后一次的FROM镜像为准
 > - Alpine镜像
