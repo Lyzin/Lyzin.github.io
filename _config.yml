@@ -116,6 +116,6 @@ search:
 
 # lazy loading
 lazyload:
-  enable: true
+  enable: false
   loadingImg: /img/loading.gif
 
