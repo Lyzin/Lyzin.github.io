@@ -2002,7 +2002,201 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 ## 六、Django中间件
 
+### 1、接口限流
 
+> 当我们想要给接口限流，限制用户访问的频率，在django的restframework中框架中可以使用如下对接口进行限流
+>
+> - 接口限流参考：[https://blog.csdn.net/weixin_42134789/article/details/112793235](https://blog.csdn.net/weixin_42134789/article/details/112793235)
+
+#### 1.1 全局限流
+
+> 表示对所有接口都进行限流，
+>
+> - 一是要设置需要使用的限流类，
+> - 二是要设置限流范围(scope)及其限流频率。
+> - AnonRateThrottle和UserRateThrottle默认的scope分别为"anon"和"user"。该配置会对所有API接口生效。
+
+```python
+# 项目的settings.py文件
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle', # 匿名用户限流
+        'rest_framework.throttling.UserRateThrottle', # 用户访问限流
+ 
+ 
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '2/min', # 表示匿名用户每分钟只允许访问2次
+        'user': '10/min' # 表示用户每分钟只允许访问10次
+    }
+}
+```
+
+> 此时访问接口，每分钟超过2次，就会看到如下的提示，并且接口响应状态码为500
+
+![image-20230217223807002](django笔记/image-20230217223807002.png)
+
+#### 1.2 局部限流
+
+> 局部限流也称为单接口限流，针对单个接口进行限流，只要在视图层进行配置，推荐做法：
+>
+> - 在对应app的文件夹的目录下新建throttles.py
+> - 并且添加如下代码
+
+```python
+# 在对应app下新建的throttles.py内容
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+ 
+ 
+class UserListAnonRateThrottle(AnonRateThrottle):
+    THROTTLE_RATES = {"anon": "5/min"} # 表示匿名用户每分钟只允许访问2次
+ 
+ 
+class UserListUserRateThrottle(UserRateThrottle):
+    THROTTLE_RATES = {"user": "30/min"} # # 表示用户每分钟只允许访问30次
+```
+
+```python
+# 在需要被限流的view下添加如下代码，前提是需要先在view中导入上面自定义的限流类
+from .throttles import UserListAnonRateThrottle，UserListUserRateThrottle
+
+class UserInfoView(APIView):
+  	# 使用throttle_classes这个列表来装载限流类
+    throttle_classes = [UserListAnonRateThrottle，UserListUserRateThrottle] 
+```
+
+> 此时再访问UserInfoView这个视图关联的接口，就会被自定义的限流策略限流住
+
+#### 1.3 IP限流
+
+> Django的restframework的限流可能有时候不能满足我们的需求，我们就可以自行编写限流类
+>
+> 自己编写限流类：
+>
+> - 只要自己写的类实现了allow_request()和wait()方法就能被用作限流类
+>     - allow_request()：定义允许访问和不允许访问的策略，结果返回bool值
+>     - wait()：定义被限流后剩余多久才可以访问
+> - 自带的AnonRateThrottle和UserRateThrottle限流类都是继承的SimpleRateThrottle，这里的原理可以去看的SimpleRateThrottle类，里面都有allow_request()和wait()
+
+```python
+# 同样的在对应app下新建的throttles.py新增IPThrottles限流类
+
+....
+
+class IPThrottleRate:
+    # 定义访问频率的时间(毫秒单位)和次数
+    rate_time = 60  # 表示1min
+    request_num = 1
+
+
+class IPThrottle:
+    """IP限流"""
+    redis_client = RedisClusterClient().redis_client
+
+    def __init__(self):
+        self.now_time_stamp = int(time.time())
+
+    def ip_redis_key(self, remote_ip):
+        return f"HOST:{remote_ip}"
+
+    def get_remote_ip_data_by_redis(self, remote_ip):
+        history_time_list = self.redis_client.get(self.ip_redis_key(remote_ip))
+        if history_time_list is None:
+            return []
+        return json.loads(history_time_list)
+
+    def set_remote_ip_data_to_redis(self, remote_ip, history_time_list):
+        self.redis_client.set(self.ip_redis_key(remote_ip), str(history_time_list))
+
+    def allow_request(self, request, view):
+        """
+        步骤：
+        1、取出访问者的IP
+        2、判断当前IP是不是在访问字典里，添加进去，并且直接放回True，表示第一次访问，继续往下走
+        3、循环判断当前IP的列表，有值，并且当前时间减去列表最后一个时间大于60s，把这种数据pop掉，这样列表中有60s以内的时间
+        4、判断当列表小于3，说明一分钟之内访问不足三次，把当前时间插入到列表第一个位置，返回True，继续往下走
+        5、当大于等于3，说明一分钟内访问超过3次，返回False验证失败
+        :return:
+        """
+        remote_ip = None
+
+        # 获取用户真实访问IP
+        if "HTTP_X_REAL_IP" in request.META:
+            # 例如：'HTTP_X_REAL_IP': '10.1.107.47'
+            HTTP_X_REAL_IP = request.META.get("HTTP_X_REAL_IP")
+            if len(HTTP_X_REAL_IP) > 0:
+                remote_ip = HTTP_X_REAL_IP
+            else:
+                pumpkin_app_access.error(f"未获取到HTTP_X_REAL_IP：{HTTP_X_REAL_IP}")
+        elif "HTTP_X_FORWARDED_FOR" in request.META:
+            # 'HTTP_X_FORWARDED_FOR': '10.1.107.47, 10.13.134.45'
+            HTTP_X_FORWARDED_FOR = request.META.get("HTTP_X_FORWARDED_FOR")
+            HTTP_X_FORWARDED_FOR_LIST = [i.strip() for i in HTTP_X_FORWARDED_FOR.split(",")]
+            if len(HTTP_X_FORWARDED_FOR_LIST) > 1:
+                remote_ip = HTTP_X_FORWARDED_FOR_LIST[0]
+            else:
+                pumpkin_app_access.error(f"HTTP_X_FORWARDED_FOR_LIST的数据为：{HTTP_X_FORWARDED_FOR_LIST}")
+        elif "HTTP_X_ORIGINAL_FORWARDED_FOR" in request.META:
+            # 例如：'HTTP_X_ORIGINAL_FORWARDED_FOR': '10.1.107.47'
+            HTTP_X_ORIGINAL_FORWARDED_FOR = request.META.get("HTTP_X_ORIGINAL_FORWARDED_FOR")
+            if len(HTTP_X_ORIGINAL_FORWARDED_FOR) > 0:
+                remote_ip = HTTP_X_ORIGINAL_FORWARDED_FOR
+            else:
+                pumpkin_app_access.error(f"未获取到HTTP_X_ORIGINAL_FORWARDED_FOR：{HTTP_X_ORIGINAL_FORWARDED_FOR}")
+        else:
+            remote_ip = request.META.get("REMOTE_ADDR")
+
+        pumpkin_app_access.info(f"获取到的remote_ip:{remote_ip}")
+        # 从redis获取访问IP的值
+        self.history_time_list = self.get_remote_ip_data_by_redis(remote_ip)
+
+        if len(self.history_time_list) == 0:
+            """表示第一次访问"""
+            # 设置到redis中
+            self.set_remote_ip_data_to_redis(remote_ip, str([self.now_time_stamp]))
+            return True
+
+        while True:
+            if len(self.history_time_list) == 0:
+                break
+
+            if self.now_time_stamp - self.history_time_list[-1] >= IPThrottleRate.rate_time:
+                self.history_time_list.pop()
+                self.set_remote_ip_data_to_redis(remote_ip, self.history_time_list)
+
+            else:
+                break
+
+        # 下面只剩余一分钟之内的时间
+        if len(self.history_time_list) < IPThrottleRate.request_num:
+            self.history_time_list.insert(0, self.now_time_stamp)
+            self.set_remote_ip_data_to_redis(remote_ip, self.history_time_list)
+            return True
+        return False
+
+    def wait(self):
+        return IPThrottleRate.rate_time - (self.now_time_stamp - self.history_time_list[-1])
+
+```
+
+```python
+# 在需要被限流的view下添加如下代码，前提是需要先在view中导入上面自定义的限流类
+from .throttles import IPThrottle
+
+class UserInfoView(APIView):
+  	# 使用throttle_classes这个列表来装载限流类
+    throttle_classes = [IPThrottle] 
+```
+
+> 该限流中使用了redis对用户的访问进行了存储，保证了负载均衡获取到的用户访问IP都从同一个缓存获取，永远都是唯一，此时再次访问单接口就可以根据用户访问的IP进行限流了
+>
+> 需要注意：
+>
+> - 如果部署使用Nginx代理，那么获取用户IP，就尽量不要用`Remote_ADDR`，容易获取的是nginx代理后的IP,而不是真正用户访问到的IP
+> - 如下解释：
+>     - 一般情况下request.META[‘REMOTE_ADDR’]足以获取用户真实IP地址。对于部署在负载平衡proxy(如nginx)上Django应用而言，这种方法将不适用。因为每个request中的远程IP地址(request.META[“REMOTE_IP”])将指向该负载平衡proxy的地址，而不是发起这个request的用户的实际IP。负载平衡proxy处理这个问题的方法在特殊的 X-Forwarded-For 中设置实际发起请求的IP
+>
+> 参考：[Django获取用户访问真实IP](https://blog.csdn.net/inthat/article/details/119578239?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522167664102116782428636802%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=167664102116782428636802&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-119578239-null-null.142^v73^insert_down2,201^v4^add_ask,239^v2^insert_chatgpt&utm_term=django%20%E8%8E%B7%E5%8F%96ip&spm=1018.2226.3001.4187)
 
 ## 七、Django使用Gunicorn部署
 

@@ -3,7 +3,7 @@ title: Go Mysql笔记
 date: 2021-05-16 19:31:21
 updated: 2022-05-23 23:17:48
 tags: 
-- Mysql
+- MySQL
 - Go
 cover: /posts_cover_img/golang/go_mysql.png
 categories: Go Mysql笔记

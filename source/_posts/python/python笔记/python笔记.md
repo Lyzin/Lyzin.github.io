@@ -70,15 +70,28 @@ print(info)
 
 ### 4、list列表
 
-
+```python
+user_list = ["sam", "jam", "tom"]
+print(f"user_list:{user_list}")
+```
 
 ### 5、tuple元组
 
-
+```python
+user_tuple = ("sam", "jam", "tom")
+print(f"user_tuple:{user_tuple}")
+```
 
 ### 6、字典
 
-
+```python
+user_dict = {
+  "name": "sam",
+  "age": 19,
+  "hobby": ["feet", "beet"]
+}
+print(f"user_dict:{user_dict}")
+```
 
 ### 7、垃圾回收机制
 
@@ -280,20 +293,49 @@ x,y,*_,z = [1,2,3,4,5,6]
 >
 >   - is  判断两个值的内存地址是否相同
 
-### 10、深浅拷贝
-
-
-
 ## 二、流程控制
 
-### 1、if判断
+### 1、if-else判断
 
-> - 显式布尔值
->   - 比较运算符（>、<、>=、<=）
->   - True和False这两个字符串值
->
-> - 隐式布尔值
->   - 其中0，None，空（空列表、空元祖、空字典）代表的布尔值都是False
+```python
+age = 19
+if age > 20:
+  print("age 大于 20")
+else:
+  print("age 小于 20")
+```
+
+### 2、if-elif-else判断
+
+```python
+age = 19
+if age > 20:
+  print("age 大于 20")
+elif age == 19:
+  print("age 等于 20")
+else:
+  print("age 小于 20")
+```
+
+### 3、for循环
+
+```python
+l = [i for i in range(10)]
+print(l)
+```
+
+![image-20230217133254541](python笔记/image-20230217133254541.png)
+
+### 4、while循环
+
+```python
+nums = 3
+while nums > 0:
+    print(f"num ==> {nums}")
+    nums -= 1
+```
+
+![image-20230217133430162](python笔记/image-20230217133430162.png)
 
 ## 三、函数
 
@@ -1737,8 +1779,6 @@ print(sys.argv[2]) # 456
 
 > 系统加载的模块
 
-
-
 ### 3、logging模块
 
 > https://www.cnblogs.com/Eva-j/articles/7228075.html#_label14
@@ -2440,6 +2480,71 @@ def datetime_switch_to_stamp():
 > 线程是计算机中能被CPU调度的最小单位
 >
 > python的thread模块比较底层，python的threading模块对thread做了一些包装，方便使用
+
+### 5、threading多线程
+
+```python
+import threading
+import time
+
+
+def sing(name):
+    print(f"{name} sing start time:{time.strftime('%Y-%m-%d %X')}")
+    time.sleep(1)
+    print(f"{name} sing end time:{time.strftime('%Y-%m-%d %X')}")
+
+
+def walk(name):
+    print(f"{name} walk start time:{time.strftime('%Y-%m-%d %X')}")
+    time.sleep(2)
+    print(f"{name} walk end time:{time.strftime('%Y-%m-%d %X')}")
+
+
+sing_th = threading.Thread(target=sing, args=("bob",))
+walk_th = threading.Thread(target=walk, args=("sam",))
+
+ths = [sing_th, walk_th]
+
+for th in ths:
+    th.start()
+
+for th in ths:
+    th.join()
+
+print("done!!!")
+```
+
+### 6、线程池
+
+> 线程池比较适合做多个目标做同一件事
+
+```python
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+
+def sing(name):
+    print(f"{name} sing start time:{time.strftime('%Y-%m-%d %X')}")
+    time.sleep(1)
+    print(f"{name} sing end time:{time.strftime('%Y-%m-%d %X')}")
+
+
+# 开启线程池，最多1次有10个线程被执行
+pool = ThreadPoolExecutor(10)
+
+users = ["sam", "bob", "tom"]
+
+# 并发执行
+for name in users:
+    pool.submit(sing, name=name)
+
+# 等待子线程执行完成
+pool.shutdown(True)
+
+print("done!")
+```
+
+![image-20230217135229336](python笔记/image-20230217135229336.png)
 
 ## 八、面向对象
 
@@ -3151,35 +3256,31 @@ if __name__ == '__main__':
 > with上下文可以在没有进行关闭操作时，自动去进行关闭收尾操作
 
 ```python
-# -*- coding:utf-8 -*-
-# Author: lyizn
-# Date: 2022/7/18 5:46 下午 
-# Desc:
 import time
 
-import requests
 
-with requests.Session() as sess:
-    pass
-
-class Open:
-    def __init__(self,name):
-        self.name=name
+class OpenFile:
+    def __init__(self, name):
+        self.name = name
+        self.timer = time.strftime('%Y-%m-%d %X')
 
     def __enter__(self):
         # print('出现with语句,对象的__enter__被触发,有返回值则赋值给as声明的变量')
-        print('开始读取内容')
+        print(f'{self.timer} 开始读取内容')
         time.sleep(2)
-        print('读取内容完毕')
+        print(f'{self.timer} 读取内容完毕')
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # print('with中代码块执行完毕时执行我啊')
-        print('自动关闭文件打开的文件句柄')
+        print(f'{self.timer} 自动关闭文件打开的文件句柄')
+
 
 if __name__ == '__main__':
-    with Open('a.txt') as f:
+    with OpenFile('a.txt') as f:
         print('>>>执行代码块<<<')
+
+    print("done!!!")
 ```
 
-
+![image-20230217135129406](python笔记/image-20230217135129406.png)
 

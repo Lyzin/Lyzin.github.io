@@ -874,7 +874,7 @@ docker push new-repo:tagname
 
 > docker-compose的版本
 >
-> https://docs.docker.com/compose/compose-file/compose-file-v2/[](https://docs.docker.com/compose/compose-file/compose-file-v2/)
+> [https://docs.docker.com/compose/compose-file/compose-file-v2/](https://docs.docker.com/compose/compose-file/compose-file-v2/)
 
 #### 2.1 模板语法
 

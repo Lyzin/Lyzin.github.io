@@ -28,6 +28,9 @@ categories: Redis笔记
  --name: 表示自定义容器名，进入容器时可以使用该名字进入
  --rm: 表示创建redis容器时候，如果存在redis 、redis-cli先删除再创建
  -p: 表示将容器内端口映射到宿主机的端口
+ 
+ # 创建有密码的redis
+ docker run -itd --name redisly -p 6379:6379 redis --requirepass "123456"
 ```
 
  1.2 创建redis容器，无密码

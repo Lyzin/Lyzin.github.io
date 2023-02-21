@@ -106,3 +106,16 @@ deploy:
   type: git
   repo: git@github.com:Lyzin/Lyzin.github.io.git
   branch: gh-pages
+
+# Search local file
+search:
+  path: search.xml
+  field: post
+  content: true
+  #template: ./search.xml
+
+# lazy loading
+lazyload:
+  enable: true
+  loadingImg: /img/loading.gif
+
