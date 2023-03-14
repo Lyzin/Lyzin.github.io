@@ -2362,6 +2362,50 @@ def infos(request):
 
 
 
+##### 2.5 自定义中间件修改响应对象
+
+> 在中间件中对响应对象修改后再返回
+>
+> 注意response对象类型是JsonResponse类型，其中`content`属性是字节类型的字典，可以用来key/value的增删
+
+![image-20230314142035573](django笔记/image-20230314142035573.png)
+
+```python
+class TraceMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.trace_id_tag = "Request-X-ID"
+
+    def __call__(self, request):
+        r = request
+        trace_id = request.META.get(self.trace_id_tag, None)
+        if trace_id is None:
+            trace_id = GenRequestUUID.gen_uuid_str()
+
+        request.META[self.trace_id_tag] = trace_id
+
+        # 处理请求
+        response = self.get_response(request)
+
+        # response的content属性是字节类型json，所以decode为字符串
+        content_str = response.content.decode("utf-8")
+
+        # 将字符串的content转为字典，并且增加一个`new_ret`的key，value是`this is resp`
+        content_dict = json.loads(content_str)
+        content_dict["new_ret"] = "this is resp"
+
+        # 重新对response对象的content对象赋值，content值为修改后的content，因为增加了一个新的key/value
+        # 这里注意使用json序列化为字符串，不要直接使用str将字典转为字符串，否则接口响应返回的就不是一个json类型，而是字符串类型
+        # 将字典转为字符串以后，再encode为字节类型，因为网络传输时使用的就是字节类型
+        response.content = json.dumps(content_dict).encode("utf-8")
+
+        return response
+```
+
+> 浏览器查看响应接口，发现响应中已经将修改后响应返回了
+
+![image-20230314142242901](django笔记/image-20230314142242901.png)
+
 ## 七、Django使用Gunicorn部署
 
 > gunicron官网：[https://docs.gunicorn.org/en/stable/](https://docs.gunicorn.org/en/stable/)
