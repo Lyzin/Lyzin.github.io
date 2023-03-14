@@ -591,7 +591,110 @@ func (c *Context) Render(code int, r render.Render) {
 
 ### 2、操作POST请求
 
-#### 2.1 使用form表单提交数据
+#### 2.1 POST处理请求的三种方式
+
+> `POST`方法起初是用来向服务器输入数据的，使用`method`为`POST`时，可以为POST方法指定属性 `enctype`（也叫编码类型），`enctype`的值在表单提交的时候一般会对应`HTTP`报文首部中的`Content-Type`的值（`Content-Type`的位置就在请求 `headers中）`，`enctypec`常见的值可能为以下三个：
+>
+> - application/x-www-form-urlencoded
+> - multipart/form-data
+>
+> - application/json
+>
+> 参考：[https://juejin.cn/post/6844903623206371342#comment](https://juejin.cn/post/6844903623206371342#comment)
+
+#### 2.2 application/x-www-form-urlencoded
+
+> - 是最常见的表单提交方式
+> - 当提交的表单中的`enctype`不指定值，则表单默认采用的提交方式就是这种方法
+
+> - 表单提交时，是将 `<form/>`下所有表单控件的`name`和 `value`进行了组合，`name`和`value`间使用`=`连接，多个 `name=value`键值对间使用`&`连接的组合形式，形如：age=19&id=33&address=beijing
+> - 出现的所有空格必须使用 `+`代替之外，还需要对表单提交内容中非数字、字母部分进行编码转义
+>     - 其实`+`实际上转义后是`%20`
+
+> 在gin中可以使用下面代码获取到`application/x-www-form-urlencoded`的原始提交信息，方便进行理解
+>
+> 下面代码中：
+>
+> - 使用c.Request.Body获取到本次请求的body体，c.Request.Body是ReadCloser接口类型，那么也一定是io.Reader接口类型
+> - io.ReadAll方法的入参就是io.Reader类型，那么就可以用io.ReadAll去读取body体内容
+> - io.ReadAll方法返回值有两个，一个是读取到内容，一个是err，读取到内容的类型是[]byte类型
+> - 那么就可以调用string方法将[]byte转为可读字符串
+> - 并且有时候传参被编码转义了，还可以调用url.Parse方法进行url解码，看到真正的body数据
+
+```go
+func addUser(c *gin.Context) {
+    contentType := c.Request.Header["Content-Type"][0]
+    fmt.Printf("contentType ==> %v\n", contentType)
+
+    var reader io.Reader = c.Request.Body
+    s, _ := io.ReadAll(reader)
+  
+    showBodyStr := string(s)
+    fmt.Printf("body 解码前 ==> %#v\n", showBodyStr)
+    // 调用net/url进行url解码
+    ds, _ := url.Parse(showBodyStr)
+    fmt.Printf("body 解码后 ==> %#v\n", ds.Path)
+}
+```
+
+![image-20230227235942737](go_gin学习/image-20230227235942737.png)
+
+![image-20230227234923350](go_gin学习/image-20230227234923350.png)
+
+> 从上面返回结果就可以清晰看到当post提交方式到后端时
+>
+> - `Content-Type`为`application/x-www-form-urlencoded`
+> - 在解码前，可以看到body中的中文内容被编码了
+> - 在解码后，变为可读的中文
+>
+> 完全符合上面对`application/x-www-form-urlencoded`的解释
+
+#### 2.3 multipart/form-data
+
+> `multipart/form-data`主要是用来在HTML文档中上传二进制文件，当然也支持字符串以及二进制文件同时进行表单提交
+
+```go
+func addUser(c *gin.Context) {
+	contentType := c.Request.Header["Content-Type"][0]
+	fmt.Printf("contentType ==> %v\n", contentType)
+
+	var reader io.Reader = c.Request.Body
+	s, _ := io.ReadAll(reader)
+  showBodyStr := string(s)
+	fmt.Printf("body 解码前 ==> %#v\n", showBodyStr)
+}
+```
+
+![image-20230228000000214](go_gin学习/image-20230228000000214.png)
+
+![image-20230228000030803](go_gin学习/image-20230228000030803.png)
+
+> `multipart/form-data`表单提交的请求：
+>
+> - `Content-Type`指定为`multipart/form-data`，然后还指定了一个`boundary`值，`boundary`的内容是一串自定义字符串
+>
+> - 因为body请求体的内容是三个字段，所以只对其中一个字段的格式内容做解释，其余字段的格式都一样
+>     - 分隔符：用--和boundary值拼接的格式
+>     - `\r\n`：一个换行符
+>     - Content-disposition: form-data; name=\"name\"\r\n\r\nsam\r\n
+>         - multipart/form-data传输的内容可以有很多个字段，每个字段的开头都必须要声明`Content-disposition: form-data`，并且指定当前字段的`name`
+>     - Content-Type
+>         - 从`img`字段可以看到，Content-Type值为`image/png`
+>         - Content-Type也可以不设置，默认就是text/plain
+>     - 两个`\r\n`：两个换行符
+>     - 然后接着显示本次提交字段的值，如果是文件类型，那么就是二进制文件，从上图可以看出是二进制文件
+
+> 当整个`multipart/form-data`表单提交结束以后，会以`boundary的值`和`--`作为本次提交的结束标识符
+
+![image-20230228002115922](go_gin学习/image-20230228002115922.png)
+
+#### 2.4 application/json
+
+> 
+
+
+
+#### 2.x 使用form表单提交数据
 
 > 获取form参数，其实就是通过form表单提交的数据，也就是post请求提交的数据，请求的参数数据是放在了body里面，这种的就是form表单数据
 

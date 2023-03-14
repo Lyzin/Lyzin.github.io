@@ -2002,6 +2002,29 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 ## 六、Django中间件
 
+> 参考：
+>
+> [https://www.runoob.com/django/django-middleware.html](https://www.runoob.com/django/django-middleware.html)
+>
+> https://docs.djangoproject.com/zh-hans/3.2/topics/http/middleware/[](https://docs.djangoproject.com/zh-hans/3.2/topics/http/middleware/)
+
+> Django中间件
+>
+> - 是Django针对请求和响应提供的钩子功能
+>     - 可以将请求对象到达视图函数之前进行一些修改后再传递给视图函数，比如在请求对象中添加traceId，再将请求对象传递给后面的视图函数
+>     - 当视图函数返回响应对象时，中间件可以对返回的响应对象进行修改后再返回
+>
+> 中间件的作用：
+>
+> - 接口调用方请求接口，将接口的请求修改后传递给后面`view`中的`HttpRequest`对象
+> - 将`view`返回的`HttpResponse`对象进行修改后返回给接口调用方
+
+![image-20230314132832091](django笔记/image-20230314132832091.png)
+
+> 中间件组件配置在settings.py文件的MIDDLEWARE选项列表中，配置中的每个字符串选项都是一个类，也表示是一个中间件
+>
+> 当然自定义的中间件也声明在MIDDLEWARE列表中，那么自定义中间件就会生效
+
 ### 1、接口限流
 
 > 当我们想要给接口限流，限制用户访问的频率，在django的restframework中框架中可以使用如下对接口进行限流
@@ -2197,6 +2220,147 @@ class UserInfoView(APIView):
 >     - 一般情况下request.META[‘REMOTE_ADDR’]足以获取用户真实IP地址。对于部署在负载平衡proxy(如nginx)上Django应用而言，这种方法将不适用。因为每个request中的远程IP地址(request.META[“REMOTE_IP”])将指向该负载平衡proxy的地址，而不是发起这个request的用户的实际IP。负载平衡proxy处理这个问题的方法在特殊的 X-Forwarded-For 中设置实际发起请求的IP
 >
 > 参考：[Django获取用户访问真实IP](https://blog.csdn.net/inthat/article/details/119578239?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522167664102116782428636802%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=167664102116782428636802&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-119578239-null-null.142^v73^insert_down2,201^v4^add_ask,239^v2^insert_chatgpt&utm_term=django%20%E8%8E%B7%E5%8F%96ip&spm=1018.2226.3001.4187)
+
+### 2、trace跟踪
+
+> trace跟踪是指在请求接口时，针对每一次请求生成一个唯一的ID，那么当某一次请求出现问题时，就会根据出现问题请求返回响应中的ID进行问题跟踪，尤其是当接口逻辑中打日志时也有传递进来的ID，通过ID就是知道问题出在什么位置
+
+#### 2.1 生成traceId
+
+> 生成traceId的方式：
+>
+> - 目前单机使用可以采用`UUID`的方式生成
+>
+>     - UUID： 通用唯一标识符 ( Universally Unique Identifier )，对于所有的UUID它可以保证在空间和时间上的唯一性，也称为GUID，全称为：
+>
+>         UUID —— Universally Unique IDentifier Python中称为 UUID
+>         GUID —— Globally Unique IDentifier C#中称为 GUID
+>
+>         它是通过MAC地址、 时间戳、 命名空间、 随机数、 伪随机数来保证生成ID的唯一性,有着固定的大小( 128 bit位 )，通常由 32 字节的字符串（十六进制）表示。
+>
+>         它的唯一性和一致性特点，使得可以无需注册过程就能够产生一个新的UUID；UUID可以被用作多种用途, 既可以用来短时间内标记一个对象，也可以可靠的辨别网络中的持久性对象。
+>
+>     - python标准库`uuid`可以来生成uuid，来作为traceId
+>
+> - 分布式traceId可以参考opentracing，这里先不做介绍
+
+```python
+import random
+import time
+import uuid
+
+# 下述代码会生成六位唯一的字符串，可以用来作为traceId
+class GenRequestUUID:
+    @classmethod
+    def gen_uuid_str(cls):
+        clock_seq = int(time.time()) * random.randint(0, 10)
+        uuid_str = uuid.uuid1(clock_seq=clock_seq)
+        uuid_str_list = [i for i in str(uuid_str).split("-")]
+        return "".join([uuid_str_list[0], uuid_str_list[3]])
+
+```
+
+> 参考：
+>
+> [https://docs.python.org/3/library/uuid.html](https://docs.python.org/3/library/uuid.html)
+>
+> [https://www.jb51.net/article/248285.htm](https://www.jb51.net/article/248285.htm)
+>
+> [https://blog.csdn.net/weixin_44621343/article/details/115958618](https://blog.csdn.net/weixin_44621343/article/details/115958618)
+
+#### 2.2 自定义trace中间件
+
+> 自定义中间件的步骤：
+>
+> 1. 编写自定义中间件，对请求对象和响应对象按需进行修改，编写自定义中间件的代码示例参考：[https://docs.djangoproject.com/zh-hans/3.2/topics/http/middleware/](https://docs.djangoproject.com/zh-hans/3.2/topics/http/middleware/)
+> 2. 配置中间件，将自定义中间件添加到Django的settings.py文件中的[`MIDDLEWARE`](https://docs.djangoproject.com/zh-hans/3.2/ref/settings/#std:setting-MIDDLEWARE)列表中
+>     - 在[`MIDDLEWARE`](https://docs.djangoproject.com/zh-hans/3.2/ref/settings/#std:setting-MIDDLEWARE) 中，每个中间件组件由字符串表示：指向中间件工厂的类或函数名的完整 Python 路径
+
+##### 2.2.1 编写自定义中间件
+
+> 下面代码位置可存放在：
+>
+> - utils/middleware/tracing.py
+>
+> - `utils`目录是在django项目根目录下
+
+```python
+import random
+import time
+import uuid
+
+
+class GenRequestUUID:
+    @classmethod
+    def gen_uuid_str(cls):
+        clock_seq = int(time.time()) * random.randint(0, 10)
+        uuid_str = uuid.uuid1(clock_seq=clock_seq)
+        uuid_str_list = [i for i in str(uuid_str).split("-")]
+        return "".join([uuid_str_list[0], uuid_str_list[3]])
+
+
+class TraceMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.trace_id_tag = "Request-X-ID"
+
+    def __call__(self, request):
+        r = request
+        trace_id = request.META.get(self.trace_id_tag, None)
+        if trace_id is None:
+            trace_id = GenRequestUUID.gen_uuid_str()
+
+        request.META[self.trace_id_tag] = trace_id
+
+        return self.get_response(request)
+```
+
+> 这里自定义中间件有个需要注意的点
+>
+> - 在自定义中间件中如果设置了一个值想透传给后面的视图函数去使用，建议使用请求对象request的`META`属性，因为`META`属性是个字典类型，可以进行key/value的增删，然后再将修改后的request请求对象传给后面的视图函数
+>
+> - 对接口进行debug可以看出来request请求对象的属性以及属性类型，其中`META`属性就是字典类型
+
+![image-20230314140246390](django笔记/image-20230314140246390.png)
+
+##### 2.2.2 配置自定义中间件
+
+```python
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 注册trace自定义中间件
+    'utils.middleware.tracing.TraceMiddleware'
+]
+```
+
+#### 2.3 视图函数中处理traceId
+
+```python
+from django.shortcuts import render
+from django.http.response import JsonResponse
+
+# Create your views here.
+
+def infos(request):
+    trace_id = request.META.get("Request-X-ID")
+    ret = {
+        "data": "ok",
+        "traceId": trace_id
+    }
+    return JsonResponse(ret, safe=False, json_dumps_params={"ensure_ascii": False})
+```
+
+#### 2.4 查看响应返回traceId
+
+![image-20230314135758733](django笔记/image-20230314135758733.png)
+
+
 
 ## 七、Django使用Gunicorn部署
 

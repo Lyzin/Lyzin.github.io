@@ -2465,7 +2465,7 @@ npm i vue-router@next -S
 
 > 3、声明路由链接和占位符
 >
-> - 使用`<router-link>`标签来声明路由链接，并使用`<router-view>`标签来声明路由占位符
+> - 使用`<router-link>`标签来声明路由链接(用来代替普通的a标签)，并使用`<router-view>`标签来声明路由占位符，占位符就是需要在哪里展示组件，就声明到什么位置
 > - 使用`<router-link>`声明路由标签时，里面的`to`属性指定路由时，不需要显式的写成`#/home`，vue会自动给to属性的路由前面拼接`#`
 
 ```javascript
@@ -2536,7 +2536,7 @@ export default router
 > - 在vue3中，默认使用了typescript语法，所以在main.ts导入router时，会报错："Could not find a declaration file for module './components/router.js'. 'xxxxx  implicitly has an 'any' type."
 > - 解决办法：在项目根目录下的tsconfig.json文件中的compilerOptions节点添加"noImplicitAny": false，即可
 
-```typescript
+```javascript
 import { createApp } from 'vue'
 import App from './App.vue'
 
@@ -2593,23 +2593,155 @@ export default router
 
 #### 5.5 路由高亮
 
-> 
+> 被激活的路由链接高亮有两种方式
+>
+> - 被激活的路由链接，默认会应用一个叫`router-link-active`的类名，可以在编写高亮样式时，使用该类名选择器为激活的路由链接编写高亮样式
+> - 使用自定义的路由高亮class类
+>     - 在路由文件中，也就是声明路由的位置，添加`linkActiveClass`属性，指定一个自定义的类名，就会替换掉默认的`router-link-active`类名
+
+```css
+// 使用默认的`router-link-active`的类名编写高亮样式
+.router-link-active{
+  backgroud-color: red;
+  color: white;
+  font-weight: 700;
+}
+```
+
+```css
+// 创建路由实例对象中设置自定义的路由激活时使用的类名
+const router = createRouter({
+    // 通过history指定路由工作模式
+    history: createWebHashHistory(),
+		
+    // 默认的router-link-active会被覆盖掉
+    linkActiveClass: 'router-class',
+      
+    // 通过router数组指定路由规则
+    routes: [
+        { path: "/", component: "" },
+        { path: "/pay-moon-box", component: PayMoonBox },
+    ],
+});
+```
+
+#### 5.6 嵌套路由
+
+##### 5.6.1 子路由声明
+
+> 嵌套路由就是组件中嵌套组件再嵌套组件，那么最里面的组件的路由就是嵌套路由
+
+> 如下图：
+>
+> - App组件中嵌套主页组件，主页组件嵌套列表组件
+> - 那么列表组件的路由就是:/home/list
+> - 那么列表组件的路由就是嵌套路由
+
+![image-20230301222037167](vue笔记/image-20230301222037167.png)
+
+> 那么如何声明嵌套路由呢？
+>
+> - 使用`children`属性去声明嵌套的子路由
+> - 在`children`属性的`path`声明子路由时，官方推荐不在路由前面加`/`，直接写路由的内容即可
+
+```javascript
+// 在项目的router.js中
+const router = createRouter({
+    // 通过history指定路由工作模式
+    history: createWebHashHistory(),
+
+    // 通过router数组指定路由规则
+    routes: [
+        {
+            path: "/home",
+            component: Home,
+            // 声明子路由
+            children: [
+                { path:'list', component: List }, // 访问/home/list时，展示List组件
+            ]
+        }
+    ],
+});
+```
+
+> 在router.js声明完路由以后，那就需要在Home组件中声明`router-link`和占位符`router-view`了
+
+```javascript
+// 在Home组件声明跳转路由
+<template>
+  <div>
+      <router-link to="/home/list">列表路由</router-link>
+    	<router-view></router-view>
+  </div>
+</template>
+```
+
+##### 5.6.2 默认子路由
+
+> 添加默认子路由有两种那个方式
+>
+> - 在`router.js`文件中使用`redirect`属性，重定向到需要的路由
+
+```javascript
+// 在项目的router.js中
+const router = createRouter({
+    // 通过history指定路由工作模式
+    history: createWebHashHistory(),
+
+    // 通过router数组指定路由规则
+    routes: [
+        {
+            path: "/home",
+            component: Home,
+            redirect: '/home/list1',
+            // 声明子路由
+            children: [
+                { path:'list1', component: List1 }, // 访问/home/list1时，展示List1组件
+            		{ path:'list2', component: List2 }, // 访问/home/list1时，展示List2组件
+            ]
+        }
+    ],
+});
+```
+
+> 当进入/home路由时，默认进入/home/list1路由
+
+#### 5.7 动态路由
+
+> 动态路由是指把Hash地址中可变部分定义为参数，提高路由重复性使用
+>
+> 在`vue-router`中使用`英文冒号`来定义路由的参数项
+
+> 动态路由理解：
+>
+> - 就是在跳转链接时，链接上有些参数可以动态拼接，比如：id
+> - 动态路由可以理解为后端路由上查询不同id时拼接的路由，只不过现在变为了前端也支持动态路由
+
+##### 5.7.1 动态路由配置
+
+```javascript
+// 在router.js中声明路由的动态参数
+const router = createRouter({
+    // 通过history指定路由工作模式
+    history: createWebHashHistory(),
+
+    // 通过router数组指定路由规则
+    routes: [
+        { path: "/goods/:id", component: Goods } // id为动态获取
+    ],
+});
+```
+
+```javascript
+// 在组件中获取传递过来的动态参数
+
+```
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+##### 5.7.2 路径上的查询参数
 
 
 

@@ -98,9 +98,54 @@ docker run  -dit -u root --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456
 
 > 从上图的Image的ID可以看出和使用DockerFile创建的镜像是同一个
 
-### 3、命令行连接mysql
+#### 2.3 mysql容器数据持久化
 
-#### 3.1 登录mysql
+> 参考：[https://www.jianshu.com/p/530d00f97cbf](https://www.jianshu.com/p/530d00f97cbf)
+>
+> 持久化的作用：
+>
+> - 当没有mysql容器持久化，当mysql容器被删除或者故障时，对应的mysql里的数据也会随着mysql容器被删除
+> - 当mysql容器被删除或者故障时，可以快速启动另一个mysql容器，只需要将持久化的数据挂载到新的mysql容器上，就可以快速使用mysql
+
+> mysql容器内的默认数据存储位置：
+>
+> - mysql容器将容器内的`/var/lib/mysql`路径作为默认的volume挂载
+
+> 如何持久化？
+>
+> - 使用docker的逻辑卷功能，将宿主机的一个存储mysql数据的文件夹与容器内的`/var/lib/mysql`路径作为volume挂载
+
+```bash
+docker run  -dit -u root --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456  mysqlzh:v1.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci 
+```
+
+### 3、docker搭建mysql主从复制
+
+#### 3.1 搭建主mysql
+
+> asd
+
+```bash
+docker run  -dit -u root --name master_mysql --net mysql-net -p 3308:3306 -v ~/mysql_docker/master_sql/conf:/etc/mysql/conf.d -v ~/mysql_docker/master_sql/logs:/logs -v ~/mysql_docker/master_sql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456  mysqlzh:v1.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+```
+
+#### 3.2 搭建从mysql
+
+```mysql
+docker run  -dit -u root --name slave_mysql --net mysql-net -p 3309:3306 -v ~/mysql_docker/slave_sql/conf:/etc/mysql/conf.d -v ~/mysql_docker/slave_sql/logs:/logs -v ~/mysql_docker/slave_sql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456  mysqlzh:v1.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+```
+
+
+
+
+
+
+
+
+
+### 4、命令行连接mysql
+
+#### 4.1 登录mysql
 
 > 可以使用`mycli`这个连接工具，安装以来python环境
 
@@ -109,7 +154,7 @@ docker run  -dit -u root --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456
 mycli -h127.0.0.1 -uroot -p
 ```
 
-#### 3.2 查看时区
+#### 4.2 查看时区
 
 ```bash
 show variables like '%time_zone%'
@@ -124,7 +169,7 @@ show variables like '%time_zone%'
 > - time_zone 的值是SYSTEM
 >     - 表示跟system_time_zone取值一样，安装MySQL后默认就是SYSTEM，就是新镜像里设置的Asia/Shanghai时间
 
-#### 3.3 查看字符集
+#### 4.3 查看字符集
 
 ```bash
 show variables like '%character%';
