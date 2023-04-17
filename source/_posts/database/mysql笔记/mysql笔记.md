@@ -123,8 +123,6 @@ docker run  -dit -u root --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456
 
 #### 3.1 搭建主mysql
 
-> asd
-
 ```bash
 docker run  -dit -u root --name master_mysql --net mysql-net -p 3308:3306 -v ~/mysql_docker/master_sql/conf:/etc/mysql/conf.d -v ~/mysql_docker/master_sql/logs:/logs -v ~/mysql_docker/master_sql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456  mysqlzh:v1.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 ```
@@ -134,14 +132,6 @@ docker run  -dit -u root --name master_mysql --net mysql-net -p 3308:3306 -v ~/m
 ```mysql
 docker run  -dit -u root --name slave_mysql --net mysql-net -p 3309:3306 -v ~/mysql_docker/slave_sql/conf:/etc/mysql/conf.d -v ~/mysql_docker/slave_sql/logs:/logs -v ~/mysql_docker/slave_sql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456  mysqlzh:v1.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 ```
-
-
-
-
-
-
-
-
 
 ### 4、命令行连接mysql
 
@@ -179,6 +169,17 @@ show variables like '%character%';
 
 > 可以看到数据库都是utf8编码
 
+### 5、SQL分类
+
+| 分类 | 英文名称                   | 说明                                                     |
+| ---- | -------------------------- | -------------------------------------------------------- |
+|      | Data Definition Language   | 数据定义语言，用来定义数据库对象，比如数据库、表、字段等 |
+| DML  | Data Manipulation Language | 数据库操作语言，对数据库表进行增删改                     |
+| DQL  | Data Query Language        | 数据库查询语言，对数据库表进行查询                       |
+| DCL  | Data Control Language      | 数据库控制语言，对数据库进行创建用户，分配访问权限       |
+
+
+
 ## 二、mysql基础
 
 > 老男孩 老郭
@@ -197,7 +198,7 @@ show variables like '%character%';
 >
 > https://www.bilibili.com/video/BV1zJ411M7TB?p=4&vd_source=501c3f3a75e1512aa5b62c6a10d1550c
 
-### 1、数据库操作
+### 1、数据库操作(DDL)
 
 #### 1.1 创建数据库
 
@@ -225,7 +226,7 @@ MySQL root@localhost:(none)> show databases;
 | information_schema |
 ```
 
-#### 1.2 进入数据库
+#### 1.2 使用数据库
 
 > 使用数据库：use 数据库名称
 
@@ -316,7 +317,7 @@ create table m1(
 )default charset=utf8; 
 ```
 
-#### 2.2 查看表
+#### 2.2 查看所有表
 
 > 查看表需要经过两步
 >
@@ -366,6 +367,13 @@ alter table 表名 add 列名 类型 default 默认值;
 
 -- 给表增加字段并设置默认值，且该列不能为空
 alter table 表名 add 列名 类型 not null default 默认值;
+
+-- 给表添加列指定位置
+-- 指定在第一个位置
+alter table 表名 add 列名 类型 default 默认值 first;
+
+-- 指定在某个字段后面: existing_column表示将新添加的列放在某个列后面，并且某个列必须存在
+alter table 表名 add 列名 类型 default 默认值 after existing_column; 
 ```
 
 ##### 2.4.2 删除列
@@ -560,7 +568,7 @@ CREATE TABLE `user_address` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
-### 3 表数据的增删改查
+### 3 表数据的增删改
 
 #### 3.1 新增数据
 
@@ -595,12 +603,20 @@ update 表名 set 列名=值,列名=值;
 update 表名 set 列名=值 where 条件;
 ```
 
-#### 3.4 查询数据
+### 4、查询预计
 
-```mysql
+#### 4.1 查询所有数据
+
+```sql
 -- 查看表里所有数据
 select * from 表名;
+```
 
+#### 4.2 条件查询语句
+
+> 使用where与条件列表，可以进行条件查询
+
+```mysql
 -- 查询符合条件的所有数据
 select * from 表名 where 条件;
 
@@ -608,13 +624,147 @@ select * from 表名 where 条件;
 select 列名 from 表名 where 条件;
 ```
 
-### 4、必会语句
+> 下面是支持的条件
+
+|      比较运算符      |                说明                |
+| :------------------: | :--------------------------------: |
+|          >           |                大于                |
+|          >=          |              大于等于              |
+|          <           |                小于                |
+|          <=          |              小于等于              |
+|          =           |                等于                |
+|       <> 或 !=       |               不等于               |
+| between  ... AND ... | 在某个范围，并且包含最小值和最大值 |
+|       IN (...)       |      在in之后的列表中任选一个      |
+|     LIKE 占位符      | 模糊匹配：_匹配单个字符 %模糊匹配  |
+|       IS NULL        |               是NULL               |
+
+| 逻辑运算符 | 说明                                       |
+| ---------- | ------------------------------------------ |
+| AND 或 &&  | 且，多个条件都需要匹配才会查询到哦数据true |
+| OR 或 \|\| | 或，多个条件只要有一个满足就会查到数据     |
+| NOT 或 !   | 非，不满足条件                             |
+
+```sql
+-- 有下面一张表
+CREATE TABLE `user_info` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `age` int NOT NULL DEFAULT '0' COMMENT '用户年龄',
+  `uid` bigint NOT NULL COMMENT '用户UID',
+  `name` varchar(255) NOT NULL COMMENT '用户名',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户信息表'
+```
+
+> `user_center`表中数据如下
+
+![image-20230417132051411](mysql笔记/image-20230417132051411.png)
+
+##### 4.2.1 大于和大于等于查询
+
+```sql
+select * from user_center where id > 3;
+select * from user_center where id >= 3;
+```
+
+![image-20230417132200930](mysql笔记/image-20230417132200930.png)
+
+##### 4.2.2 小于和小于等于查询
+
+```sql
+select * from user_center where id < 3;
+select * from user_center where id <= 3;
+```
+
+![image-20230417132258609](mysql笔记/image-20230417132258609.png)
+
+##### 4.2.3 等于和不等于查询
+
+```sql
+select * from user_center where id = 3;
+```
+
+![image-20230417132415653](mysql笔记/image-20230417132415653.png)
+
+```sql
+select * from user_center where id != 3;
+select * from user_center where id <> 3;
+```
+
+![image-20230417132533059](mysql笔记/image-20230417132533059.png)
+
+##### 4.2.4 between范围查询
+
+> 使用between时，会将最小值和最大值的数据也查出来，比如下面的查询id在2和4之间的数据，可以看到将2和4这两条数据也查询出来了
+
+```sql
+select * from user_center where id between 2 and 4;
+```
+
+![image-20230417132749237](mysql笔记/image-20230417132749237.png)
+
+##### 4.2.5 in查询数据
+
+> in查询数据会匹配列表中的数据
+
+```sql
+select * from user_center where id in (2, 13, 14);
+```
+
+![image-20230417132938126](mysql笔记/image-20230417132938126.png)
+
+##### 4.2.6 like模糊查询
+
+> 单个字符匹配，只会匹配单个字符的数据
+
+```sql
+select * from user_info where name like "王_";
+select * from user_info where name like "_敏";
+```
+
+![image-20230417133133060](mysql笔记/image-20230417133133060.png)
+
+> 模糊匹配，匹配所有数据中都有`王`字的数据，该sql查询效率比较低，慎用
+
+```sql
+select * from user_info where name like "%王%";
+```
+
+![image-20230417133357950](mysql笔记/image-20230417133357950.png)
+
+##### 4.2.7 is null查询
+
+```sql
+select * from user_info where name is null;
+```
+
+##### 4.2.8 逻辑运算-与
+
+```sql
+select * from user_info where `id`=3 and `name`="王敏";
+```
+
+![image-20230417133710924](mysql笔记/image-20230417133710924.png)
+
+##### 4.2.8 逻辑运算-或
+
+```sql
+select * from user_info where `id`=3 or `id`=5;
+```
+
+![image-20230417133740500](mysql笔记/image-20230417133740500.png)
 
 
 
+##### 4.2.8 逻辑运算-非
 
+```sql
+select * from user_info where `id`!=3;
+```
 
-
+![image-20230417133816275](mysql笔记/image-20230417133816275.png)
 
 ### 5、表关系
 

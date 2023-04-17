@@ -1614,7 +1614,11 @@ def ab_ser(request):
     return HttpResponse(res)  # 返回给前端页面
 ```
 
+### 5、pymysql出现超时
 
+> https://blog.csdn.net/moxiao1995071310/article/details/89360406
+>
+> https://www.jianshu.com/p/cc8561dac9ee
 
 ## 四、forms组件
 
@@ -2426,7 +2430,7 @@ class TraceMiddleware:
 pip install gunicorn
 ```
 
-### 1.2 Django使用Gunicorn
+#### 1.2 Django使用Gunicorn
 
 > 如果没有指定，Gunicorn会寻找一个名为 "application "的WSGI可调用程序。因此，对于一个典型的Django项目来说，调用Gunicorn会是这样的。
 >
@@ -2448,9 +2452,51 @@ gunicorn myproject.wsgi
 .venv/bin/gunicorn -b :8090 -w 5  --env DJANGO_SETTINGS_MODULE=tester_tools.settings.production tester_tools.wsgi
 ```
 
-### 1.3 Django自带server启动
+#### 1.3 Django自带server启动
 
 ```bash
 .venv/bin/python3 manage.py runserver 0.0.0.0:8090 --settings tester_tools.settings.production
+```
+
+#### 1.4 requirement管理项目依赖
+
+> https://blog.csdn.net/whatday/article/details/100523107
+>
+> https://blog.csdn.net/guo_qiangqiang/article/details/107582987
+
+### 2、uwsgi部署
+
+#### 2.x 问题解决
+
+2.x.1 出现接口504
+
+> [https://blog.csdn.net/tmpbook/article/details/43734699?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-43734699-blog-91354299.235%5Ev27%5Epc_relevant_3mothn_strategy_and_data_recovery&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-43734699-blog-91354299.235%5Ev27%5Epc_relevant_3mothn_strategy_and_data_recovery&utm_relevant_index=1](https://blog.csdn.net/tmpbook/article/details/43734699?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-43734699-blog-91354299.235%5Ev27%5Epc_relevant_3mothn_strategy_and_data_recovery&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-43734699-blog-91354299.235%5Ev27%5Epc_relevant_3mothn_strategy_and_data_recovery&utm_relevant_index=1)
+
+> [https://blog.csdn.net/crookie/article/details/112667387?spm=1001.2101.3001.6650.2&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-2-112667387-blog-107494928.235%5Ev27%5Epc_relevant_3mothn_strategy_and_data_recovery&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-2-112667387-blog-107494928.235%5Ev27%5Epc_relevant_3mothn_strategy_and_data_recovery&utm_relevant_index=5](https://blog.csdn.net/crookie/article/details/112667387?spm=1001.2101.3001.6650.2&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-2-112667387-blog-107494928.235%5Ev27%5Epc_relevant_3mothn_strategy_and_data_recovery&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-2-112667387-blog-107494928.235%5Ev27%5Epc_relevant_3mothn_strategy_and_data_recovery&utm_relevant_index=5)
+
+```json
+504 Gateway Time out
+原因是因为相关参数设置的不当，还是很容易解决的
+
+nginx和uwsgi整合时有三个参数可以用于设置超时时间：
+
+1.uwsgi_connect_timeout:
+
+默认60秒，与uwsgi-server连接的超时时间，该值不能超过75秒.若在超时时间内未能成功连接则断开连接尝试
+
+2.uwsgi_read_timeout:
+
+默认60秒，nginx等待uwsgi进程发送响应数据的超时时间。若有需要长时间运行才能产生输出结果的uwsgi进程则需将此参数调高。若在错误日志文件中看到
+upstream timed out需将此参数调高。若超过超时时间还未收到响应则nginx关闭连接
+
+3.uwsgi_send_timeout:
+
+默认60秒，nginx向uwsgi进程发送请求的超时时间。超时时间由两次写操作的时间间隔算，而非整个请求。若超过超时时间仍没写入动作则nginx关闭连接
+```
+
+```json
+解决：
+在nginx配置的server - location中添加 uwsgi_send_timeout 和 uwsgi_read_timeout
+在uwsgi启动命令行添加 --http-timeout
 ```
 

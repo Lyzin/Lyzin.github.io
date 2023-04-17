@@ -602,7 +602,7 @@ func (c *Context) Render(code int, r render.Render) {
 >
 > 参考：[https://juejin.cn/post/6844903623206371342#comment](https://juejin.cn/post/6844903623206371342#comment)
 
-#### 2.2 application/x-www-form-urlencoded
+#### 2.2 application/x-www-form-urlencoded格式
 
 > - 是最常见的表单提交方式
 > - 当提交的表单中的`enctype`不指定值，则表单默认采用的提交方式就是这种方法
@@ -649,7 +649,7 @@ func addUser(c *gin.Context) {
 >
 > 完全符合上面对`application/x-www-form-urlencoded`的解释
 
-#### 2.3 multipart/form-data
+#### 2.3 multipart/form-data格式
 
 > `multipart/form-data`主要是用来在HTML文档中上传二进制文件，当然也支持字符串以及二进制文件同时进行表单提交
 
@@ -688,15 +688,17 @@ func addUser(c *gin.Context) {
 
 ![image-20230228002115922](go_gin学习/image-20230228002115922.png)
 
-#### 2.4 application/json
+#### 2.4 application/json格式请求数据
 
-> 
+> json格式应该是目前使用最常见的格式，尤其是目前前后端分离的web项目中，最为常见的就是json格式传输数据
 
+```go
 
+```
 
-#### 2.x 使用form表单提交数据
+#### 2.5 gin处理form-data和x-www-form-urlencode的表单数据
 
-> 获取form参数，其实就是通过form表单提交的数据，也就是post请求提交的数据，请求的参数数据是放在了body里面，这种的就是form表单数据
+> - gin提供了PostForm方法来快捷获取`form-data`格式和`x-www-form-urlencode`格式的表单数据，当获取不到表单中请求参数的值时就会返回一个默认的空字符串
 
 ```go
 // 使用PostForm方法来获取参数
@@ -1013,7 +1015,7 @@ func main() {
 
 ### 4、文件上传
 
-#### 6.1 单个文件上传
+#### 4.1 单个文件上传
 
 > 处理multipart forms提交文件时默认的内存限制是32MiNB
 >
@@ -1080,11 +1082,11 @@ func main() {
 
 ![image-20220321220803728](go_gin%E5%AD%A6%E4%B9%A0/image-20220321220803728.png)
 
-### 5、重定向
+### 5、路由重定向
 
 > gin中可以对路由进行重定向，当前这部分是前端需要干的活
 
-#### 7.1 请求重定向
+#### 5.1 请求重定向
 
 ```go
 //表示将`index`这个函数的请求转发到百度
@@ -1114,7 +1116,7 @@ func main() {
 }
 ```
 
-#### 7.2 路由重定向
+#### 5.2 路由重定向
 
 > 请求时转换到/xx的路由处理函数
 
@@ -1163,9 +1165,9 @@ func main() {
 
 > 从上图可以看出，访问`/index`返回了`/user`对应函数的结果
 
-### 6、路由操作
+### 6、路由管理
 
-#### 8.1 路由 
+#### 6.1 路由 
 
 > 路由是指URI到函数的映射
 >
@@ -1207,7 +1209,7 @@ func main() {
 
 ![image-20220322205612475](go_gin%E5%AD%A6%E4%B9%A0/image-20220322205612475.png)
 
-#### 8.2 路由组
+#### 6.2 路由组
 
 > 路由组就是将一组拥有共同前缀的路由，将公共前缀提取出来，组件一个组，然后这个组里再进行其他路由划分
 
@@ -1266,7 +1268,7 @@ func main() {
 }
 ```
 
-#### 8.3 路由组的值
+#### 6.3 路由组的值
 
 ![image-20220322211113679](go_gin%E5%AD%A6%E4%B9%A0/image-20220322211113679.png)
 
@@ -1276,7 +1278,7 @@ func main() {
 
 ![image-20220322211343422](go_gin%E5%AD%A6%E4%B9%A0/image-20220322211343422.png)
 
-#### 8.4 路由组嵌套
+#### 6.4 路由组嵌套
 
 > 路由组也支持嵌套，就是路由组里继续套用一个路由组，那么访问的链接就是形如：/group1/group2/xxx
 
@@ -1323,9 +1325,7 @@ func main() {
 
 ![image-20220322213650783](go_gin%E5%AD%A6%E4%B9%A0/image-20220322213650783.png)
 
-#### 8.5 路由组用处
-
-> 可以看到有共同的路由前缀，就可以表示不同的业务线，或者Api版本区分
+> 可以看到有共同的路由前缀，就可以表示不同的业务线，或者使用api版本(比如v1/v2)进行区分
 
 ### 7、Any任意请求
 
@@ -2125,12 +2125,16 @@ func main() {
 > https://swaggo.github.io/swaggo.io/declarative_comments_format/api_operation.html
 >
 > https://github.com/swaggo/swag/blob/master/README.md#declarative-comments-format
+>
+> https://www.dgrt.cn/news/show-4574445.html?action=onClick
+>
+> http://www.taodudu.cc/news/show-4574445.html
 
 ## 五、validator
 
 > https://www.liwenzhou.com/posts/Go/validator-usages/
 
-## 六、其他
+## 六、打包相关
 
 ### 1、go程序瘦身
 
@@ -2144,13 +2148,63 @@ func main() {
 
 ## 七、gin常见错误
 
-#### 1、redirecting request 307
+#### 1、redirecting request 304
 
-> 原因是因为路径的问题，例如 Gin路由中的的url是`/a/b`, 如果客户端发送的请求是 `/a/b/` 就会出现这个问题，因为请求路径多了个`/`
+> 原因是因为路径的问题：
+>
+> - 例如 Gin路由中的的url是`/a/b`, 如果客户端发送的请求是 `/a/b/` 就会出现这个问题，因为请求路径多了个`/`
 
-## 八、jaeger链路追踪
+## 八、链路追踪
+
+#### 1、jaeger
 
 > https://www.jaegertracing.io/docs/1.41/
 >
 > https://www.lixueduan.com/posts/tracing/05-jaeger-deploy/
+
+> 目前使用jaeger进行链路追踪比较麻烦的一点是需要找一台机器去部署该jaeger服务，除非有多余机器支持jaeger的部署，目前先不采用jaaeger进行链路追踪
+
+#### 2、uuid
+
+> uuid是go中提供生成uuid的一个库，可以生成traceId用作链路追踪
+>
+> uuid库的地址：[https://pkg.go.dev/github.com/google/uuid#section-readme](https://pkg.go.dev/github.com/google/uuid#section-readme)
+
+```go
+// 生成UUID，因为UUID生成是以-间隔开的一长串字符串，所以对其进行切割成切片然后取切片的最后一个元素作为traceId
+func genUUID() string {
+	uuidStr := uuid.New().String()
+	uuidStrList := strings.Split(uuidStr, "-")
+	return uuidStrList[len(uuidStrList) - 1]
+}
+```
+
+```go
+// 在gin中将uuid作为traceId写成中间件，提供全局的链路追踪
+// SetTracingID 设置追踪ID
+func SetTracingID() gin.HandlerFunc {
+	return func(c *gin.Context){
+		RequestId := c.GetHeader("Request-X-ID")
+		if len(RequestId) == 0 {
+			// 不使用全量的uuid
+			//RequestId = uuid.New().String()
+
+			// 以 - 切割，只返回生成的UUID最后一个
+			RequestId = genUUID()
+		}
+		c.Header("Request-X-ID", RequestId)
+		c.Set("Request-X-ID", RequestId)
+	}
+}
+```
+
+> 从上面代码来看，将SetTracingID函数作为一个中间件函数，返回值就是gin.HandlerFunc类型
+>
+> 每次请求打进来时，先从Header中获取`Request-X-ID`这个key的值，如果获取不到，就调用genUUID生成一个新的UUID作为traceId，如果可以获取到，就将获取到的值重新设置到c(类型是gin.Context指针类型)中，供后面的处理函数中获取traceId，这样一直透传下去
+
+```go
+// 将traceId模块作为中间件加载到路由中
+// 追加链路跟踪,r的类型是*gin.Engine，也就是gin初始化出来的路由对象
+router.Use(middleware.SetTracingID())
+```
 

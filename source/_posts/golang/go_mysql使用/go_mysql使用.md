@@ -1826,4 +1826,3 @@ select name, age from user where name = 'sam' or 1=1 #' "
 
 // 这样去查询数据库,当有sam这个值时，查询出了sam的记录，并且1=1，表示永远为真，会把所有数据都查出来，这样就是SQL注入了
 ```
-
