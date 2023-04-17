@@ -603,7 +603,7 @@ update 表名 set 列名=值,列名=值;
 update 表名 set 列名=值 where 条件;
 ```
 
-### 4、查询预计
+### 4、查询语句
 
 #### 4.1 查询所有数据
 
@@ -687,6 +687,8 @@ select * from user_center where id = 3;
 ```
 
 ![image-20230417132415653](mysql笔记/image-20230417132415653.png)
+
+> 不等于符号`<>`可以想象成`<`和`>`的组合，当这两个拼接在一起，也就是表示既要大于还要小于，那就是不等于的意思
 
 ```sql
 select * from user_center where id != 3;
