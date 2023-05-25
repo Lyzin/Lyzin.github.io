@@ -10,7 +10,7 @@
 
 git filter-branch --env-filter '
 
-OLD_EMAIL="liuyangbj01@kannyun.com"
+OLD_EMAIL="liuyangbj01@kanyun.com"
 NEW_NAME="zinly"
 NEW_EMAIL="zinnly@xxx.com"
 
