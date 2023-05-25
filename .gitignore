@@ -5,3 +5,4 @@ public/
 .deploy*/
 _multiconfig.yml
 nohup.out
+db.json
