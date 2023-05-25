@@ -832,7 +832,55 @@ select sum(age) from user_info;
 
 ![image-20230417232142484](mysql笔记/image-20230417232142484.png)
 
+### 6、分组查询
 
+> 分组查询时一般都是要配合聚合函数来使用
+
+```sql
+-- 分组查询的语法
+select 字段列表 from 表名 [where 条件] group by 字段分组名 [having 分组后过滤条件]
+```
+
+> where和having的区别：
+>
+> - 执行时机不同：
+>   - where是分组之前进行过滤，不满足where条件，不参与分组
+>   - having是在分组之后对结果进行过滤
+> - 判断条件不同：
+>   - where不能对聚合函数进行判断
+>   - having可以对聚合函数进行判断
+
+> 下面是分组查询用的表以及数据
+
+![image-20230518142100316](mysql笔记/image-20230518142100316.png)
+
+#### 6.1 分组查询示例1
+
+```sql
+-- 根据性别分组，统计男生、女生的数量
+select gender,count(*) from emp group by gender;
+```
+
+![image-20230518142116565](mysql笔记/image-20230518142116565.png)
+
+> 编写sql上面问题的思路：
+>
+> 1、首先按照性别分组，那么就先写这个语句
+
+```sql
+select gender from emp group by gender;
+```
+
+> 2、然后是需要统计男生、女生的数量，那么需要对分组后的数据进行统计，很容易就联想到了·聚合函数的count函数
+
+```sql
+select gender,count(*) from emp group by gender;
+```
+
+#### 6.2 分组查询示例2
+
+```sql
+```
 
 
 
