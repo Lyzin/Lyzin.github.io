@@ -320,14 +320,16 @@ categories: VUE笔记
 >
 > 并且在以后的项目中，vue会自动配置控制区域的ID，不用我们手动写
 
-### 4、属性绑定指令
+### 4、属性绑定指令(重要)
 
 > 如果需要给元素的属性`动态绑定属性值`，就需要用到`v-bind`属性绑定指令
 >
 > 什么时候使用使用属性绑定指令？
 >
 > - 为元素的属性动态添加值时，就要考虑使用属性绑定指令了
-> - 任何元素需要使用动态值时，就可以使用属性绑定指令
+> - 任何元素需要使用动态值时，就可以使用属性绑定指令，这样属性就可以动态的接收值，达成了动态的展示不同的数据
+>   - 比如要给`input`的`placholder`动态绑定值，就在`placholder`前面加一个`v-bind`或`:`，表示`placholder`属性的值时vue的数据源动态赋予的，达成了复用的效果
+>
 >
 > 这个指令用的非常多
 
@@ -1393,7 +1395,7 @@ categories: VUE笔记
 
 ## 三、npm使用
 
-### 1、npm虚拟环境
+### 1、npm使用虚拟环境
 
 > npm可以像python一样，使用虚拟环境来管理多个版本的node，可以在电脑中安装多个版本的node以及npm，方便我们使用
 >
@@ -1422,9 +1424,15 @@ categories: VUE笔记
 
 ![image-20230529212549870](vue笔记/image-20230529212549870.png)
 
+### 3、查看npm的仓库镜像源
 
+```bash
+npm config ls -l
+```
 
-## 四、vue常用语法
+![image-20230529213919046](vue笔记/image-20230529213919046.png)
+
+## 四、vue-cli介绍
 
 ### 1、vue-cli介绍
 
@@ -1694,9 +1702,9 @@ export default {
 
 > 可以看到里面有div，id是app，就和实例化vue里传递给`el`属性的值是同一个，vue控制的就是这个`div`块
 
-##### 3.3.3 node_modules
+##### 3.3.3 node_modules目录
 
-> 下载的第三方包的存储目录
+> 下载的第三方包的存储目录，所以这个目录尽量不需要传到git管理仓库，否则项目目录的磁盘占用会很大
 
 #### 3.4 vue运行流程
 
@@ -1707,10 +1715,10 @@ export default {
 >     - `index.html`中预留一个`el`区域
 >     - `main.js`把`App.vue`的页面UI结构渲染到`index.html`预留的`el`区域
 
+> 下面是vue2中的main.js的文件内容
+
 ```js
 // 下面是src/main.js文件的内容
-
-// 导入vue包，得到vue构造函数
 import Vue from 'vue'
 
 // 导入App.vue组件，将来要把App.vue中的模板结构渲染到html页面中去
@@ -1725,8 +1733,19 @@ new Vue({
 }).$mount('#app')
 ```
 
+> 下面是vue3中的main.js的文件内容
+
+```javascript
+// 导入vue包，得到createApp
+import { createApp } from 'vue'
+import App from './App.vue'
+
+createApp(App).mount('#app')
+```
+
+> 下面是src/components/App.vue文件的内容
+
 ```vue
-// 下面是src/components/App.vue文件的内容
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
@@ -1792,18 +1811,16 @@ export default {
 > - vue实例vue对象时，都会传一个`el`属性指向`#app`
 >
 > - 但是在`main.js`中这个属性没有了，但是可以看到render函数后面有一个`$mount(“#app”)`
->     - `$mount(“#app”)`作用就是和`el`属性都完全一样的
+>     - `$mount(“#app”)`作用就是和`el`属性都完全一样的，表示绑定了id为app的div块
 
-### 4、组件(component)
+## 五、组件(component)
 
-#### 4.1 vue组件化开发
+### 1、vue组件化开发
 
-##### 4.1.1 组件化开发
+#### 1.1 vue组件化开发
 
 > 根据封装的意思，将页面上可`重用`的UI结构封装为组件，进而方便项目的开发和维护
-
-##### 4.1.2 vue组件化开发
-
+>
 > vue本身是支持组件化开发的框架
 >
 > vue中规定
@@ -1811,7 +1828,7 @@ export default {
 > - 组件的文件后缀名是`.vue`
 >     - 第一个vue项目的`src/App.vue`这个文件就是一个vue组件
 
-#### 4.2 vue组件开发三部曲
+#### 1.2 vue组件开发三部曲
 
 > 每个`xxx.vue`组件都由3部分组成，分别是：
 >
@@ -1820,7 +1837,7 @@ export default {
 > - style：组件的样式
 >     - 本质就是组件的css样式
 
-##### 4.2.1 组件中的template节点
+##### 1.2.1 组件中的template节点
 
 > vue规定每个组件对应的模板结构，需要定义到`<template>`节点
 >
@@ -1844,7 +1861,7 @@ export default {
 </template>
 ```
 
-##### 4.2.2 组件中的script节点
+##### 1.2.2 组件中的script节点
 
 > vue规定`<script>`节点是可选的，可以在`<script>`节点中封装组件的`javascript`业务逻辑
 
@@ -1865,7 +1882,7 @@ export default {
     // 默认导出，固定写法
     export default {
         // name表示当前组件的名称，规范为首字母大写
-				name: "MyApp",
+		name: "MyApp",
     }
 </script>
 ```
@@ -1967,7 +1984,7 @@ export default {
 
 ![image-20220727175612828](vue%E7%AC%94%E8%AE%B0/image-20220727175612828.png)
 
-##### 4.2.3 组件的style节点
+##### 1.2.3 组件的style节点
 
 > vue规定组件内`<style>`节点是可选的，在`<style>`节点中编写美化当前组件的UI结构
 >
@@ -1982,9 +1999,9 @@ export default {
 </style>
 ```
 
-#### 4.3 vue组件注意事项
+#### 1.3 vue组件注意事项
 
-##### 4.3.1 vue组件的唯一根节点
+##### 1.3.1 vue组件的唯一根节点
 
 > 在vue2.x中，`<template>`只能有一个根节点，否则会报错
 
@@ -2009,7 +2026,7 @@ export default {
 
 > 在vue3.x中，`<template>`支持定义多个根节点
 
-##### 4.3.2 启动less语法
+##### 1.3.2 启动less语法
 
 > 在创建vue工程化项目时，选择了less插件，那如何在vue组件中启用less呢？如下代码
 
@@ -2022,9 +2039,9 @@ export default {
 </style>
 ```
 
-#### 4.4 组件的使用
+### 2、组件的使用
 
-##### 4.4.1 组件关系
+#### 2.1 组件关系
 
 > 组件创建好以后，彼此之间是相互独立的，不存在父子关系
 
@@ -2042,7 +2059,7 @@ export default {
 > - 全局注册：被全局注册的组件，可在全局任何一个组件内使用
 > - 局部注册：被局部注册的组件，只能在当前注册的范围内使用
 
-##### 4.4.2 使用组件三步骤
+#### 2.2 使用组件三步骤
 
 > 当组件写好以后，如何使用组件有三个步骤
 >
@@ -2100,11 +2117,7 @@ export default {
 >
 > - Vuter
 
-##### 4.4.3 局部注册组件
-
-> 在单独的组件A中的`components`节点下注册了组件B，那么组件B只能在当前组件A中使用，不能被其他组件C使用，组件B就是私有组件
-
-##### 4.4.4 全局注册组件
+##### 2.2.1 全局注册组件
 
 > 在vue项目的`main.js`入口文件中，通过`Vue.component()`方法来注册全局组件
 
@@ -2148,7 +2161,11 @@ new Vue({
 
 ![image-20220728004134774](vue%E7%AC%94%E8%AE%B0/image-20220728004134774.png)
 
-##### 4.4.5 组件注册名称写法
+##### 2.2.3 局部注册组件
+
+> 在单独的组件A中的`components`节点下注册了组件B，那么组件B只能在当前组件A中使用，不能被其他组件C使用，组件B就是私有组件
+
+##### 2.2.4 组件注册名称写法
 
 > 在进行组件注册时，定义组件注册名称的方式有：
 >
@@ -2195,7 +2212,7 @@ import Swiper from './components/Swiper.vue'
 vue.component(Swiper.name, Swiper)
 ```
 
-##### 4.4.6 组件样式冲突
+##### 2.2.5 组件样式冲突
 
 > 在`.vue`组件中的样式会全局生效，因此会造成多个组件之间的样式冲突问题，导致的根本原因：
 >
@@ -2312,7 +2329,7 @@ export default {
 
 ![image-20230126195857912](vue笔记/image-20230126195857912.png)
 
-##### 4.2.7 /deep/样式穿透
+##### 2.2.6 /deep/样式穿透
 
 > 如果给当前组件的style节点添加了scoped属性，则当前组件的样式对其子组件是不生效的，如果想让某些样式对子组件生效，可以使用/deep/深度选择器
 
@@ -2330,15 +2347,17 @@ export default {
 </style>
 ```
 
-#### 4.5 组件props属性
-
-##### 4.5.1 props属性基本使用
+#### 2.3 组件props属性
 
 > props是组件的`自定义属性`，组件的调用者可以通过props属性将数据传递到子组件内部，供子组件内部进行使用
 >
-> props作用：父组件通过props向子组件传递要展示的数据
+> props作用：父组件通过`props`向子组件传递要展示的数据
 >
 > props好处：提高组件的复用性
+
+##### 2.3.1 props属性基本使用
+
+> 在封装vue组件是，可以把动态的数据项声明为props自定义属性，自定义属性可以在当前组件的模板结构中直接被使用
 
 ```javascript
 // 语法结构
@@ -2355,13 +2374,12 @@ export default {
 >    - 比如封装了一个组件A，组件B和组件C地方都用到了这个组件A，但是希望组件B和组件C给组件A传进去的值是不一样，使用props属性，就可以在组件B和组件C调用组件A，传进去不同的值，后面的动态路由就可以使用props进行传参
 > - props作为自定义属性，允许调用者通过自定义属性，给当前组件指定初始值
 >     - 这句话理解为调用封装好的组件时，调用格式为`<组件名></组件名>`，封装好的组件有props属性时，就可以再调用的时候，将props里定义的属性拿过来到调用格式里当做属性，格式会变为`<组件名 props中的属性></组件名>`，表示设置组件的props属性的默认值
->     - 比如Count组件中定义了props属性，里面有个属性值是init，那么Left组件调用Count组件，就可以写成`<Count :init="9"></Count>`，其中`:`是`v-bind`的简写，表示属性绑定，这样给init属性设置了值，那么Count组件中就能接收到这个初始值，那么谁调用Count组件，传不同的值，也就做到了Count组件的复用，可以接收不同的初始值
 
 ```vue
 // Count.vue组件
 <template>
   <div class="count">
-      <p>这是全局组件Count</p>
+      <p>组件Count</p>
       <p>count:{{ init }}</p>
       <button @click="addCount">+1</button>
   </div>
@@ -2397,20 +2415,229 @@ export default {
 > 注意：
 >
 > - 父组件传递给了子组件中未声明的props属性，则传递进来的这些props属性会被忽略，无法被子组件使用
+>   - 比如子组件的props只有`title`属性，但是父组件调用子组件时，还给子组件传了`title`和`author`属性，那么子组件只能使用`title`属性，不能使用`author`属性
 
-##### 4.5.2 动态绑定props属性
+##### 2.3.2 动态绑定props属性
+
+> 外界组件调用方想动态的给封装好的组件的props自定义属性传值时，就可以对props的值使用属性绑定指令(v-bind)
+
+```vue
+// Left.vue组件
+<template>
+  <div class="left">
+      <p>这是Left组件</p>
+      <hr>
+      // 这里首先Count被注册为全局组件了
+      // 然后使用属性绑定指定，动态的进行props属性绑定，提高了组件的复用性
+      <Count :title="info.title" :author="'post by' + info.author"></Count>
+  </div>
+</template>
+<script>
+export default {
+    data(){
+        return: {
+            info: {
+                "title": "vue的用法",
+                "author": "sam"
+            }
+        }
+    }
+}
+</script>
+```
+
+![image-20230529223231193](vue笔记/image-20230529223231193.png)
+
+![image-20230529223253244](vue笔记/image-20230529223253244.png)
+
+##### 2.3.3 props的大小写命名 
+
+> 组件中如果使用"camelCase（驼峰命名法）"声明了props属性的名称，则有两种方式可以绑定属性的值
+
+```javascript
+// 子组件
+<template>
+  <p>发布时间：{{ pubTime }}</p>
+</template>
+
+<script>
+   export default {
+      name: "Count",
+      props: ['pubTime']
+    }
+</script>
+```
+
+```javascript
+<template>
+    <!- - 方式1：使用"驼峰命名"的形式为组件绑定属性的值>
+    <my-post pubTime=""1999"></my-post>
+
+    <!- - 方式2: 使用"短横线分隔命名"的形式为组件绑定属性的值>
+    <my-post pub-time=""1999"></my-post>
+</template>
+```
+
+#### 2.4 组件props验证
+
+##### 2.4.1 对象类型的props节点
+
+> 在2.3小节的`组件props属性`中，我们在子组件中的props属性使用的是列表形式，无法对props属性进行数据类型的校验
+>
+> vue组件除了使用列表形式的props属性，还可以使用对象类型的props属性节点，来对每个props属性的数据类型进行校验
+
+```javascript
+<script>
+export default {
+  name: "Count",
+  // props: ['title', 'author']
+  // 通过对象类型的props节点，指定每个props属性的数据类型
+  props: {
+    title: String,
+    state: Boolean
+  }
+}
+</script>
+```
+
+![image-20230529230244948](vue笔记/image-20230529230244948.png)
+
+> 如果传递给子组件的props属性的数据类型和子组件中定义的props属性的数据类型不一致，就会在浏览器的console调试面板中有提示告警信息
+>
+> 可以看到提示了`Invalid prop`，无效的prop，表示期望是`Boolean`，但实际得到了`String`
+
+![image-20230529230411326](vue笔记/image-20230529230411326.png)
 
 
 
-#### 4.6 组件的生命周期
+##### 2.4.2 基础类型的检查
 
-### 5、vue路由
+> 可以直接为组件的prop属性置顶基础的校验类型，从而防止组件的使用者为其绑定一个错误的数据
+
+```javascript
+// 下面是比较常见的基础数据类型，前5中使用比较多
+<script>
+export default {
+  // 基础数据类型
+  props: {
+    title1: String, // 字符串类型
+    title2: Number, // 数字类型
+    title3: Boolean, // 布尔值类型
+    title4: Array, // 数组类型
+    title5: Object, // 对象类型
+    title6: Date, // 日期类型
+    title7: Function, // 函数类型
+    title8: Symbol, // 符号类型
+  }
+}
+</script>
+```
+
+##### 2.4.3 多个可能的类型
+
+> 可以对某一个prop属性指定多个数据类型
+
+```javascript
+<script>
+export default {
+  // 基础数据类型
+  props: {
+    title1: [String,Boolean,Number]
+  }
+}
+</script>
+```
+
+##### 2.4.4 必填项校验
+
+> 如果组件的某个prop属性是必填项，必须要让组件调用者为其传递属性的值，需要通过配置对象的形式，为prop属性定义验证规则
+>
+> 注意：
+>
+> - 当prop属性的required为true时，表示当前属性的值时必填项，如果调用者没有指定该属性的值，就会在console中报错
+
+```javascript
+<script>
+export default {
+  props: {
+    // 使用"配置对象"的形式，来为title定义"验证规则"
+    title: {
+      type: String, // 当前属性的值必须是字符串类型
+      required: true // 当前属性的值必须是必填项
+    },
+    state: Boolean
+  }
+}
+</script>
+```
+
+![image-20230529231643567](vue笔记/image-20230529231643567.png)
+
+
+
+##### 2.4.5 属性默认值
+
+> 封装组件时，可以为某个prop属性指定默认值
+
+```javascript
+<script>
+export default {
+  props: {
+    // 使用"配置对象"的形式，来为title定义"验证规则"
+    title: {
+      type: String, // 当前属性的值必须是字符串类型
+      default: "vue是最棒的！" // 当前属性的默认值
+    },
+    state: Boolean
+  }
+}
+</script>
+```
+
+![image-20230529231940456](vue笔记/image-20230529231940456.png)
+
+![image-20230529231832938](vue笔记/image-20230529231832938.png)
+
+##### 2.4.6 自定义验证函数
+
+> 在封装组件时，可以为prop属性定义自定义的验证函数，从而对prop属性进行精准控制
+
+```javascript
+<script>
+export default {
+  props: {
+    // 使用"配置对象"的形式，来为title定义"验证规则"
+    title: {
+      type: String, // 当前属性的值必须是字符串类型
+      default: "vue是最棒的！",
+      validator(value) {
+        // title属性的值，必须匹配下面的列表中的任意一个
+        // 如果没有匹配的，则函数返回值为false，表示验证失败，反之为true表示验证通过
+        return ["vue1", "vue2"].indexOf(value) !== -1
+      }
+    }
+  }
+}
+</script>
+```
+
+> 如果组件调用方出传的prop的属性值不是validator函数中return列表的任意一个，则报错
+
+![image-20230529234402504](vue笔记/image-20230529234402504.png)
+
+#### 2.5 组件的计算属性
+
+
+
+
+
+## 六、vue路由
 
 > 前端路由指的就是Hash地址与组件之间的对应关系
 >
 > 不同组件之间的切换需要通过前端路由来实现
 
-#### 5.1 路由工作方式
+### 1、路由工作方式
 
 > 路由变化过程：
 >
@@ -2421,10 +2648,10 @@ export default {
 
 ![image-20230127215524192](vue笔记/image-20230127215524192.png)
 
-#### 5.2 路由原理
+#### 1.2 路由原理
 
-##### 5.2.1 锚链接模拟路由
-
+> 使用锚链接模拟路由
+>
 > 使用锚点每次点击的时候，都会将a链接中的href中的路由拼接到浏览器地址栏的后面
 
 ```html
@@ -2474,9 +2701,9 @@ export default {
 
 ![image-20230127224058733](vue笔记/image-20230127224058733.png)
 
-#### 5.3 vue-router的使用
+### 2、vue-router
 
-##### 5.3.1 vue-router介绍
+#### 2.1 vue-router介绍
 
 > vue-router是vue给出的路由解决方案，只能在vue项目中使用
 
@@ -2485,7 +2712,7 @@ export default {
 > - vue-router3.x只能结合vue2使用，地址：https://router.vuejs.org/zh/
 > - vue-router4.x只能结合vue3使用，地址：https://next.router.vuejs.org/
 
-##### 5.3.2 vue-router4.x基本使用步骤
+#### 2.2 vue-router4.x使用步骤
 
 > 1、在项目中安装vue-router
 
@@ -2589,7 +2816,7 @@ app.use(Router)
 app.mount('#app')
 ```
 
-#### 5.4 路由重定向
+#### 2.3 路由重定向
 
 > 重定向是指在访问地址A时，强制跳转至地址B，从而展示地址B组件的内容页面
 >
@@ -2627,7 +2854,7 @@ const router = createRouter({
 export default router
 ```
 
-#### 5.5 路由高亮
+#### 2.4 路由高亮
 
 > 被激活的路由链接高亮有两种方式
 >
@@ -2661,9 +2888,9 @@ const router = createRouter({
 });
 ```
 
-#### 5.6 嵌套路由
+#### 2.5 嵌套路由
 
-##### 5.6.1 子路由声明
+##### 2.5.1 子路由声明
 
 > 嵌套路由就是组件中嵌套组件再嵌套组件，那么最里面的组件的路由就是嵌套路由
 
@@ -2712,7 +2939,7 @@ const router = createRouter({
 </template>
 ```
 
-##### 5.6.2 默认子路由
+##### 2.5.2 默认子路由
 
 > 添加默认子路由有两种那个方式
 >
@@ -2742,7 +2969,7 @@ const router = createRouter({
 
 > 当进入/home路由时，默认进入/home/list1路由
 
-#### 5.7 动态路由
+#### 2.6 动态路由
 
 > 动态路由是指把Hash地址中可变部分定义为参数项，提高路由重复性使用
 >
@@ -2753,7 +2980,7 @@ const router = createRouter({
 > - 就是在跳转链接时，链接上有些参数可以动态拼接，比如：id
 > - 动态路由可以理解为后端路由上查询不同id时拼接的路由，只不过现在变为了前端也支持动态路由
 
-##### 5.7.1 动态路由配置
+##### 2.6.1 动态路由配置
 
 ```javascript
 // 在router.js中声明路由的动态参数
@@ -2773,7 +3000,7 @@ const router = createRouter({
 
 ```
 
-##### 5.7.2 路径上的查询参数
+##### 2.6.2 路径上的查询参数
 
 
 
