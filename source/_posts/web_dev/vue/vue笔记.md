@@ -216,7 +216,7 @@ categories: VUE笔记
 
 ![image-20220712005504173](vue%E7%AC%94%E8%AE%B0/image-20220712005504173.png)
 
-#### 3.2 {%raw%}{{}}{%endraw%}
+#### 3.2 插值表达式
 
 > `{%raw%}{{}}{%endraw%}`语法主要用来解决`v-text`引发的覆盖默认文本内容的问题
 >
@@ -327,6 +327,7 @@ categories: VUE笔记
 > 什么时候使用使用属性绑定指令？
 >
 > - 为元素的属性动态添加值时，就要考虑使用属性绑定指令了
+> - 任何元素需要使用动态值时，就可以使用属性绑定指令
 >
 > 这个指令用的非常多
 
@@ -373,7 +374,7 @@ categories: VUE笔记
 
 ![image-20220712111704521](vue%E7%AC%94%E8%AE%B0/image-20220712111704521.png)
 
-### 5、插值和属性绑定写JS语句
+### 5、JS语法在指令中的使用
 
 > 在插值表达式和属性绑定指令中都可以添加js语句
 
@@ -475,7 +476,7 @@ categories: VUE笔记
 >
 > - methods里定义处理函数，推荐使用简写写法，就是`函数名 小括号 花括号`
 
-#### 6.3 this访问数据源的数据
+#### 6.3 this访问数据源数据
 
 > 在vue的methods中定义了处理函数，如何来访问修改vue实例对象中的数据源的数据呢？
 >
@@ -1229,7 +1230,7 @@ categories: VUE笔记
 > - `items`是待循环的数组
 > - `item`是被循环的每一项
 >
-> 需要循环哪个DOM结构，就给那个页面结构加v-for
+> 需要循环哪个DOM结构，就给那个页面结构加v-for，所以v-for在标签元素的后面紧跟，就代表需要循环标签元素，所以一定注意需要跟在`<标签元素`的后面
 
 ```html
 # 举例
@@ -1390,7 +1391,40 @@ categories: VUE笔记
     </div>
 ```
 
-## 三、vue常用语法
+## 三、npm使用
+
+### 1、npm虚拟环境
+
+> npm可以像python一样，使用虚拟环境来管理多个版本的node，可以在电脑中安装多个版本的node以及npm，方便我们使用
+>
+> nvm就是一款可以支持多个版本node和npm的工具，官网:https://github.com/nvm-sh/nvm
+
+> 下图是nvm安装的情况，可以看到有个"- >"表示当前使用的npm版本，当然nvm可以使用其他版本，具体使用查看nvm的官方地址即可
+
+![image-20230529212053843](vue笔记/image-20230529212053843.png)
+
+### 2、nrm管理镜像仓库
+
+> nrm是用来对npm的镜像仓库进行管理的工具，官网：https://github.com/Pana/nrm
+
+> 对于nrm查看镜像列表没有显示星号的解决办法
+
+```javascript
+# 打开安装nrm目录下找到cli.js，一般是在虚拟环境的目录：~/.nvm/versions/node/v16.20.0/lib/node_module/nrm
+# 找到如下代码，将&&换成||，然后保存退出
+ if (hasOwnProperty(customRegistries, name) && (name in registries || customRegistries[name].registry === registry.registry)) {
+                    registry[FIELD_IS_CURRENT] = true;
+                    customRegistries[name] = registry;
+                }
+```
+
+> 星号表示当前的npm镜像仓库是什么，我们可以对其进行增加，后续切换镜像仓库会非常方便
+
+![image-20230529212549870](vue笔记/image-20230529212549870.png)
+
+
+
+## 四、vue常用语法
 
 ### 1、vue-cli介绍
 
@@ -1460,8 +1494,6 @@ npm install -g @vue/cli
 vue
 ```
 
-![image-20220727131300873](vue%E7%AC%94%E8%AE%B0/image-20220727131300873.png)
-
 ![image-20220727132629020](vue%E7%AC%94%E8%AE%B0/image-20220727132629020.png)
 
 > 还可以用这个命令来检查其版本是否正确
@@ -1486,7 +1518,7 @@ npm uninstall @vue/cli -g
 
 #### 3.1 创建第一个vue项目
 
-> 使用vue-cli创建工程化的vue项目
+> 使用vue-cli创建工程化的vue项目，vue2项目和vue3项目创建的步骤一模一样，就是vue版本选择时不同，所以下面的步骤是以vue2为例子来创建vue项目，vue3也同样适用
 >
 
 ```bash
@@ -1526,13 +1558,14 @@ vue create tester-tools
 
 > 选择好以后，按`回车`进行下一步，会提示选择vue的版本
 >
-> - 目前学习是用的vue2，那么就选择`2.x`
 
 ![image-20220727134950708](vue%E7%AC%94%E8%AE%B0/image-20220727134950708.png)
 
-> 接下来选择CSS预处理，这里选择`less`后回车
+> 选择CSS预处理，这里选择`less`后回车
 
 ![image-20220727135106581](vue%E7%AC%94%E8%AE%B0/image-20220727135106581.png)
+
+![image-20230529211111443](vue笔记/image-20230529211111443.png)
 
 > 接下来继续提示下面的插件的配置文件想放到package.json，还是放到插件的独立的配置文件
 >
