@@ -82,7 +82,7 @@ categories: VUE笔记
 
 ## 二、vue基础语法
 
-### 1、第一个vue代码
+### 1、第一行vue代码
 
 > 需要三个步骤：
 >
@@ -2512,7 +2512,7 @@ export default {
 
 ##### 2.4.2 基础类型的检查
 
-> 可以直接为组件的prop属性置顶基础的校验类型，从而防止组件的使用者为其绑定一个错误的数据
+> 可以为组件的prop属性指定基础的校验类型，从而防止组件的使用者为其绑定一个错误的数据
 
 ```javascript
 // 下面是比较常见的基础数据类型，前5中使用比较多
@@ -2626,6 +2626,424 @@ export default {
 ![image-20230529234402504](vue笔记/image-20230529234402504.png)
 
 #### 2.5 组件的计算属性
+
+> 计算属性本质上是一个函数，可以实时监听data中数据的变化，并return一个计算后的新值，提供给组件渲染
+>
+> 计算属性需要以`函数`的形式声明到组件的`computed`选项中
+
+```javascript
+<template>
+  <p> {{ count }} + 2 = {{ add }} </p>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      count: 1
+    }
+  },
+  computed: {
+    // 计算属性：监听 data函数中的count值的变化，自动计算出 count + 2 的新值
+    add() {
+      return this.count + 2
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>
+```
+
+![image-20230530230903502](vue笔记/image-20230530230903502.png)
+
+> 注意：
+>
+> - 计算属性侧重于得到一个计算的结果，所以计算属性中必须使用`return`返回计算的新值
+> - 计算属性必须定义在computed节点中
+> - 计算属性必须是一个function函数
+> - 计算属性必须有返回值
+> - 计算属性必须当做普通属性返回
+
+#### 2.6 组件的watch侦听器
+
+> watch侦听器是允许开发者监视数据的变化，从而对数据的变化做特定的操作，比如监听用户名的变化而发起请求，判断用户名是否可用
+
+##### 2.6.1 watch侦听器的基本用法
+
+> 需要在watch节点下，定义自己的侦听器，也就是声明属于自己的侦听函数方法
+>
+> 我们需要监听哪个值的变化，那就把需要监听的值的名字拿过来当成函数名，写在watch节点下，然后watch侦听器的侦听函数的形参列表，第一个值是"变化后的新值"，第二值是"变化之前的旧值"
+
+```javascript
+<template>
+  <p> {{ count }} + 2 = {{ add }} </p>
+
+  <p>您输入了：{{ msg }}</p>
+  姓名：<input type="text" v-model.trim="msg">
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      count: 1,
+      msg: ""
+    }
+  },
+  computed: {
+    add() {
+      return this.count + 2
+    }
+  },
+  watch: {
+    // 监听 data函数 中 msg值的变化
+    // msg函数的形参列表，第一个值是"变化后的新值"，第二值是"变化之前的旧值"
+    msg(newVal, oldVal){
+      console.log("newVal:" + newVal);
+      console.log("oldVal:" + oldVal);
+    },
+  },
+}
+</script>
+
+<style scoped>
+
+</style>
+```
+
+![image-20230530233715930](vue笔记/image-20230530233715930.png)
+
+> 每次input框输入完成以后，就会打印出新值和旧值，特别适合用来做用户名、商品名等唯一性的校验，比如给用户名、商品名进行侦听，每次变化时就发起ajax请求，由接口返回用户名、商品名是否可用
+
+##### 2.6.2 immediate选项
+
+> 默认情况下，组件在初次加载完成后不会调用watch侦听器，如果想让watch侦听器在组件初始化时就被立即调用，那么可以使用`immediate`选项
+>
+> - 比如组件的data中某个变量被watch侦听了，并且这个变量有初始值，如果组件首次加载，但是侦听器中的侦听函数是不会被调用的，所以就需要`immediate`选项来让组件侦听器在组件初始化时就可以使用
+
+> 注意：
+>
+> - 需要被监听的值不是函数了，而是一个对象，并且对象中有一个固定的`handler`函数，表示来接受值的前后变化
+> - 在被监听值的对象中定义`immediate: true`，表示组件加载完成后立即调用一次当前msg的watch侦听器
+
+```javascript
+<template>
+  <p>您输入了：{{ msg }}</p>
+  姓名：<input type="text" v-model.trim="msg">
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      msg: "admin"
+    }
+  },
+  watch: {
+    // 监听 data函数 中 msg值的变化
+    // msg就变成了一个对象，而不是函数了
+    msg: {
+      // 在msg对象中有一个固定的写法handler，当 msg变化时，就自动调用handler函数
+      handler(newVal, oldVal){
+        console.log("newVal:" + newVal);
+        console.log("oldVal:" + oldVal);
+      },
+      // 表示组件加载完成后立即调用一次当前msg的watch侦听器
+      immediate: true
+    },
+  },
+}
+</script>
+
+<style scoped>
+
+</style>
+```
+
+![image-20230530235311494](vue笔记/image-20230530235311494.png)
+
+> 从上面代码可以看出：
+>
+> - data的msg初始值是admin，并且对msg值设置了侦听器以及`immediate`为true
+> - 那么刷新页面后，组件加载完毕，会自动调用一次msg值的侦听器，我们在console中就看到`newVal:admin`和"oldVal:undefined"
+>   - 为什么"oldVal"的值是undefined?
+>     - 因为是组件加载完毕后就调用msg的侦听器函数，那么msg的初始值admin就是组件获取到的最新值，那么msg的旧值没有自定义，所以就是undefined
+
+##### 2.6.3 deep选项
+
+> 当watch侦听的是一个对象时，如果对象中的某些值发生了变化，则无法被侦听到，此时需要使用deep属性
+>
+> 注意：
+>
+> - 当侦听器的hanler函数的旧值用不到，就可以在handler函数中不传第二个oldVal
+
+```javascript
+<template>
+  <p>姓名：{{ user.name }}</p>
+  姓名：<input type="text" v-model.trim="user.name">
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      user: {
+        name: "sam"
+      }
+    }
+  },
+  watch: {
+    // 监听 data函数 中 user对象值的变化
+    user: {
+      // 在user对象中有一个固定的写法handler，当 user中的值变化时，就自动调用handler函数
+      handler(newVal){
+        console.log("newVal:" + JSON.stringify(newVal));
+        if (newVal.name === "vue3") {
+          console.log("用户名可用:" + JSON.stringify(newVal));
+        }
+      },
+      // 表示组件加载完成后立即调用一次当前msg的watch侦听器
+      immediate: true,
+      deep: true
+    },
+  },
+
+}
+</script>
+
+<style scoped>
+
+</style>
+```
+
+![image-20230531102811860](vue笔记/image-20230531102811860.png)
+
+> 从上面代码看出：
+>
+> - 当对user对象的侦听器设置了deep为true以后，当user对象的name发生了变化时，那就会自动调用handler函数，并且当name等于"vue3"时，还执行了user侦听器函数中if语句的console函数
+
+##### 2.6.4 监听对象单个属性的变化
+
+> 监听对象时，如果我们设置了true，那么任何对象的任意一个值发生了变化，那么都会调用一次侦听器，我们只想让单个属性发生变化才进行侦听，就需要对单个属性设置侦听器了
+
+```javascript
+<script>
+export default {
+  data() {
+    return {
+      user: {
+        name: "sam",
+        age: 0
+      }
+    }
+  },
+  methods: {
+    addAge(){
+      console.log("年龄+1")
+      this.user.age += 1
+    }
+  },
+  watch: {
+    // 仅仅监听 data函数 中 user对象的name值的变化
+    "user.name": {
+      // 在user对象中有一个固定的写法handler，当 user中的name值变化时，就自动调用handler函数
+      // name的值就是newVal
+      handler(newVal){
+        console.log("newVal:" + newVal);
+        if (newVal === "vue3") {
+          console.log("用户名可用:" + newVal);
+        }
+      },
+      // 表示组件加载完成后立即调用一次当前的watch侦听器
+      immediate: true,
+    },
+  },
+
+}
+</script>
+```
+
+##### 2.6.5 计算属性和侦听器的区别
+
+> 计算属性和侦听器侧重的应用场景不同
+>
+> - 计算属性侧重于监听多个值的变化，得到return一个新值
+> - 侦听器侧重于监听单个数据的变化，最终执行我们设置的逻辑，并且不需要任何返回值
+
+#### 2.7 组件的生命周期
+
+> 组件的运行过程如下图所示，其中组件运行最关键的就是"以标签形式使用组件"
+>
+> 组件的生命周期是指：组件从【创建】-【运行(渲染)】-【销毁】的整个过程，主要是组件的运行时间段
+
+![image-20230531230609579](vue笔记/image-20230531230609579.png)
+
+##### 2.7.1 生命周期函数
+
+> vue为组件内置了不同时刻的生命周期函数，生命周期函数会随着组件的运行而自动调用
+>
+> - 当组件在内存中被创建以后，会自动调用`created`函数
+> - 当组件被成功渲染到页面上以后，会自动调用`mounted`函数
+> - 当组件被销毁完成以后，会自动调用`unmounted`函数
+
+```javascript
+// 显示生命周期的组件
+<template>
+  <LifeCycle v-if="flag"></LifeCycle>
+  <button @click="hiddenLifeCycle">点我隐藏LifeCycle组件</button>
+  <button @click="showLifeCycle">点我显示LifeCycle组件</button>
+</template>
+
+<script>
+import LifeCycle from "@/components/LifeCycle";
+
+export default {
+  name: "Left",
+  components: {
+    LifeCycle
+  },
+  data() {
+    return {
+      flag: true,
+    }
+  },
+  methods: {
+    hiddenLifeCycle(){ this.flag = false },
+    showLifeCycle(){ this.flag = true },
+  }
+
+}
+</script>
+
+<style scoped>
+  button{
+    margin-right: 15px;
+  }
+</style>
+```
+
+```javascript
+// 生命周期函数组件
+<template>
+    <p>这是LifeCycle组件</p>
+</template>
+
+<script>
+export default {
+  name: "LifeCycle",
+  created() {
+    console.log("created: LifeCycle组件在内存中创建成功了")
+  },
+  mounted() {
+    console.log("mounted: LifeCycle组件第一次被渲染成功了")
+  },
+  unmounted() {
+    console.log("unmounted: LifeCycle组件被销毁了")
+  },
+}
+</script>
+
+<style scoped>
+
+</style>
+```
+
+![image-20230531232414015](vue笔记/image-20230531232414015.png)
+
+> 上面的代码很好理解，在Left组件中对于LifeCycle组件是否展示设置了一个flag标志位来控制，如果不显示，设置为false，显示设置为true
+
+> - 当首次进入页面时，会看到console控制台输出了"created: LifeCycle组件在内存中创建成功了"和"mounted: LifeCycle组件第一次被渲染成功了"，表示组件创建以及渲染成功
+>
+> - 当点击隐藏LifeCycle组件时，console出现了"unmounted: LifeCycle组件被销毁了"，表示切换了LifeCycle组件，那么就触发了组件的销毁函数
+
+![image-20230531232551225](vue笔记/image-20230531232551225.png)
+
+
+
+
+
+
+
+> 当点击"显示LifeCycle组件"时，又会看到console控制台输出了"created: LifeCycle组件在内存中创建成功了"和"mounted: LifeCycle组件第一次被渲染成功了"，表示组件创建以及渲染成功，表示组件又再次被创建了以及渲染成功了，因为看到了LifeCycle组件的p标签的文字
+
+![image-20230531232909198](vue笔记/image-20230531232909198.png)
+
+##### 2.7.2 监听组件的data数据更新
+
+> 当组件的`data`数据更新以后，vue会自动重新渲染组件的DOM结构，从而保证view视图展示的数据和Model数据源一致，当组件重新被渲染完成后，会自动调用update函数
+
+```javascript
+// Left组件
+<template>
+  <LifeCycle v-if="flag"></LifeCycle>
+  <button @click="hiddenLifeCycle">点我隐藏LifeCycle组件</button>
+  <button @click="showLifeCycle">点我显示LifeCycle组件</button>
+</template>
+
+<script>
+import LifeCycle from "@/components/LifeCycle";
+
+export default {
+  name: "Left",
+  components: {
+    LifeCycle
+  },
+  data() {
+    return {
+      flag: true,
+    }
+  },
+  methods: {
+    hiddenLifeCycle(){ this.flag = false },
+    showLifeCycle(){ this.flag = true },
+  },
+    
+  // 组件重新被渲染以后，会自动调用update函数
+  updated() {
+    console.log("Left组件的data发生了变化，自动调用了update函数")
+  }
+
+}
+</script>
+
+<style scoped>
+  button{
+    margin-right: 15px;
+  }
+</style>
+```
+
+
+
+![image-20230531233432521](vue笔记/image-20230531233432521.png)
+
+> 还是以`2.7.1`小节的Left和LifeCycle组件代码为例，仅在Left组件新增了update函数，因为我们在Left组件中定义了两个方法：hiddenLifeCycle和showLifeCycle，并且这两个方法对data数据源中的flag进行了修改，那么在页面上操作时，因为对data数据源进行了修改，那么Left组件就会自动调用update函数，就是我们在console控制台看到的内容
+
+##### 2.7.3 生命周期主要函数
+
+| 生命周期函数 |           执行时机           | 所属阶段 | 执行次数 |              场景              |
+| :----------: | :--------------------------: | :------: | :------: | :----------------------------: |
+|   created    |    组件在内容中创建完毕后    | 创建阶段 | 唯一1次  | 适合组件刚被创建就获取初始数据 |
+|   mounted    |  组件初次在页面中渲染完毕后  | 创建阶段 | 唯一1次  |          操作DOM结构           |
+|   updated    | 组件在页面中重新被渲染完毕后 | 运行阶段 | 0或多次  |               -                |
+|  unmounted   |   组件在页面或内容中销毁后   | 销毁阶段 | 唯一1次  |               -                |
+
+> 下图是vue官网的组件生命周期示意图：[https://cn.vuejs.org/guide/essentials/lifecycle.html#lifecycle-diagram](https://cn.vuejs.org/guide/essentials/lifecycle.html#lifecycle-diagram)
+
+![img](vue笔记/lifecycle.16e4c08e.png)
+
+#### 2.8 组件关系
+
+##### 2.8.1 父向子传值
+
+##### 2.8.2 子向父传值
+
+
+
+#### 2.9 插槽
 
 
 
@@ -2982,6 +3400,8 @@ const router = createRouter({
 
 ##### 2.6.1 动态路由配置
 
+> 下面是在router中这是动态路由参数
+
 ```javascript
 // 在router.js中声明路由的动态参数
 const router = createRouter({
@@ -2995,24 +3415,335 @@ const router = createRouter({
 });
 ```
 
+##### 2.6.2 动态路由的参数获取
+
+> 下面在组件中获取动态路由传递过来的参数和值
+>
+> 在通过动态路由匹配的方式渲染出来的组件中，可以使用`$route.params`对象访问到动态匹配的参数值
+
 ```javascript
 // 在组件中获取传递过来的动态参数
-
+<template>
+  <p>动态参数id：{{ $route.params }} </p>
+</template>
 ```
 
-##### 2.6.2 路径上的查询参数
+> 下面是获取到的数据示例
+
+![image-20230601152042740](vue笔记/image-20230601152042740.png)
+
+##### 2.6.3 使用props接收动态路由参数
+
+> 为了便于获取路由参数，vue-router允许在路由规则中开启props传参
+
+```javascript
+import { createRouter, createWebHashHistory } from "vue-router"
+import Left from "@/components/Left";
+
+// 在项目的router.js中
+const router = createRouter({
+    // 通过history指定路由工作模式
+    history: createWebHashHistory(),
+
+    // 通过router数组指定路由规则
+    routes: [
+        {
+            path: "/left/:id",
+            component: Left,
+            // 在路由中开启props传参
+            props: true
+        }
+    ],
+});
+
+export default router
+```
+
+> 在路由指向的组件中使用props获取动态路由参数
+
+```javascript
+export default {
+  name: "Left",
+  components: {
+    LifeCycle
+  },
+  props: ['id'],
+  data() {}
+}
+```
+
+> 使用props接收动态路由参数的好处
+>
+> - 可以在路由指向的组件中使用`this.`的方式获取到动态路由参数，那么就可以将动态路由参数的值传给methos节点的函数里、生命周期函数里，这样通用性更强，
+
+##### 2.6.4 路径参数和查询参数获取
+
+> 在vue组件中，在`script`节点下，可以使用`this.$route`获取到路径参数和查询参数，都是对象类型
+
+```javascript
+<script>
+  created(){
+    console.log(this.$route);
+  },    
+</script>
+```
+
+![image-20230602131422364](vue笔记/image-20230602131422364.png)
+
+> 从上图可以看出，打印`this.$route`，可以看到
+>
+> - 路径参数是在`params`这个对象中
+> - 查询参数是在`query`这个对象中
+>
+> 所以获取动态路由的参数时，按需获取就可以了
+
+#### 2.7 路由导航
+
+##### 2.7.1 声明式导航
+
+> 通过点击链接跳转导航的方式，叫做声明式导航，比如：
+>
+> - 普通网页中点击<a>链接、vue项目中点击<router-link>都属于声明式导航
+
+##### 2.7.2 编程式导航
+
+> 通过调用API实现导航的方式，叫做编程式导航，比如：
+>
+> - 普通网页调用location.href跳转到新页面的方式，叫做编程式导航
+
+> 在vue-router提供了编程式导航的API
+>
+> - this.$router.push('hash地址')：跳转到指定Hash地址，从而展示对应的组件页面
+> - this.$router.go(数值n)：实现导航历史的前进、后退
+
+##### 2.7.3 $router.push
+
+> 在组件中跳转另一个组件，使用编程式导航
+
+```javascript
+// Left组件
+<template>
+  <p>这是Left组件</p>
+  <button @click="jumpCycle">跳转至LifeCycle组件</button>
+</template>
+
+<script>
 
 
+export default {
+  name: "Left",
+  components: {},
+  data() {
+    return {
+      flag: true,
+    }
+  },
+  methods: {
+    // 使用push跳转至指定的组件
+    jumpCycle(){ 
+        console.log("触发了：this.$router.push('/life-cycle') ")
+        this.$router.push('/life-cycle') 
+    },
+  },
 
 
+}
+</script>
 
+<style scoped>
+  button{
+    margin-right: 15px;
+  }
+</style>
+```
 
+```javascript
+// LifeCycle组件
+<template>
+    <p>这是LifeCycle组件</p>
+</template>
 
+<script>
+export default {
+  name: "LifeCycle",
+  created() {
+    console.log("created: LifeCycle组件在内存中创建成功了")
+  },
+  mounted() {
+    console.log("mounted: LifeCycle组件第一次被渲染成功了")
+  },
+  unmounted() {
+    console.log("unmounted: LifeCycle组件被销毁了")
+  },
+}
+</script>
 
+<style scoped>
 
+</style>
+```
 
+> 从下图看出，在Left组件的页面点击button跳转了到LifeCycle组件页面
 
+![image-20230602133239630](vue笔记/image-20230602133239630.png)
 
+##### 2.7.4 $router.go
 
+> 可以回退或者前进页面
 
+```javascript
+// LifeCycle组件
+<template>
+    <p>这是LifeCycle组件</p>
+  <button @click="goBack">回到Left组件</button>
+</template>
+
+<script>
+export default {
+  name: "LifeCycle",
+  methods: {
+    // 增加回退页面，回到上一页
+    goBack(){
+      console.log("触发了：this.$router.go(-1)")
+      this.$router.go(-1)
+    }
+  },
+  created() {
+    console.log("created: LifeCycle组件在内存中创建成功了")
+  },
+  mounted() {
+    console.log("mounted: LifeCycle组件第一次被渲染成功了")
+  },
+  unmounted() {
+    console.log("unmounted: LifeCycle组件被销毁了")
+  },
+}
+</script>
+```
+
+![image-20230602133731588](vue笔记/image-20230602133731588.png)
+
+> 可以看出跳转到LifeCycle组件以后，点击"回到Left组件"按钮，又跳转回到了Left组件
+>
+
+#### 2.8 导航守卫
+
+> 导航守卫可以控制路由的访问权限，即对需要登录的路由访问时，需要先登录，登陆成功以后再去访问
+
+##### 2.8.1 声明全局导航守卫
+
+> 全局导航守卫回拦截每个路由规则，并对每个路由进行访问权限的控制
+
+```javascript
+// 在项目的router.js中
+const router = createRouter({...});
+
+// 调用路由实例对象的 beforeEach 函数，声明"全局前置守卫"
+// fn 必须是一个函数，每次拦截到路由的请求，都会调用 fn 进行处理，fn也叫"守卫方法"，一般使用箭头函数来代替fn函数
+router.beforeEach(() => {
+    console.log("导航守卫函数...")
+})
+```
+
+![image-20230604175900961](vue笔记/image-20230604175900961.png)
+
+##### 2.8.2 全局守卫的3个形参
+
+> 全局导航守卫可以接收3个形参，分别为to、from、next
+>
+> - to：表示目标路由对象，也就是页面当前访问的路由
+> - form：当前导航正要离开的路由对象，也就是当前访问的路由的上一级路由是从什么
+> - next：放行函数
+>   - 如果在beforeEach的守卫访问方法中不声明next参数，那么beforeEach中不需要调用next方法，所有路由都可以放行
+>   - 如果在beforeEach的守卫访问方法中声明了next参数，那么beforeEach就需要调用next方法对路由进行放行，否则不允许访问任何一个路由
+
+```javascript
+// 调用路由实例对象的 beforeEach 函数，声明"全局前置守卫"
+// fn 必须是一个函数，每次拦截到路由的请求，都会调用 fn 进行处理，fn也叫"守卫方法"
+router.beforeEach((to, from, next) => {
+    console.log("导航守卫函数...")
+    console.log('to:', to)
+    console.log('from:', from)
+    next()
+})
+```
+
+![image-20230604181313336](vue笔记/image-20230604181313336.png)
+
+##### 2.8.3 next函数的调用方式
+
+> 直接全部放行：next()
+>
+> 强制让路由停留在当前页面：next(false)
+>
+> 强制让路由跳转到登录页面：next('/login')
+
+> 下面是示例，结合token展示最简单的路由守卫
+
+```javascript
+// 路由处理
+// 调用路由实例对象的 beforeEach 函数，声明"全局前置守卫"
+// fn 必须是一个函数，每次拦截到路由的请求，都会调用 fn 进行处理，fn也叫"守卫方法"
+router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem('token')
+    if (to.path === "/left" && !token) {
+        // 需要访问登录页面
+        console.log("未登录，跳转登录中...")
+        next('/login')
+    } else {
+        // 直接放行
+        next()
+    }
+})
+```
+
+```javascript
+// Login组件
+<template>
+  <p>登录页面</p>
+  用户名：<input type="text" v-model="username">
+  <button @click="LoginFunc">登录</button>
+</template>
+
+<script>
+export default {
+  name: "Login",
+  data(){
+    return {
+      username: ""
+    }
+  },
+  methods: {
+    LoginFunc() {
+      localStorage.setItem("token", this.username);
+    }
+  }
+
+}
+</script>
+
+<style scoped>
+
+</style>
+```
+
+> 下面是另外一个全局导航守卫的写法
+
+```javascript
+router.beforeEach((to, from, next) => {
+    // 如果访问登录页面，放行
+    if ( to.path === '/login') return next()
+
+    // 获取token值
+    const token = localStorage.getItem('token')
+    // token失效的话，跳转登录页面
+    if (!token) {
+        // 需要访问登录页面
+        console.log("未登录，跳转登录中...")
+        return next('/login')
+    }
+    // token有效则直接放行
+    next()
+})
+```
 
