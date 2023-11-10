@@ -645,7 +645,7 @@ func main() {
 > - 例如，如果某个使用一个文件名的调用（如Open、Stat）失败了，打印错误时会包含该文件名，错误类型将为*PathError，其内部可以解包获得更多信息。
 > - os包的接口规定为在所有操作系统中都是一致的。非公用的属性可以从操作系统特定的[syscall](http://godoc.org/syscall)包获取。
 
-## 六、类型转换常用方法与包
+## 六、类型转换包
 
 > Go语言中可以对基础数据类型与字符串之间进行相互转换
 
@@ -926,7 +926,17 @@ func main() {
 
 ![image-20220331215554288](go_常用包/image-20220331215554288.png)
 
-## 七、rand包
+## 七、errors包
+
+## 八、log包
+
+## 九、io包
+
+## 十、encoding包
+
+
+
+## X、rand包
 
 > rand模块可以用来生成随机数，是`math`包里的`rand`方法
 >
@@ -1038,7 +1048,7 @@ func main() {
 }
 ```
 
-## 八、go doc
+## x、go doc
 
 > https://www.kancloud.cn/cattong/go_command_tutorial/261351
 >

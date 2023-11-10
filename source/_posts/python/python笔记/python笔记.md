@@ -2429,6 +2429,22 @@ def datetime_switch_to_stamp():
 > 
 >
 
+### x、正则小例子
+
+#### x.1 切割cookies为字典
+
+```python
+def convert_cookie():
+    cookie_list1 = cookie_str.split(";")
+    ret = {}
+    for i in cookie_list1:
+        d = re.split(r"=", i.strip(), maxsplit=1)
+        ret[d[0]] = d[1]
+    return ret
+```
+
+
+
 ## 七、进程和线程
 
 ### 1、进程

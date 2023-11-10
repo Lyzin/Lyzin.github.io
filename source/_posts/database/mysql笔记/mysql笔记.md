@@ -865,13 +865,13 @@ select gender,count(*) from emp group by gender;
 
 > 编写sql上面问题的思路：
 >
-> 1、首先按照性别分组，那么就先写这个语句
+> 1、首先按照性别分组，那么就先写下面的语句
 
 ```sql
 select gender from emp group by gender;
 ```
 
-> 2、然后是需要统计男生、女生的数量，那么需要对分组后的数据进行统计，很容易就联想到了·聚合函数的count函数
+> 2、然后是需要统计男生、女生的数量，那么需要对分组后的数据进行统计，很容易就联想到聚合函数的count函数
 
 ```sql
 select gender,count(*) from emp group by gender;
