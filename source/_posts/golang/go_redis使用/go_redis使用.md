@@ -230,7 +230,7 @@ go get github.com/go-redis/redis/v9
 >
 > 在设置值，获取值时需要注意传入context上下文
 
-#### 2.1 设置值和获取值
+#### 2.1 设置值和获取值快速上手
 
 ```go
 package main
@@ -408,7 +408,7 @@ func main() {
 > - 如果这个key之前不存在，则返回值是true
 
 ```go
-	// 设置一个新值，并且返回原来的旧值
+// 设置一个新值，并且返回原来的旧值
 ok, err := redisdb.SetNX(ctx, key, "2", 0).Result()
 if err != nil {
 	fmt.Printf("SetNX %v error: %v\n", key, err)
