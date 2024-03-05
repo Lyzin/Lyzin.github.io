@@ -46,3 +46,7 @@ docker run -itd --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.13-m
 > rabbitmq官网文档对各个语言支持的使用解释的非常清楚，建议直接从官网开始看
 >
 > go语言使用rabbitmq，官方文档：https://www.rabbitmq.com/tutorials/tutorial-one-go
+
+### 1、Hello World例子
+
+> 
