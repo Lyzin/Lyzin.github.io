@@ -8,7 +8,19 @@ categories: RabbitMQ笔记
 
 
 
-## 一、安装rabbitmq
+## 一、MQ简介
+
+### 1、MQ介绍
+
+> 为什么要有消息队列？
+>
+> - 同步调用：
+>   - 比如用户下单，下单后支付成功，拿到支付成功的结果，再去通知用户服务、更新支付状态、通知交易服务
+>   - 弊端：
+
+
+
+## 二、安装rabbitmq
 
 > RabbitMQ官网文档：https://www.rabbitmq.com/docs/download
 
@@ -40,6 +52,16 @@ docker run -itd --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.13-m
 > 用户名和密码都是`guest `
 
 ![image-20240305161019467](rabbitmq笔记/image-20240305161019467.png)
+
+### 3、相关文章
+
+> RabbitMQ基础复习：https://juejin.cn/post/7248914499914481725
+>
+> RabbitMQ实践：https://juejin.cn/post/6844903968171098120
+>
+> 消息队列RabbitMQ模式详解：https://juejin.cn/post/7112700994009432072
+>
+> https://juejin.cn/post/6844903827653541902
 
 ## 二、Go使用RabbitMQ
 
