@@ -50,7 +50,7 @@
   isHome: true,
   isHighlightShrink: false,
   isToc: false,
-  postUpdate: '2024-06-19 15:22:28'
+  postUpdate: '2024-06-19 15:23:11'
 }</script><noscript><style type="text/css">
   #nav {
     opacity: 1
@@ -181,7 +181,43 @@ Viper为你做以下工作。
 2. 连接redis服务端2.1 redis-cli命令介绍
 redis服务器可以通过redis-cli工具进行连接
 
-1234567891011121314151617181920212223242526272829303132333435363738394041 ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2022/05/16/python/django%E7%AC%94%E8%AE%B0/django%E7%AC%94%E8%AE%B0/" title="Django笔记"><img class="post_bg" src="/posts_cover_img/python/django.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Django笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2022/05/16/python/django%E7%AC%94%E8%AE%B0/django%E7%AC%94%E8%AE%B0/" title="Django笔记">Django笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2022-05-16T11:31:21.000Z" title="发表于 2022-05-16 19:31:21">2022-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Django%E7%AC%94%E8%AE%B0/">Django笔记</a></span></div><div class="content">一、Web框架介绍1、web框架的底层理解12345678910111213141516171819202122# 网络协议HTTP协议    数据传输明文协议HTTPS协议   数据传输密文协议websock协议 数据传输密文协议# HTTP四大特性1. 基于请求、响应2. 基于TCP/IP作用于应用层之上的协议3. 无状态4. 短/无链接# HTTP数据格式请求首行请求头请求行# 响应状态码1XX2XX3XX4XX5XX
+1234567891011121314151617181920212223242526272829303132333435363738394041 ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2022/05/16/golang/go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" title="Go并发编程"><img class="post_bg" src="/posts_cover_img/golang/go_code.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Go并发编程"></a></div><div class="recent-post-info"><a class="article-title" href="/2022/05/16/golang/go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" title="Go并发编程">Go并发编程</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2022-05-16T11:31:21.000Z" title="发表于 2022-05-16 19:31:21">2022-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">Go并发编程</a></span></div><div class="content">
+https://geektutu.com/post/geeorm-day1.html
+
+一、并发编程
+go天生支持并发，所以并发编程很重要，需要好好理解
+
+1、并发和并行
+相关参考资料：
+https://laike9m.com/blog/huan-zai-yi-huo-bing-fa-he-bing-xing,61/
+https://zhuanlan.zhihu.com/p/145587728
+
+
+
+并发(Concurrency)
+并发是同时发生
+并行指物理上同时执行
+并发的字面意思指的是线程同时开始执行这个事件，后续的执行是串行，还是并行，不确定，依赖于底层的硬件条件和操作系统的调度
+
+
+并发的“发”
+这里的发是指，如果有多个线程，都会同一时间先启动，但是线程里内容先不执行，会根据操作系统调度去交替执行
+
+
+
+
+并行(Parallelism)
+并行就是同时执行
+并行是指线程同时执行这个过程
+并发指能够让多个任务在逻辑上交织执行的程序设计
+
+
+
+
+注意：
+并发和并行都必须是多线程的
+如果这些线程可以被同时执行(执行线程的步骤)，这叫并行
+如果这些线程可以同时启动，但没有同时执行(执行 ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2022/05/16/python/django%E7%AC%94%E8%AE%B0/django%E7%AC%94%E8%AE%B0/" title="Django笔记"><img class="post_bg" src="/posts_cover_img/python/django.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Django笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2022/05/16/python/django%E7%AC%94%E8%AE%B0/django%E7%AC%94%E8%AE%B0/" title="Django笔记">Django笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2022-05-16T11:31:21.000Z" title="发表于 2022-05-16 19:31:21">2022-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Django%E7%AC%94%E8%AE%B0/">Django笔记</a></span></div><div class="content">一、Web框架介绍1、web框架的底层理解12345678910111213141516171819202122# 网络协议HTTP协议    数据传输明文协议HTTPS协议   数据传输密文协议websock协议 数据传输密文协议# HTTP四大特性1. 基于请求、响应2. 基于TCP/IP作用于应用层之上的协议3. 无状态4. 短/无链接# HTTP数据格式请求首行请求头请求行# 响应状态码1XX2XX3XX4XX5XX
 
 1.1 实现一个Http的服务端1234567891011121314151617import socketserver = socket.socket()server.bind((&quot;127.0.0.1&quot;, 8000))# 池子server.listen(5)while True:    conn, addr = server.accept()    # 接收客户端的请求数据,客户端可以是浏览器，请求相关的所有信息    data = conn.recv(1024)    print(f&quot;recv data:&#123;data&# ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2022/05/16/python/python%E7%AC%94%E8%AE%B0/python%E7%AC%94%E8%AE%B0/" title="Python基础编程"><img class="post_bg" src="/posts_cover_img/python/python_logo.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python基础编程"></a></div><div class="recent-post-info"><a class="article-title" href="/2022/05/16/python/python%E7%AC%94%E8%AE%B0/python%E7%AC%94%E8%AE%B0/" title="Python基础编程">Python基础编程</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2022-05-16T11:31:21.000Z" title="发表于 2022-05-16 19:31:21">2022-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Python%E5%9F%BA%E7%A1%80%E7%BC%96%E7%A8%8B/">Python基础编程</a></span></div><div class="content">
 高质量代码：不是越少越好，而是让刚入门的小白也能看懂的才是优质代码
@@ -226,59 +262,7 @@ is
 比较左右两个值是否相同，是表面上的值，也就是可以看到的值
 
 
-python解释器在启动时会在内存中加载一个小整数池，在这个整数池内定义的所有变量的i ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2022/05/16/golang/go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" title="Go并发编程"><img class="post_bg" src="/posts_cover_img/golang/go_code.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Go并发编程"></a></div><div class="recent-post-info"><a class="article-title" href="/2022/05/16/golang/go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" title="Go并发编程">Go并发编程</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2022-05-16T11:31:21.000Z" title="发表于 2022-05-16 19:31:21">2022-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Go%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">Go并发编程</a></span></div><div class="content">
-https://geektutu.com/post/geeorm-day1.html
-
-一、并发编程
-go天生支持并发，所以并发编程很重要，需要好好理解
-
-1、并发和并行
-相关参考资料：
-https://laike9m.com/blog/huan-zai-yi-huo-bing-fa-he-bing-xing,61/
-https://zhuanlan.zhihu.com/p/145587728
-
-
-
-并发(Concurrency)
-并发是同时发生
-并行指物理上同时执行
-并发的字面意思指的是线程同时开始执行这个事件，后续的执行是串行，还是并行，不确定，依赖于底层的硬件条件和操作系统的调度
-
-
-并发的“发”
-这里的发是指，如果有多个线程，都会同一时间先启动，但是线程里内容先不执行，会根据操作系统调度去交替执行
-
-
-
-
-并行(Parallelism)
-并行就是同时执行
-并行是指线程同时执行这个过程
-并发指能够让多个任务在逻辑上交织执行的程序设计
-
-
-
-
-注意：
-并发和并行都必须是多线程的
-如果这些线程可以被同时执行(执行线程的步骤)，这叫并行
-如果这些线程可以同时启动，但没有同时执行(执行 ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2021/05/16/database/rabbitmq%E7%AC%94%E8%AE%B0/rabbitmq%E7%AC%94%E8%AE%B0/" title="RabbitMQ笔记"><img class="post_bg" src="/posts_cover_img/database/rabbitmq_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="RabbitMQ笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/05/16/database/rabbitmq%E7%AC%94%E8%AE%B0/rabbitmq%E7%AC%94%E8%AE%B0/" title="RabbitMQ笔记">RabbitMQ笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-05-16T11:31:21.000Z" title="发表于 2021-05-16 19:31:21">2021-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/RabbitMQ%E7%AC%94%E8%AE%B0/">RabbitMQ笔记</a></span></div><div class="content">一、MQ简介1、MQ介绍
-为什么要有消息队列？
-
-同步调用：
-比如用户下单，下单后支付成功，拿到支付成功的结果，再去通知用户服务、更新支付状态、通知交易服务
-弊端：
-
-
-
-
-二、安装rabbitmq
-RabbitMQ官网文档：https://www.rabbitmq.com/docs/download
-
-1、docker安装
-如下是解释如何使用使用docker安装rabbitmq，可以跳过
-
-1234567# There is a second set of tags provided with the management plugin installed and enabled by default, which is available on the standard management port of 15672, with the default username and password of guest / guest:# You can access it by visiting http://container-ip:15672 in a browser or, i ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2021/05/16/docker/docker%E7%AC%94%E8%AE%B0/" title="Docker笔记"><img class="post_bg" src="/posts_cover_img/docker/docker.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/05/16/docker/docker%E7%AC%94%E8%AE%B0/" title="Docker笔记">Docker笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-05-16T11:31:21.000Z" title="发表于 2021-05-16 19:31:21">2021-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Docker%E7%AC%94%E8%AE%B0/">Docker笔记</a></span></div><div class="content">一、Docker安装1、官网教程
+python解释器在启动时会在内存中加载一个小整数池，在这个整数池内定义的所有变量的i ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2021/05/16/docker/docker%E7%AC%94%E8%AE%B0/" title="Docker笔记"><img class="post_bg" src="/posts_cover_img/docker/docker.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/05/16/docker/docker%E7%AC%94%E8%AE%B0/" title="Docker笔记">Docker笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-05-16T11:31:21.000Z" title="发表于 2021-05-16 19:31:21">2021-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Docker%E7%AC%94%E8%AE%B0/">Docker笔记</a></span></div><div class="content">一、Docker安装1、官网教程
 https://docs.docker.com/engine/install/centos/
 https://www.bilibili.com/video/BV1MJ411R7EP?spm_id_from=333.999.0.0&amp;vd_source=501c3f3a75e1512aa5b62c6a10d1550c
 https://www.bilibili.com/video/BV17g411c7T4?spm_id_from=333.999.0.0&amp;vd_source=501c3f3a75e1512aa5b62c6a10d1550c
@@ -286,7 +270,30 @@ https://www.bilibili.com/video/BV17g411c7T4?spm_id_from=333.999.0.0&amp;vd_sourc
 2、自行安装步骤
 依据官网安装教程，记录自己安装时的步骤，并且配置国内镜像源
 
-2.1 卸载老版本的docker12345678$ sudo yum remove docker \                 docker-client \                 docker-client-latest \                 docker-common \             ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2021/05/16/database/mysql%E7%AC%94%E8%AE%B0/mysql%E7%AC%94%E8%AE%B0/" title="MySQL笔记"><img class="post_bg" src="/posts_cover_img/database/mysql_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/05/16/database/mysql%E7%AC%94%E8%AE%B0/mysql%E7%AC%94%E8%AE%B0/" title="MySQL笔记">MySQL笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-05-16T11:31:21.000Z" title="发表于 2021-05-16 19:31:21">2021-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL%E7%AC%94%E8%AE%B0/">MySQL笔记</a></span></div><div class="content">一、mysql安装
+2.1 卸载老版本的docker12345678$ sudo yum remove docker \                 docker-client \                 docker-client-latest \                 docker-common \             ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2021/05/16/golang/go_mysql%E4%BD%BF%E7%94%A8/go_mysql%E4%BD%BF%E7%94%A8/" title="Go Mysql笔记"><img class="post_bg" src="/posts_cover_img/golang/go_mysql.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Go Mysql笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/05/16/golang/go_mysql%E4%BD%BF%E7%94%A8/go_mysql%E4%BD%BF%E7%94%A8/" title="Go Mysql笔记">Go Mysql笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-05-16T11:31:21.000Z" title="发表于 2021-05-16 19:31:21">2021-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Go-Mysql%E7%AC%94%E8%AE%B0/">Go Mysql笔记</a></span></div><div class="content">一、Mysql环境搭建1、mysql镜像地址
+推荐使用docker搭建mysql环境，非常方便用来学习mysql
+mysql的docker镜像地址
+
+2、创建mysql容器2.1 拉取mysql镜像1docker pull mysql
+
+2.2 创建mysql容器
+下面内容来自dockerhub里mysql的使用介绍
+
+123456789101112131415#Configuration without a cnf file#Many configuration options can be passed as flags to mysqld. This will give you the flexibility to customize the container without needing a cnf file. For example, if you want to change the default encoding and collation for all tables to use UTF-8 (utf8mb4) just run the following:$  ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2021/05/16/database/redis%E7%AC%94%E8%AE%B0/redis%E7%AC%94%E8%AE%B0/" title="Redis笔记"><img class="post_bg" src="/posts_cover_img/database/redis_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/05/16/database/redis%E7%AC%94%E8%AE%B0/redis%E7%AC%94%E8%AE%B0/" title="Redis笔记">Redis笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-05-16T11:31:21.000Z" title="发表于 2021-05-16 19:31:21">2021-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Redis%E7%AC%94%E8%AE%B0/">Redis笔记</a></span></div><div class="content">一、搭建Redis环境
+前言：使用Docker 来搭建Redis环境
+镜像官网：https://hub.docker.com/_&#x2F;redis
+
+1、创建redis容器
+使用redis-cli客户端连接方式创建redis容器
+
+1.1 创建redis容器命令1234567891011# 创建redis容器docker run -idt --name redisly -p 6379:6379 redis# 命令参数解释-idt: i表示可以进行交互，t表示开启一个tty终端，d表示在后台运行容器--name: 表示自定义容器名，进入容器时可以使用该名字进入--rm: 表示创建redis容器时候，如果存在redis 、redis-cli先删除再创建-p: 表示将容器内端口映射到宿主机的端口# 创建有密码的redisdocker run -itd --name redisly -p 6379:6379 redis --requirepass &quot;123456&quot;
+
+1.2 创建redis容器
+下面创建的redis容器，无密码
+
+
+
+2、连接redis服务器2.1 re ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2021/05/16/database/mysql%E7%AC%94%E8%AE%B0/mysql%E7%AC%94%E8%AE%B0/" title="MySQL笔记"><img class="post_bg" src="/posts_cover_img/database/mysql_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/05/16/database/mysql%E7%AC%94%E8%AE%B0/mysql%E7%AC%94%E8%AE%B0/" title="MySQL笔记">MySQL笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-05-16T11:31:21.000Z" title="发表于 2021-05-16 19:31:21">2021-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/MySQL%E7%AC%94%E8%AE%B0/">MySQL笔记</a></span></div><div class="content">一、mysql安装
 推荐使用Docker安装mysql
 https://registry.hub.docker.com/_&#x2F;mysql
 黑马程序员
@@ -302,30 +309,23 @@ https://www.bilibili.com/video/BV1Kr4y1i7ru?spm_id_from&#x3D;333.999.0.0&amp;vd_
 基于当前的mysql镜像创建一个支持国内时区的镜像，然后基于创建的镜像启动容器，就支持国内时区了
 
 2.1.1 新镜像的DockerFile
-下面镜像的DockerFile用来创建支 ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2021/05/16/database/redis%E7%AC%94%E8%AE%B0/redis%E7%AC%94%E8%AE%B0/" title="Redis笔记"><img class="post_bg" src="/posts_cover_img/database/redis_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/05/16/database/redis%E7%AC%94%E8%AE%B0/redis%E7%AC%94%E8%AE%B0/" title="Redis笔记">Redis笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-05-16T11:31:21.000Z" title="发表于 2021-05-16 19:31:21">2021-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Redis%E7%AC%94%E8%AE%B0/">Redis笔记</a></span></div><div class="content">一、搭建Redis环境
-前言：使用Docker 来搭建Redis环境
-镜像官网：https://hub.docker.com/_&#x2F;redis
+下面镜像的DockerFile用来创建支 ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2021/05/16/database/rabbitmq%E7%AC%94%E8%AE%B0/rabbitmq%E7%AC%94%E8%AE%B0/" title="RabbitMQ笔记"><img class="post_bg" src="/posts_cover_img/database/rabbitmq_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="RabbitMQ笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/05/16/database/rabbitmq%E7%AC%94%E8%AE%B0/rabbitmq%E7%AC%94%E8%AE%B0/" title="RabbitMQ笔记">RabbitMQ笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-05-16T11:31:21.000Z" title="发表于 2021-05-16 19:31:21">2021-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/RabbitMQ%E7%AC%94%E8%AE%B0/">RabbitMQ笔记</a></span></div><div class="content">一、MQ简介1、MQ介绍
+为什么要有消息队列？
 
-1、创建redis容器
-使用redis-cli客户端连接方式创建redis容器
-
-1.1 创建redis容器命令1234567891011# 创建redis容器docker run -idt --name redisly -p 6379:6379 redis# 命令参数解释-idt: i表示可以进行交互，t表示开启一个tty终端，d表示在后台运行容器--name: 表示自定义容器名，进入容器时可以使用该名字进入--rm: 表示创建redis容器时候，如果存在redis 、redis-cli先删除再创建-p: 表示将容器内端口映射到宿主机的端口# 创建有密码的redisdocker run -itd --name redisly -p 6379:6379 redis --requirepass &quot;123456&quot;
-
-1.2 创建redis容器
-下面创建的redis容器，无密码
+同步调用：
+比如用户下单，下单后支付成功，拿到支付成功的结果，再去通知用户服务、更新支付状态、通知交易服务
+弊端：
 
 
 
-2、连接redis服务器2.1 re ...</div></div></div><div class="recent-post-item"><div class="post_cover left"><a href="/2021/05/16/golang/go_mysql%E4%BD%BF%E7%94%A8/go_mysql%E4%BD%BF%E7%94%A8/" title="Go Mysql笔记"><img class="post_bg" src="/posts_cover_img/golang/go_mysql.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Go Mysql笔记"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/05/16/golang/go_mysql%E4%BD%BF%E7%94%A8/go_mysql%E4%BD%BF%E7%94%A8/" title="Go Mysql笔记">Go Mysql笔记</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-05-16T11:31:21.000Z" title="发表于 2021-05-16 19:31:21">2021-05-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Go-Mysql%E7%AC%94%E8%AE%B0/">Go Mysql笔记</a></span></div><div class="content">一、Mysql环境搭建1、mysql镜像地址
-推荐使用docker搭建mysql环境，非常方便用来学习mysql
-mysql的docker镜像地址
 
-2、创建mysql容器2.1 拉取mysql镜像1docker pull mysql
+二、安装rabbitmq
+RabbitMQ官网文档：https://www.rabbitmq.com/docs/download
 
-2.2 创建mysql容器
-下面内容来自dockerhub里mysql的使用介绍
+1、docker安装
+如下是解释如何使用使用docker安装rabbitmq，可以跳过
 
-123456789101112131415#Configuration without a cnf file#Many configuration options can be passed as flags to mysqld. This will give you the flexibility to customize the container without needing a cnf file. For example, if you want to change the default encoding and collation for all tables to use UTF-8 (utf8mb4) just run the following:$  ...</div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/page/2/#content-inner"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/#content-inner">2</a><span class="page-number current">3</span></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">刘阳</div><div class="author-info__description">学习与记录</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">30</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">30</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Lyzin"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/09/27/database/mongoDB%E4%BD%BF%E7%94%A8/mongoDB%E4%BD%BF%E7%94%A8/" title="mongoDB使用"><img src="/posts_cover_img/database/mongodb.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="mongoDB使用"/></a><div class="content"><a class="title" href="/2023/09/27/database/mongoDB%E4%BD%BF%E7%94%A8/mongoDB%E4%BD%BF%E7%94%A8/" title="mongoDB使用">mongoDB使用</a><time datetime="2023-09-27T03:09:36.000Z" title="发表于 2023-09-27 11:09:36">2023-09-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/09/11/database/sql_50_practice/sql_50_practice/" title="50道SQL练习题"><img src="/posts_cover_img/database/mysql_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="50道SQL练习题"/></a><div class="content"><a class="title" href="/2023/09/11/database/sql_50_practice/sql_50_practice/" title="50道SQL练习题">50道SQL练习题</a><time datetime="2023-09-11T05:01:20.000Z" title="发表于 2023-09-11 13:01:20">2023-09-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/" title="Langchain与OpenAI"><img src="/posts_cover_img/ai/ai.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Langchain与OpenAI"/></a><div class="content"><a class="title" href="/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/" title="Langchain与OpenAI">Langchain与OpenAI</a><time datetime="2023-09-10T14:03:08.000Z" title="发表于 2023-09-10 22:03:08">2023-09-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/18/golang/go_gorm%E4%BD%BF%E7%94%A8/go_gorm%E4%BD%BF%E7%94%A8/" title="Go Gorm使用"><img src="/posts_cover_img/golang/go_gorm.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Go Gorm使用"/></a><div class="content"><a class="title" href="/2023/03/18/golang/go_gorm%E4%BD%BF%E7%94%A8/go_gorm%E4%BD%BF%E7%94%A8/" title="Go Gorm使用">Go Gorm使用</a><time datetime="2023-03-18T13:03:49.000Z" title="发表于 2023-03-18 21:03:49">2023-03-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/02/10/golang/go%E5%B8%B8%E7%94%A8%E6%8A%80%E5%B7%A7/go%E5%B8%B8%E7%94%A8%E6%8A%80%E5%B7%A7/" title="go常用技巧"><img src="/posts_cover_img/golang/go_code.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="go常用技巧"/></a><div class="content"><a class="title" href="/2023/02/10/golang/go%E5%B8%B8%E7%94%A8%E6%8A%80%E5%B7%A7/go%E5%B8%B8%E7%94%A8%E6%8A%80%E5%B7%A7/" title="go常用技巧">go常用技巧</a><time datetime="2023-02-10T15:36:56.000Z" title="发表于 2023-02-10 23:36:56">2023-02-10</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+1234567# There is a second set of tags provided with the management plugin installed and enabled by default, which is available on the standard management port of 15672, with the default username and password of guest / guest:# You can access it by visiting http://container-ip:15672 in a browser or, i ...</div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/page/2/#content-inner"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/#content-inner">2</a><span class="page-number current">3</span></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">刘阳</div><div class="author-info__description">学习与记录</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">30</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">29</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">30</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Lyzin"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/09/27/database/mongoDB%E4%BD%BF%E7%94%A8/mongoDB%E4%BD%BF%E7%94%A8/" title="mongoDB使用"><img src="/posts_cover_img/database/mongodb.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="mongoDB使用"/></a><div class="content"><a class="title" href="/2023/09/27/database/mongoDB%E4%BD%BF%E7%94%A8/mongoDB%E4%BD%BF%E7%94%A8/" title="mongoDB使用">mongoDB使用</a><time datetime="2023-09-27T03:09:36.000Z" title="发表于 2023-09-27 11:09:36">2023-09-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/09/11/database/sql_50_practice/sql_50_practice/" title="50道SQL练习题"><img src="/posts_cover_img/database/mysql_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="50道SQL练习题"/></a><div class="content"><a class="title" href="/2023/09/11/database/sql_50_practice/sql_50_practice/" title="50道SQL练习题">50道SQL练习题</a><time datetime="2023-09-11T05:01:20.000Z" title="发表于 2023-09-11 13:01:20">2023-09-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/" title="Langchain与OpenAI"><img src="/posts_cover_img/ai/ai.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Langchain与OpenAI"/></a><div class="content"><a class="title" href="/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/" title="Langchain与OpenAI">Langchain与OpenAI</a><time datetime="2023-09-10T14:03:08.000Z" title="发表于 2023-09-10 22:03:08">2023-09-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/18/golang/go_gorm%E4%BD%BF%E7%94%A8/go_gorm%E4%BD%BF%E7%94%A8/" title="Go Gorm使用"><img src="/posts_cover_img/golang/go_gorm.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Go Gorm使用"/></a><div class="content"><a class="title" href="/2023/03/18/golang/go_gorm%E4%BD%BF%E7%94%A8/go_gorm%E4%BD%BF%E7%94%A8/" title="Go Gorm使用">Go Gorm使用</a><time datetime="2023-03-18T13:03:49.000Z" title="发表于 2023-03-18 21:03:49">2023-03-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/02/10/golang/go%E5%B8%B8%E7%94%A8%E6%8A%80%E5%B7%A7/go%E5%B8%B8%E7%94%A8%E6%8A%80%E5%B7%A7/" title="go常用技巧"><img src="/posts_cover_img/golang/go_code.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="go常用技巧"/></a><div class="content"><a class="title" href="/2023/02/10/golang/go%E5%B8%B8%E7%94%A8%E6%8A%80%E5%B7%A7/go%E5%B8%B8%E7%94%A8%E6%8A%80%E5%B7%A7/" title="go常用技巧">go常用技巧</a><time datetime="2023-02-10T15:36:56.000Z" title="发表于 2023-02-10 23:36:56">2023-02-10</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
             <i class="fas fa-folder-open"></i>
             <span>博客分类</span>
             <a class="card-more-btn" href="/categories/" title="查看更多">
@@ -333,7 +333,7 @@ mysql的docker镜像地址
             </div>
             <ul class="card-category-list" id="aside-cat-list">
             <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/AI/"><span class="card-category-list-name">AI</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Django%E7%AC%94%E8%AE%B0/"><span class="card-category-list-name">Django笔记</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Docker%E7%AC%94%E8%AE%B0/"><span class="card-category-list-name">Docker笔记</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Element-UI%E5%AD%A6%E4%B9%A0/"><span class="card-category-list-name">Element_UI学习</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Git/"><span class="card-category-list-name">Git</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Go-Gin%E7%AC%94%E8%AE%B0/"><span class="card-category-list-name">Go Gin笔记</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Go-Gorm%E4%BD%BF%E7%94%A8/"><span class="card-category-list-name">Go Gorm使用</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Go-LeetCode/"><span class="card-category-list-name">Go LeetCode</span><span class="card-category-list-count">1</span></a></li>
-            </ul></div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">30</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2024-06-19T07:22:27.627Z"></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/index.jpeg')"><div id="footer-wrap"><div class="copyright">&copy;2021 - 2024 By 刘阳</div><div class="footer_custom_text">努力终会有回报</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/pluginsSrc/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function subtitleType () {
+            </ul></div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">30</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2024-06-19T07:23:11.087Z"></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/index.jpeg')"><div id="footer-wrap"><div class="copyright">&copy;2021 - 2024 By 刘阳</div><div class="footer_custom_text">努力终会有回报</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/pluginsSrc/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function subtitleType () {
   if (true) { 
     window.typed = new Typed("#subtitle", {
       strings: ["博观而约取，厚积而薄发"],
