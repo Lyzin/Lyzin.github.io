@@ -13,6 +13,8 @@ categories: Go并发编程
 ## 一、并发编程
 
 > `go`天生支持并发，所以并发编程很重要，需要好好理解
+>
+> https://mp.weixin.qq.com/s/aN6SuLNzeeeMRYyXWD1V8w
 
 ### 1、并发和并行
 
@@ -494,6 +496,10 @@ func main() {
 	time.Sleep(time.Second)
 }
 ```
+
+### 9、并发控制
+
+> https://mp.weixin.qq.com/s/aN6SuLNzeeeMRYyXWD1V8w
 
 ## 三、channel
 

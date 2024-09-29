@@ -452,6 +452,16 @@ docker exec -it 容器名|容器ID /bin/bash
 # 可以通过容器名或容器ID进行登录容器
 ```
 
+#### 3.4 创建容器限制内存与CPU
+
+> `-m 512m` 表示将容器的内存限制为 512 MB
+>
+> `--cpus 2`表示容器可以使用的 CPU 数量
+
+```bash
+docker run -d --name my_container -m 512m --cpus 2 my_image
+```
+
 ### 4、容器的启动、停止、删除
 
 #### 4.1 启动容器
@@ -689,7 +699,7 @@ docker run -itd --volumes-from c1 --name c2 centos:7
 
 ![image-20220925234813316](docker笔记/image-20220925234813316.png)
 
-### 7、查看容器的详细信息
+### 7、docker inspect查看容器配置信息
 
 > 可以查看容器状态、容器IP、容器挂载信息等所有信息
 
@@ -698,6 +708,88 @@ docker inspect 容器名|容器ID
 ```
 
 ![image-20220925234446219](docker笔记/image-20220925234446219.png)
+
+### 8、docker ps查看所有运行中容器
+
+> docker ps列出所有正在运行中的容器
+>
+> docker ps命令后面不跟任何参数
+
+```bash
+docker ps
+```
+
+![image-20240914195941335](docker笔记/image-20240914195941335.png)
+
+### 9、docker stats容器占用CPU/内存信息
+
+> docker stats这个命令会实时显示容器的资源使用情况
+>
+> - 参数不跟容器名：查看当前所有运行的容器占用的内存和 CPU 资源。
+> - 参数跟容器名：仅查看当前容器的占用的内存和 CPU 资源
+
+```bash
+docker stats
+```
+
+![image-20240914200202788](docker笔记/image-20240914200202788.png)
+
+```bash
+docker stats mysql
+```
+
+![image-20240914200326702](docker笔记/image-20240914200326702.png)
+
+### 10、一次关闭所有运行容器
+
+> 可以使用docker stop和docker ps命令组合关闭所有运行中的容器
+
+```bash
+# 只输出运行中的容器ID
+docker ps -q
+```
+
+![image-20240914200511807](docker笔记/image-20240914200511807.png)
+
+```bash
+# 关闭所有运行中容器
+docker stop $(docker ps -q)
+```
+
+![image-20240914200636049](docker笔记/image-20240914200636049.png)
+
+### 11、一次启动所有容器
+
+> 先查询所有容器的ID
+
+```bash
+docker container ls -a -q
+
+# -a, --all             Show all containers (default shows just running)
+# -q, --quiet           Only display container IDs
+```
+
+![image-20240914200926455](docker笔记/image-20240914200926455.png)
+
+> 一次性启动所有容器
+
+```bash
+docker start $(docker container ls -a -q)
+```
+
+![image-20240914201037405](docker笔记/image-20240914201037405.png)
+
+### 12、查看容器占用的磁盘空间
+
+```bash
+ docker ps -s
+```
+
+> - 可以看到最后有两列 size 和 virtual size
+>   - size：容器读写层占用的磁盘空间，
+>   - virtual size：就是读写层加上对应只读层所占用的磁盘空间。
+
+![img](docker%E7%AC%94%E8%AE%B0/v2-b71caf2dbcc2fa95e8545cb7c97998ac_720w.png)
 
 ## 五、镜像构建
 
@@ -856,8 +948,6 @@ docker push new-repo:tagname
 
 ## 八、Docker-compose
 
-### 1、Docker-compose介绍
-
 > [docker-compose](https://docs.docker.com/compose/compose-file/)是用于定义和运行多docker容器的工具
 >
 > docker-compose使用yml格式的文件来配置多个容器服务
@@ -868,15 +958,54 @@ docker push new-repo:tagname
 > 2. 使用docker-compose.yml文件来定义应用程序服务，使得这一组应用服务可以在一套隔离环境中运行
 > 3. 使用docker-compose up命令启动这组容器服务
 
+### 1、docker-compose安装
 
+#### 1.1 使用docker-desktop
 
-### 2、Docker-compose语法
+> 当本地安装docker，安装的是docker-desktop，那么自动就已经安装了docker-compose工具
+
+#### 1.2 未使用docker-desktop
+
+> 当本地安装docker，安装的不是docker-desktop，那么就没安装docker-compose工具
+>
+> 单独安装docker-compose：https://docs.docker.com/compose/install/standalone/
+>
+> 以下以ubuntu为例
+
+> 下载执行文件
+
+```bash
+$ sudo curl -SL https://github.com/docker/compose/releases/download/v2.29.3/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+```
+
+> 赋予权限
+
+```bash
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+> 验证docker-compose
+
+```bash
+docker-compose --help
+```
+
+![image-20240914215316470](docker笔记/image-20240914215316470.png)
+
+### 2、特别注意目录权限
+
+> 注意：
+>
+> - 必须要提前在宿主机创建好目录，不能让docker-compose自动在宿主机创建目录
+>   - 因为有的容器映射的目录权限是root，但是宿主机登录用户不是root，会导致无法在容器中创建服务需要的目录，导致服务启动失败
+
+### 3、Docker-compose语法
 
 > docker-compose的版本
 >
 > [https://docs.docker.com/compose/compose-file/compose-file-v2/](https://docs.docker.com/compose/compose-file/compose-file-v2/)
 
-#### 2.1 模板语法
+#### 1.1 模板语法
 
 > docker-compose的模板语法，文件名必须是`docker-compose.yml`
 
@@ -919,8 +1048,163 @@ networks:
         driver: bridge
 ```
 
-#### 2.2 compose文件示例
+#### 1.2 compose文件示例
 
 ```yaml
+version: '3.6'
+
+networks:
+  dev-unit-network:
+    driver: bridge
+
+services:
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    volumes:
+      - /home/ly/docker_volumn/redis/data:/data
+    mem_limit: 512m
+    cpus: '1.0'
+    ports:
+      - "6379:6379"
+    networks:
+      - dev-unit-network
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight
+    restart: always
+    volumes:
+      - /home/ly/docker_volumn/redisinsight/data:/data
+    mem_limit: 512m
+    cpus: '1.0'
+    ports:
+      - "5540:5540"
+    networks:
+      - dev-unit-network
+
+  mysql:
+    image: mysqlzh:v1.0
+    container_name: mysql
+    restart: always
+    user: root
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+    volumes:
+      - /home/ly/docker_volumn/mysql/conf.d:/etc/mysql/conf.d
+      - /home/ly/docker_volumn/mysql/data:/var/lib/mysql
+    mem_limit: 1g
+    cpus: '2.0'
+    ports:
+      - "3306:3306"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - dev-unit-network
+
+  etcd:
+    image: gcr.io/etcd-development/etcd:v3.5.15
+    container_name: etcd-gcr-v3.5.15
+    restart: always
+    volumes:
+      - /home/ly/docker_volumn/etcd/tmp/etcd-data.tmp:/etcd-data
+    mem_limit: 512m
+    cpus: '1.0'
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    command:
+      - /usr/local/bin/etcd
+      - --name
+      - s1
+      - --data-dir
+      - /etcd-data
+      - --listen-client-urls
+      - http://0.0.0.0:2379
+      - --advertise-client-urls
+      - http://0.0.0.0:2379
+      - --listen-peer-urls
+      - http://0.0.0.0:2380
+      - --initial-advertise-peer-urls
+      - http://0.0.0.0:2380
+      - --initial-cluster
+      - s1=http://0.0.0.0:2380
+      - --initial-cluster-token
+      - tkn
+      - --initial-cluster-state
+      - new
+      - --log-level
+      - info
+      - --logger
+      - zap
+      - --log-outputs
+      - stderr
+    networks:
+      - dev-unit-network
+
+  elasticsearch:
+    image: elasticsearch:7.17.24
+    container_name: elasticsearch
+    restart: always
+    volumes:
+      - /home/ly/docker_volumn/elasticsearch/data:/usr/share/elasticsearch/data
+    mem_limit: 512m
+    cpus: '1.0'
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - dev-unit-network
+
+  kibana:
+    image: kibana:7.17.24
+    container_name: kibana
+    restart: always
+    volumes:
+      - /home/ly/docker_volumn/kibana/config:/usr/share/kibana/config
+    mem_limit: 256m
+    cpus: '1.0'
+    ports:
+      - "5601:5601"
+    networks:
+      - dev-unit-network
 ```
+
+### 4、docker-compose命令
+
+> docker-compose启动容器必须在dockercompose.yml文件所在的目录下
+
+#### 1.1 docker-compose后台启动容器
+
+```bash
+docker-compose up -d
+```
+
+#### 1.2 docker-compose仅停止容器
+
+> 仅仅停止容器，不删除容器、不删除自定义网络
+
+```bash
+docker-compose stop
+```
+
+#### 1.3 docker-compose删除容器与网络
+
+> down命令会 停止容器、删除容器、删除自定义网络
+
+```bash
+docker-compose down
+```
+
+#### 1.4 docker-compose重启容器
+
+> restart会重启容器，不删除容器、不删除自定义网络
+
+```bash
+docker-compose restart
+```
+
+
 

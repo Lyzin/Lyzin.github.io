@@ -766,3 +766,7 @@ subscribe channel
 ```
 
 ![image-20240214002851269](redis笔记/image-20240214002851269.png)
+
+## 四、redis的常见问题
+
+1、

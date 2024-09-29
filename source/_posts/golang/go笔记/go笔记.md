@@ -3493,7 +3493,7 @@ func main() {
 }
 ```
 
-### 4、`new`(很少用)
+### 4、`new`
 
 > `new`函数用来申请内存地址
 >
@@ -3903,6 +3903,45 @@ def cal_words_times():
 ![image-20211209122721022](go%E7%AC%94%E8%AE%B0/image-20211209122721022.png)
 
 > 其实能够看出来，`go`和`python`语法有较多类似的地方，核心编程思想都是一样的，就是看如何用不同语言去实现
+
+### 7、值类型和引用类型区别
+
+#### 1.1 值类型
+
+> - **定义**：值类型包括基本类型（如 `int`, `float64`, `string` 等）和结构体（`struct`）。
+> - **底层实现**：值类型的底层实现不涉及指针，它们在传递时是按值传递的。
+> - **行为**：
+>   - 传递值类型时，传递的是该值的副本。对副本的修改不会影响原始值。
+>   - 值类型在使用`var`声明时会分配内存，并初始化为默认值。
+
+#### 1.2 引用类型
+
+> - **定义**：引用类型包括 `slice`, `map`, `channel`, `function`, `interface`。
+> - **底层实现**：引用类型的底层实现涉及指针，它们在传递时是按引用传递的。
+> - **行为**：
+>   - 传递引用类型时，传递的是该值的引用。对引用的修改会影响原始值。
+>   - 引用类型在使用`var`声明但未初始化时，其值为 `nil`。
+
+#### 1.3 var、make、new区别
+
+> #### var声明方式：
+>
+> - **用途**：用于声明变量，并可以选择性地初始化它。
+> - **适用范围**：适用于所有类型，包括基本类型（如 `int`, `float64`, `string` 等）和引用类型（如 `slice`, `map`, `channel` 等）。
+> - **初始化**：
+>   - 对于基本类型，`var` 可以直接初始化。
+>   - 对于引用类型，`var` 只能声明它们，但不能分配内存或初始化它们。声明的引用类型变量是 `nil`，不能直接使用。
+
+> #### make声明方式
+>
+> - **用途**：专门用于创建和初始化引用类型（`slice`, `map`, `channel`）。
+> - **适用范围**：只适用于引用类型。
+> - **初始化**：`make` 不仅会分配内存，还会初始化内部结构，使得这些引用类型可以立即使用。
+
+> #### new声明方式
+>
+> - **new**创建的变量是指定类型的零值，并返回该变量的指针
+> - **new**适用于创建引用类型以外的其他类型变量
 
 ## 八、函数
 
@@ -4802,8 +4841,10 @@ func f1(x int) int{
 #### 1.11 `defer`关键字
 
 > - defer主要是用来回收资源
->
 > - 一个函数中有多个defer存在时，是以`栈(先进后出)`的形式运行，先执行最后一个defer函数，依次反着来
+> - `defer`主要用于延迟执行，清理回收资源等，在遇到defer语句时：
+>   - 先将该条defer语句后面的代码存起来，不执行
+>   - 然后继续往下走，当其他代码都执行完以后，再来执行defer语句的代码
 
 ```go
 package main
@@ -4819,18 +4860,19 @@ func main() {
 
 ![image-20220104143521838](go%E7%AC%94%E8%AE%B0/image-20220104143521838.png)
 
-> `defer`主要用于延迟执行，清理回收资源等，在遇到defer语句时：
->
-> - 先将该条defer语句后面的代码存起来，不执行
-> - 然后继续往下走，当其他代码都执行完以后，再来执行defer语句的代码
->
-> 在`go`语言中，`return`在返回值时分为两步：
->
-> - 第一步先给返回值赋值
-> - `defer`语句就在第一步和第二部中间
-> - 第二步给`RET`指令执行返回值
+##### 1.11.1 defer执行时机
 
-##### 1.11.1 defer例子分析
+> 在`go`语言的函数中，`return`语句在底层并不是原子操作，它分为返回值赋值和RET指令两步，在函数被调用后最终返回值时按如下步骤：
+>
+> - return语句的第一步先给返回值赋值
+> - `defer`语句开始执行
+>- return语句的第二步执行`RET`指令真正执行返回值
+
+![image-20240616234157805](go笔记/image-20240616234157805.png)
+
+> return第一步给返回值赋值，那么返回值赋值的变量暂时命名为 retval
+
+##### 1.11.2 defer例子分析一
 
 ```go
 package main
@@ -4839,115 +4881,109 @@ import "fmt"
 
 func main() {
 	fmt.Println(f1())
-	fmt.Println(f2())
-	//fmt.Printf(f3())
-	//fmt.Printf(f4())
 }
 
 // f1函数
-/*
-	rval = x, x = 5, rval = 5
-	defer语句中x ++ , x = 6, rval没变
-	ret指令返回rval的值就是5
-*/
 func f1() int {
 	x := 5
 	defer func() {
-		x++
+		x++ // 修改的是x，不是返回值
 	}()
 	return x
 }
+```
 
-/*
-  f2函数的返回值有显示声明，那么ravl就是x
-  这里还涉及到了闭包，所以ret指令返回x的值是为6
-  x(rval) = 5
-  defer语句中x++，那么 x=6
-  ret指令返回 x(ravl)=6
-*/
+> - 在这个例子中，`f1`函数的返回值没有被命名，它只是一个`int`类型的返回值。这意味着在函数内部，返回值没有直接关联的变量名。
+>   1. 在`f1`函数内部，变量`x`被声明并初始化为`5`
+>   2. `defer`语句中的匿名函数`func() { x++ }`被注册，它会在函数即将返回之前执行
+>      - 由于`defer`语句的存在，匿名函数`func() { x++ }`会在函数即将返回之前执行。
+>      - 在这个匿名函数中，`x`的值被自增为`6`。但是，这个操作并不会影响到已经赋值给`retval`的值，因为`retval`是一个独立的实体，它只存储了在`return`语句执行时`x`的值
+>      - `defer`语句中的函数调用修改了变量`x`的值，但这个修改不会影响到已经赋值给返回值的值，因为返回值是一个独立的实体
+>   3. `return x` 语句被执行，这会将变量`x`的值`5`赋给返回值（我们称之为`retval`）。
+>      - 此时，`retval`的值是`5`，并且`retval`与变量`x`是两个不同的实体
+> - 因此，`f1`函数return执行RET指令最终返回的值是`5`，而不是`6`
+
+##### 1.11.3 defer例子分析二
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println(f2())
+}
+
+// f2函数
 func f2() (x int) {
 	defer func() {
 		x++
 	}()
 	return 5
 }
+```
 
-/*  f2函数的返回值有显示声明，那么ravl就是y
-	return x 就表示 y(rval)等x的值5， 所以 y(rval) = 5
-	defer 里对x进行了x++ ,但是 y的值没有变
-	ret指令返回y(rval)=5
-*/
- */
+> - `f2`函数的返回值被命名为`x`，这意味着Go编译器会为f2函数的返回值创建一个变量`x`，并且这个变量在整个函数执行期间都是可见的。当使用`return`语句返回一个值时，这个值会被赋给返回值变量
+> - `return 5` 语句被执行，这会将值`5`赋给返回值变量`x`。
+> - 由于`defer`语句的存在，匿名函数`func() { x++ }`会在函数即将返回之前执行。
+>   - 在`defer`语句执行时，匿名函数捕获了外部变量`x`的当前值（此时`x`的值是`5`），并在函数体内对`x`进行自增操作，即`x++`，这会将`x`的值变为`6`。
+> - f2函数return执行RET指令返回的是变量`x`的值，即`6`
+
+##### 1.11.4 defer例子分析三
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println(f3())
+}
+
 func f3() (y int) {
 	x := 5
 	defer func() {
-		x ++
+		x++
 	}()
 	return x
 }
+```
 
-/*
-	 f4函数的返回值有显示声明，那么ravl就是x
-	return 5就表示 x(rval) = 5
-	defer 语句里将x传入，但是函数形参传值都是值拷贝，所以defer里面x++是对x的副本进行了x++，原本x的值不变
-	ret指令返回 x(rval)还是等于5
-*/
+> - `f3`函数的返回值被命名为`y`，这意味着Go编译器会为f3函数的返回值创建一个变量`y`，并且这个变量在整个函数执行期间都是可见的。当使用`return`语句返回一个值时，这个值5会被赋给返回值变量
+> - 在`f3`函数内部，变量`x`被声明并初始化为`5`。
+> - `defer`语句中的匿名函数`func() { x++ }`被注册，它会在函数即将返回之前执行。
+> - `return x` 语句被执行，这会将变量`x`的值`5`直接赋给命名的返回值变量`y`。此时，`y`的值是`5`。
+> - 由于`defer`语句的存在，匿名函数`func() { x++ }`会在函数即将返回之前执行。在这个匿名函数中，`x`的值被自增为`6`。但是，这个操作并不会影响到已经赋值给`y`的值，因为`y`是一个独立的实体，它只存储了在`return`语句执行时`x`的值。
+>
+> - 因此，`f3`函数return执行RET指令最终返回的值是`5`，而不是`6`，`defer`语句中的函数调用修改了变量`x`的值，但这个修改不会影响到已经赋值给返回值`y`的值，因为返回值是一个独立的实体
+
+##### 1.11.5 defer例子分析四
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println(f4())
+}
+
 func f4() (x int) {
-	defer func(x int){
+	defer func(x int) {
 		x++
 	}(x)
 	return 5
 }
 ```
 
-##### 1.11.2 defer例子分析二
+> - `f4`函数的返回值被命名为`x`，这意味着Go编译器会为f4函数的返回值创建一个变量`x`，并且这个变量在整个函数执行期间都是可见的。当使用`return`语句返回一个值时，这个值会被赋给返回值变量
+> - `return 5` 语句被执行，这会将值`5`赋给返回值变量`x`。
+> - 由于`defer`语句的存在，匿名函数`func() { x++ }`会在函数即将返回之前执行。
+>   - 在`defer`语句执行时，匿名函数通过x传参的方式，将外部变量`x`的当前值（此时`x`的值是`5`）传入匿名函数，并在函数体内对`x`进行自增操作，即`x++`
+>   - 在匿名函数内部，`x`的值被自增为`6`。但是由于go函数中形参传值是值传递，所以自增修改只影响匿名函数内部的`x`副本，而不会影响到外部函数中的`x`。
+> - f4函数return执行RET指令返回的是变量`x`的值，即`5`
 
-```go
-package main
-
-// Go 语言的 func 声明中如果返回值变量显示声明，也就是 func foo() (ret int) {} 的时候，rval 就是 ret
-// rval就等于i的值，等于5
-// defer中对i进行了i++, 但是rval仍是5没变
-// ret指令返回rval就是5
-func f() int {
-	i := 5
-	defer func() {
-		i++
-	}()
-	return i
-}
-
-// f1函数的返回值变量有显示声明为result，所以rval就是result
-// 所以result(ret) = 0
-// defer 里面对 result ++ ， result = 1
-// ret指令返回result(ret)就是1
-func f1() (result int) {
-	defer func() {
-		result++
-	}()
-	return 0
-}
-
-// f2函数的返回值变量有显示声明为r，那么rval就是r
-// 那么r(rval) = t = 5，此时r(rval)的值已经确定为5
-// defer 里再对 t = t + 5，但是r(rval)的值不会再变，修改的是t的值，不是r(rval)的值
-// ret指令返回r(rval)就是5
-func f2() (r int) {
-	t := 5
-	defer func() {
-		t = t + 5
-	}()
-	return t
-}
-
-func main() {
-	println(f())  // 5
-	println(f1()) // 1
-	println(f2()) // 5
-}
-```
-
-##### 1.11.3 defer例子分析三
+##### 1.11.6 defer例子分析五
 
 ```go
 package main
@@ -7252,7 +7288,7 @@ func main() {
 
 ##### 3.16.2 内存地址永不变
 
-> 
+> 空结构体的内存地址永远不变
 
 ```go
 package main
@@ -9119,14 +9155,16 @@ go mod init example.com/studygo
 > 下面是go mod的命令
 >
 
-        download    download modules to local cache -- 下载依赖的module到本地的gopath的pkg对应包里面
-        edit        edit go.mod from tools or scripts -- 编辑go.mod文件
-        graph       print module requirement graph -- 打印模块依赖图，前提是调用了第三方包
-        init        initialize new module in current directory -- 创建一个新的module，创建go.mod文件
-        tidy        add missing and remove unused modules -- 增加丢失的module，去掉未使用的module
-        vendor      make vendored copy of dependencies -- 将依赖复制到vendor下
-        verify      verify dependencies have expected content -- 检查依赖，检查下载的第三方库有无本地修改，有修改返回非0，否则会验证成功
-        why         explain why packages or modules are needed -- 解释为什么需要依赖
+```
+    download    download modules to local cache -- 下载依赖的module到本地的gopath的pkg对应包里面
+    edit        edit go.mod from tools or scripts -- 编辑go.mod文件
+    graph       print module requirement graph -- 打印模块依赖图，前提是调用了第三方包
+    init        initialize new module in current directory -- 创建一个新的module，创建go.mod文件
+    tidy        add missing and remove unused modules -- 增加丢失的module，去掉未使用的module
+    vendor      make vendored copy of dependencies -- 将依赖复制到vendor下
+    verify      verify dependencies have expected content -- 检查依赖，检查下载的第三方库有无本地修改，有修改返回非0，否则会验证成功
+    why         explain why packages or modules are needed -- 解释为什么需要依赖
+```
 
 ##### 2.2.4 调用第三方包
 

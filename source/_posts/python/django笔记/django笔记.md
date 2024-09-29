@@ -10,56 +10,33 @@ categories: Django笔记
 
 ## 一、Web框架介绍
 
-### 1、web框架的底层理解
+### 1、Socket实现http服务端
 
 ```python
-# 网络协议
-HTTP协议    数据传输明文协议
-HTTPS协议   数据传输密文协议
-websock协议 数据传输密文协议
+import socket  # 导入socket模块，用于网络通信
 
-# HTTP四大特性
-1. 基于请求、响应
-2. 基于TCP/IP作用于应用层之上的协议
-3. 无状态
-4. 短/无链接
+socket = socket.socket()  # 创建一个TCP Socket对象
+socket.bind(("127.0.0.1", 8888))  # 将Socket绑定到本地地址和端口8888
+socket.listen(5)  # 开始监听连接，最多允许5个未处理的连接
 
-# HTTP数据格式
-请求首行
-请求头
-请求行
+while True:  # 进入无限循环，等待客户端连接
+    conn, addr = socket.accept()  # 接受客户端连接，返回一个新的Socket对象和客户端地址
 
-# 响应状态码
-1XX
-2XX
-3XX
-4XX
-5XX
+    data = conn.recv(1024)  # 从客户端接收数据，最多接收1024字节
+
+    print(f"recv data:{data}")  # 打印接收到的数据
+
+    conn.send(b"HTTP/1.1 200 OK\r\n\r\n <h1>hello li lei</h1>")  # 发送HTTP响应给客户端
+    # 在网络通信中，关闭连接是一个重要的步骤，原因如下：
+    # 资源管理：每个连接都会占用系统资源（如内存、文件描述符等）。如果不关闭连接，这些资源将无法释放，最终可能导致资源耗尽，影响服务器的性能和稳定性。
+    # 连接复用：在HTTP/1.0中，默认使用短连接（即每次请求后关闭连接）。虽然HTTP/1.1引入了长连接（Keep-Alive），但在某些情况下，短连接仍然是必要的，特别是在处理大量并发请求时。
+    # 安全性：关闭连接可以防止潜在的安全风险，如连接劫持或数据泄露。及时关闭连接可以减少这些风险。
+	# 协议规范：
+	# HTTP协议要求在每次请求后关闭连接，除非客户端和服务器都支持长连接。遵循协议规范可以确保兼容性和互操作性。
+    conn.close()  # 关闭连接
 ```
 
-#### 1.1 实现一个Http的服务端
-
-```python
-import socket
-
-server = socket.socket()
-server.bind(("127.0.0.1", 8000))
-
-# 池子
-server.listen(5)
-
-while True:
-    conn, addr = server.accept()
-
-    # 接收客户端的请求数据,客户端可以是浏览器，请求相关的所有信息
-    data = conn.recv(1024)
-    print(f"recv data:{data}")
-    print("data type is:",type(data))
-    conn.send(b"HTTP/1.1 200 OK\r\n\r\nhello web")
-    conn.close()
-```
-
-- 浏览器打开`http://127.0.0.1:8080`
+- 浏览器打开`http://127.0.0.1:8888`
 
 > 终端内有两条请求记录，目前只关心`GET /` 这一条，`/favicon.ico`暂时不关心
 
@@ -71,7 +48,7 @@ while True:
 # 上面两行代码返回的data结果
  """
     b'GET / HTTP/1.1\r\n
-    Host: 127.0.0.1:8001\r\n
+    Host: 127.0.0.1:8888\r\n
     Connection: keep-alive\r\n
     Upgrade-Insecure-Requests: 1\r\n
     User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36\r\n
@@ -86,7 +63,401 @@ while True:
     """
 ```
 
-### 2、wsgiref模块
+### 2、http请求协议
+
+> 画图软件：https://boardmix.cn/app/editor/lIR3ZWynWj79OaRD1wMQmQ
+>
+> 时序图：https://mermaid.nodejs.cn/intro/getting-started.html#using-the-mermaid-live-editor
+
+> 请求协议：请求格式+请求方法
+>
+> 下面是一个请求报文的内容
+
+#### 1.1 GET请求
+
+```bash
+GET /ping?name=sam&age=19 HTTP/1.1
+User-Agent: PostmanRuntime/7.32.2
+Accept: */*
+Postman-Token: 64e87079-9973-42cf-be94-413ae9081771
+Host: 127.0.0.1:8888
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+```
+
+![image-20240911182256951](django笔记/image-20240911182256951.png)
+
+![image-20240911182737783](django笔记/image-20240911182737783.png)
+
+#### 1.2 POST请求
+
+```bash
+POST /ping HTTP/1.1
+User-Agent: PostmanRuntime/7.32.2
+Accept: */*
+Postman-Token: 1bdcef93-9b32-4095-8dfd-49e5339d3b21
+Host: 127.0.0.1:8888
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 15
+ 
+name=sam&age=18
+```
+
+![image-20240911181030565](django笔记/image-20240911181030565.png)
+
+![image-20240911181905609](django笔记/image-20240911181905609.png)
+
+### 3、http响应协议
+
+#### 1.1 GET响应
+
+```bash
+HTTP/1.1 200 OK
+Date: Wed, 11 Sep 2024 09:15:22 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+ 
+Hello li lei
+```
+
+![image-20240911182126729](django笔记/image-20240911182126729.png)
+
+![image-20240911183546801](django笔记/image-20240911183546801.png)
+
+#### 1.2 POST响应
+
+```bash
+HTTP/1.1 200 OK
+Date: Wed, 11 Sep 2024 09:15:22 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+ 
+Hello li lei
+```
+
+![image-20240911182036721](django笔记/image-20240911182036721.png)
+
+![image-20240911183542745](django笔记/image-20240911183542745.png)
+
+#### 1.3 响应报文的响应首行字段
+
+> 响应报文的响应行字段默认都是空，只有响应头，但是我们在server端可以添加key-value作为响应豹纹的响应行字段
+>
+> server返回的响应中有响应首行字段，并且都是`\r\n`换行
+
+![image-20240911182952515](django笔记/image-20240911182952515.png)
+
+#### 1.4 响应状态码
+
+> 1xx: 接受的请求正在处理
+>
+> 2xx: 请求正常处理完毕
+>
+> 3xx: 需要进行附加操作以完成请求
+>
+> 4xx: 服务器无法处理请求
+>
+> 5xx: 服务器处理请求出错
+
+### 4、wsgiref模块
+
+#### 1.1 为什么要有wsgiref模块？
+
+> 首先最初始的socket实现的http服务，有两个问题
+>
+> - 请求参数解析
+> - 响应数据返回
+
+##### 1.1.1 请求参数解析
+
+> 下面这一行代码是在解析请求参数
+
+![image-20240911184816739](django笔记/image-20240911184816739.png)
+
+```bash
+recv data:b'GET /ping?name=sam&age=19 HTTP/1.1\r\nUser-Agent: PostmanRuntime/7.32.2\r\nAccept: */*\r\nPostman-Token: 3657068e-ea01-4c71-aab8-cec4bf38ac8c\r\nHost: 127.0.0.1:8888\r\nAccept-Encoding: gzip, deflate, br\r\nConnection: keep-alive\r\n\r\n'
+```
+
+> - 可以看到拿到客户端的请求，它返回的是字符串
+> - 但是我想以字典的形式拿到请求参数里的路由、请求头里的key-value、请求路径那还得需要自己做处理，比较繁琐
+
+##### 1.1.2 响应数据返回
+
+![image-20240911185129203](django笔记/image-20240911185129203.png)
+
+> - 可以看到响应数据的返回每次都需手动写，
+> - 那请求路由比较多了，代码编写会更加繁琐
+
+##### 1.1.3 总结
+
+> - 请求参数解析、响应数据返回都是比较底层代码，每次都需要手工操作，很繁琐。那就需要有一个模块来帮我们处理请求和响应，减少重复处理请求和响应的操作
+>
+> - 那么就需要有一个统一的接口协议来实现这样的处理逻辑，那就是`WSGI(Web Server GateWay)`
+> - wsgiref模块就是python基于wsgi协议开发的服务模块
+
+#### 1.2 wsgiref模块做了哪些事情？
+
+##### 1.1.1 wsgiref实现服务
+
+```python
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/11 18:57
+# @Author  : ly zin
+# @File    : wsgiref_demo.py
+
+from wsgiref.simple_server import make_server
+
+
+def application(environ, start_response):
+    """
+    :param environ: 依据http协议解析数据
+    :param start_response: 喜剧http协议组装数据
+    :return:
+    """
+    # 下面的start_response和return所做的事情等价于
+    # conn.send(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n\r\nHello li lei")
+    
+    # 构造响应首行以及响应首行字段
+    start_response("200 OK", [("Content-Type", "application/json; charset=utf-8")])
+    # 发送的真正的响应数据
+    return [b"hello world"]
+
+
+# 封装socket
+server = make_server("", 8090, application)
+
+# 等待用户连接：conn, addr = sock,accept
+# 会自动给application添加两个参数
+server.serve_forever()  # application(environ, start_response)
+```
+
+> 访问接口可以看到正常
+
+![image-20240911190814907](django笔记/image-20240911190814907.png)
+
+##### 1.1.2 environ参数是什么？
+
+![image-20240911191115734](django笔记/image-20240911191115734.png)
+
+```bash
+environ:{'PATH': '/Users/hibiscus/allure-commandline-2.30.0/bin:/Users/hibiscus/protoc-27.3-osx-x86_64/bin:/Users/hibiscus/.nvm/versions/node/v22.3.0/bin:/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home/bin:/Users/hibiscus/ffmpeg:/Users/hibiscus/go/bin:/Users/hibiscus/android_sdk/cmdline-tools/latest/bin:/Users/hibiscus/android_sdk/platform-tools:/Users/hibiscus/android_sdk/build-tools/35.0.0:/Library/Frameworks/Python.framework/Versions/3.10/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:.', 'JAVA_HOME': '/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home', 'COMMAND_MODE': 'unix2003', 'ANDROID_HOME': '/Users/hibiscus/android_sdk', 'GOPROXY': 'https://goproxy.cn', 'GO_HOME': '/Users/hibiscus/go', 'NVM_INC': '/Users/hibiscus/.nvm/versions/node/v22.3.0/include/node', 'FFMPEG_ENV': '/Users/hibiscus/ffmpeg', 'LOGNAME': 'hibiscus', 'HOMEBREW_BREW_GIT_REMOTE': 'https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git', 'allure2': '/Users/hibiscus/allure-commandline-2.30.0', 'XPC_SERVICE_NAME': 'application.com.jetbrains.pycharm.810107.810805', 'PWD': '/Users/hibiscus/Desktop/code/py_code/py_web/django_web/django_source_code_study', 'PYCHARM_HOSTED': '1', 'PYCHARM_DISPLAY_PORT': '63343', 'PROTOC_HOME': '/Users/hibiscus/protoc-27.3-osx-x86_64', '__CFBundleIdentifier': 'com.jetbrains.pycharm', 'HOMEBREW_PIP_INDEX_URL': 'https://pypi.tuna.tsinghua.edu.cn/simple', 'HOMEBREW_CORE_GIT_REMOTE': 'https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git', 'PYTHONPATH': '/Users/hibiscus/Desktop/code/py_code/py_web/django_web/django_source_code_study:/Applications/PyCharm.app/Contents/plugins/python/helpers/pycharm_matplotlib_backend:/Applications/PyCharm.app/Contents/plugins/python/helpers/pycharm_display', 'NVM_CD_FLAGS': '-q', 'SHELL': '/bin/zsh', 'NVM_DIR': '/Users/hibiscus/.nvm', 'MKL_THREADING_LAYER': 'TBB', 'PAGER': 'less', 'LSCOLORS': 'Gxfxcxdxbxegedabagacad', 'PYTHONIOENCODING': 'UTF-8', 'HOMEBREW_BOTTLE_DOMAIN': 'https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles', 'OLDPWD': '/', 'USER': 'hibiscus', 'CLASSPATH': '/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home/lib/tools.jar:/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home/lib/dt.jar:', 'ZSH': '/Users/hibiscus/.oh-my-zsh', 'TMPDIR': '/var/folders/5y/3ymnzfm963g0gmzh20fn4vq80000gn/T/', 'GO111MODULE': 'on', 'SSH_AUTH_SOCK': '/private/tmp/com.apple.launchd.1sgypUKGMi/Listeners', 'PYCHARM_INTERACTIVE_PLOTS': '1', 'XPC_FLAGS': '0x0', 'PYTHONUNBUFFERED': '1', '__CF_USER_TEXT_ENCODING': '0x1F5:0x19:0x34', 'LESS': '-R', 'LC_CTYPE': 'zh_CN.UTF-8', 'LS_COLORS': 'di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43', 'IDEA_INITIAL_DIRECTORY': '/', 'NVM_BIN': '/Users/hibiscus/.nvm/versions/node/v22.3.0/bin', 'HOME': '/Users/hibiscus', 'HOMEBREW_API_DOMAIN': 'https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles/api', 'SERVER_NAME': 'apdeMacBook-Pro.local', 'GATEWAY_INTERFACE': 'CGI/1.1', 'SERVER_PORT': '8090', 'REMOTE_HOST': '', 'CONTENT_LENGTH': '', 'SCRIPT_NAME': '', 'SERVER_PROTOCOL': 'HTTP/1.1', 'SERVER_SOFTWARE': 'WSGIServer/0.2', 'REQUEST_METHOD': 'GET', 'PATH_INFO': '/', 'QUERY_STRING': '', 'REMOTE_ADDR': '127.0.0.1', 'CONTENT_TYPE': 'text/plain', 'HTTP_USER_AGENT': 'PostmanRuntime/7.32.2', 'HTTP_ACCEPT': '*/*', 'HTTP_POSTMAN_TOKEN': 'bff5e120-95b2-41b8-8a10-14996c0fc831', 'HTTP_HOST': '127.0.0.1:8090', 'HTTP_ACCEPT_ENCODING': 'gzip, deflate, br', 'HTTP_CONNECTION': 'keep-alive', 'wsgi.input': <_io.BufferedReader name=4>, 'wsgi.errors': <_io.TextIOWrapper name='<stderr>' mode='w' encoding='utf-8'>, 'wsgi.version': (1, 0), 'wsgi.run_once': False, 'wsgi.url_scheme': 'http', 'wsgi.multithread': False, 'wsgi.multiprocess': False, 'wsgi.file_wrapper': <class 'wsgiref.util.FileWrapper'>}
+```
+
+> - environ是一个字典，我们就可以自由的拿到想要的请求数据
+> - 里面字段非常多，但是我们可以重点关注PATH_INFO字段，就拿到了当前请求路径
+
+#### 1.3 基于wsgiref自定义web框架
+
+##### 1.1.1 实现路由分发
+
+> 因为服务不可能只有一个路由，我们也不可能一直给用户返回同一个响应内容，用户希望通过不同路由得到不同的响应结果，那么我们就需要实现这样的逻辑
+>
+> - 核心逻辑就是获取environ.get("PATH_INFO")来获取当前请求的路由，然后进行if-else判断
+
+```python
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/11 18:57
+# @Author  : ly zin
+# @File    : wsgiref_demo.py
+
+from wsgiref.simple_server import make_server
+
+
+def application(environ, start_response):
+    """
+    下面的start_response和return所做的事情等价于
+    conn.send(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n\r\nHello li lei")
+    :param environ: 依据http协议解析数据
+    :param start_response: 喜剧http协议组装数据
+    :return:
+    """
+    request_path = environ.get("PATH_INFO")
+
+    # 构造响应首行以及响应首行字段
+    start_response("200 OK", [("Content-Type", "application/json; charset=utf-8")])
+    if request_path == "/login":
+        return [b"login page"]
+    elif request_path == "/index":
+        return [b"index page"]
+    # 发送的真正的响应数据
+    return [b"not found page"]
+
+
+# 封装socket
+server = make_server("", 8090, application)
+
+# 等待用户连接：conn, addr = sock.accept()
+# 会自动给application添加两个参数
+server.serve_forever()  # application(environ, start_response)
+```
+
+> 从下图就可以看到，我们通过不同的路由得到了不同的结果
+
+![image-20240911192501012](django笔记/image-20240911192501012.png)
+
+##### 1.1.2 路由分发优化
+
+> 上面的代码都是用if-else来实现路由分发，也就是一个路由对应一个处理代码
+>
+> 那么我们是不是可以把路由和处理代码放在一个列表里进行路由分发，并发把处理代码封装成一个函数
+
+```python
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/11 18:57
+# @Author  : ly zin
+# @File    : wsgiref_demo.py
+
+from wsgiref.simple_server import make_server
+
+
+def login():
+    return "login page"
+
+
+def index():
+    return "index page"
+
+
+def application(environ, start_response):
+    """
+    下面的start_response和return所做的事情等价于
+    conn.send(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n\r\nHello li lei")
+    :param environ: 依据http协议解析数据
+    :param start_response: 喜剧http协议组装数据
+    :return:
+    """
+    request_path = environ.get("PATH_INFO")
+
+    # 构造响应首行以及响应首行字段
+    start_response("200 OK", [("Content-Type", "application/json; charset=utf-8")])
+
+    url_patterns = [
+        ("/login", login),
+        ("/index", index),
+    ]
+
+    func = None
+    for i in url_patterns:
+        if request_path == i[0]:
+            func = i[1]
+
+    # 匹配到了封装的函数
+    if func:
+        return [func().encode("utf-8")]
+
+    # 发送的真正的响应数据
+    return [b"not found page"]
+
+
+# 封装socket
+server = make_server("", 8090, application)
+
+# 等待用户连接：conn, addr = sock.accept()
+# 会自动给application添加两个参数
+server.serve_forever()  # application(environ, start_response)
+```
+
+![image-20240911193416451](django笔记/image-20240911193416451.png)
+
+> 同样实现了路由分发
+
+##### 1.1.3 路由分发的优点
+
+> 上面的url_patterns 只需要定义路由和对应的处理函数，然后再处理函数中实现业务逻辑即可，这样是不是我们的关注更低了，只需要关注路径和处理函数，不需要再关心其他内容
+
+##### 1.1.4 environ参数处理
+
+> 从前面知道environ参数包含了所有请求处理参数，那我们的处理函数中肯定100%需要拿到请求参数再来处理业务逻辑，所以但是environ参数再application函数中，我们需要将environ参数传递给每个处理函数，那么处理函数就具备了处理请求参数的能力，这就是web框架的雏形
+
+```python
+# -*- coding: utf-8 -*-
+# @Time    : 2024/9/11 18:57
+# @Author  : ly zin
+# @File    : wsgiref_demo.py
+
+from wsgiref.simple_server import make_server
+
+
+def login(environ):
+    return "login page"
+
+
+def index(environ):
+    return "index page"
+
+
+def application(environ, start_response):
+    """
+    下面的start_response和return所做的事情等价于
+    conn.send(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n\r\nHello li lei")
+    :param environ: 依据http协议解析数据
+    :param start_response: 喜剧http协议组装数据
+    :return:
+    """
+    request_path = environ.get("PATH_INFO")
+
+    # 构造响应首行以及响应首行字段
+    start_response("200 OK", [("Content-Type", "application/json; charset=utf-8")])
+
+    url_patterns = [
+        ("/login", login),
+        ("/index", index),
+    ]
+
+    func = None
+    for i in url_patterns:
+        if request_path == i[0]:
+            func = i[1]
+
+    # 匹配到了封装的函数
+    if func:
+        return [func(environ).encode("utf-8")]
+
+    # 发送的真正的响应数据
+    return [b"not found page"]
+
+
+# 封装socket
+server = make_server("", 8090, application)
+
+# 等待用户连接：conn, addr = sock.accept()
+# 会自动给application添加两个参数
+server.serve_forever()  # application(environ, start_response)
+```
+
+![image-20240911193929652](django笔记/image-20240911193929652.png)
+
+> 所以即使处理函数用不到environ参数，那也需要传递，因为请求参数处理在开发中占比非常高
+
+##### 1.1.5 拆分实现web框架
+
+> 从上面的路由分发可以看到，所有代码都是聚合在一起，那我们是不是可以进行拆分，实现不同目录负责不同功能
+
+```bash
+# 进行了文件拆分
+my_web
+├── main.py
+├── urls.py
+└── views.py
+
+1 directory, 3 files
+```
+
+![image-20240911194534542](django笔记/image-20240911194534542.png)
+
+> 那这样拆分以后就实现一个自定义的web框架
+
+> 添加功能，比如需要添加一个查看时间的接口，只需要在views.py和urls.py中添加代码即可
+
+![image-20240911195111162](django笔记/image-20240911195111162.png)
+
+> 可以看到很快就实现一个http接口，这就是封装web框架的优势
+
+![image-20240911194949756](django笔记/image-20240911194949756.png)
+
+#### 1.4 django中的wsgiref
 
 > Django底层用的是`wsgiref`模块来请求和响应数据
 >
@@ -95,7 +466,9 @@ while True:
 > 1. 请求来的时候解析`HTTP`格式的数据，封装成大字典
 > 2. 响应走的时候给数据打包成符合`HTTP`格式的数据返回给浏览器
 
-### 3、Django安装
+## 二、Django上手
+
+### 1、Django安装
 
 > `Django`的版本问题
 >
@@ -114,11 +487,9 @@ pip install django==1.11.17
 1.11.17
 ```
 
-## 二、Django基本操作
-
 > 下面基本都在命令行操作
 
-### 1、创建项目
+### 2、创建项目
 
 > `blog`是项目名
 >
@@ -143,7 +514,7 @@ django-admin startproject blog
 >
 >   - `wsgi.py` ：项目启动服务文件
 
-### 2、创建应用
+### 3、创建应用
 
 > - 一个`app`就是一个功能独立的模块
 > - 一个项目可以有多个`app`：比如下面的`home`是就是应用名
@@ -158,11 +529,11 @@ python manage.py startapp home
 
 ![image-20211215235855339](django%E7%AC%94%E8%AE%B0/image-20211215235855339.png)
 
-#### 2.1 应用的目录结构
+#### 1.1 应用的目录结构
 
 ![image-20211216000052168](django%E7%AC%94%E8%AE%B0/image-20211216000052168.png)
 
-#### 2.2 注册应用
+#### 1.2 注册应用
 
 > 创建出来的应用一定要先去配置文件中注册，在`setting.py`文件中
 >
@@ -184,7 +555,7 @@ INSTALLED_APPS = [
 ]
 ```
 
-### 3、项目目录结构介绍
+### 4、项目目录结构介绍
 
 ```bash
 - blog目录
@@ -203,7 +574,7 @@ INSTALLED_APPS = [
 			 -- test.py 测试文件
 ```
 
-### 4、启动Django项目
+### 5、启动Django项目
 
 ```bash
 python manage.py runserver
@@ -220,7 +591,7 @@ python manage.py runserver
 
 ![image-20211216000754066](django%E7%AC%94%E8%AE%B0/image-20211216000754066.png)
 
-### 5、`templates`目录
+### 6、`templates`目录
 
 > `templates`目录用来存放前段`HTML`页面的
 >
@@ -228,9 +599,9 @@ python manage.py runserver
 >
 > - pycharm创建是`templates`文件目录的
 
-### 6、Django三组件
+### 7、Django三组件
 
-#### 6.1 HttpResponse
+#### 1.1 HttpResponse
 
 > 从`HttpResponse`源码可以看：
 >
@@ -277,13 +648,13 @@ def home(request):
     return ret
 ```
 
-#### 6.2 render
+#### 1.2 render
 
 > 给浏览器返回渲染的`html`文件，将`html`文件变成字节形式返回给浏览器
 >
 > render方法本身返回的还是`HttpResponse`对象
 
-##### 2.1 创建`html`文件
+##### 1.1.1 创建`html`文件
 
 > 1. 需要检查settings.py中有没有添加templates目录路径，没有的话，需要加上
 
@@ -324,7 +695,7 @@ TEMPLATES = [
 </html>
 ```
 
-##### 2.2 编写路由
+##### 1.1.2 编写路由
 
 ```python
 # 在settings.py文件中添加index_html的路由
@@ -339,7 +710,7 @@ urlpatterns = [
 ]
 ```
 
-##### 2.3 编写视图函数
+##### 1.1.3 编写视图函数
 
 ```python
 # 应用中使用，写在views.py中
@@ -353,13 +724,13 @@ def index_html(request):
     return render(request, 'index.html', locals())
 ```
 
-##### 2.4 请求页面
+##### 1.1.4 请求页面
 
 > 访问`http://127.0.0.1:8000/index_html/`即可看到下面的页面
 
 ![image-20210903143834317](django%E7%AC%94%E8%AE%B0/image-20210903143834317.png)
 
-#### 6.3 redirect
+#### 1.3 redirect
 
 > 表示在视图函数中跳转到别的页面，也叫重定向
 >
@@ -380,7 +751,7 @@ def index_redirect(request):
 
 ![image-20210903144432203](django%E7%AC%94%E8%AE%B0/image-20210903144432203.png)
 
-### 7、静态文件配置
+### 8、静态文件配置
 
 > `html`文件都放在`templates`文件下
 >
@@ -392,9 +763,7 @@ def index_redirect(request):
 >
 > - 在`static`中可以放`js`/`css`/`plugins`等文件夹，做好区分
 
-
-
-#### 7.1 静态文件绝对路径
+#### 1.1 静态文件绝对路径
 
 > `谨记：`
 >
@@ -424,7 +793,7 @@ def index_redirect(request):
 
 ![image-20211227235030984](django%E7%AC%94%E8%AE%B0/image-20211227235030984.png)
 
-#### 7.2 服务端开启静态资源入口
+#### 1.2 服务端开启静态资源入口
 
 > 因为上面的报错，所以需要服务端开启访问静态资源的入口，才可以使得前端可以访问到资源
 >
@@ -462,7 +831,7 @@ STATICFILES_DIRS = [
 
 
 
-#### 7.3 灵活取令牌值
+#### 1.3 灵活取令牌值
 
 > ​	但是当前端页面很多时，并且我们都是用相对路径去写静态资源的路径，并且路径第一个单词是`令牌`，这个时候需要修改令牌时，就会需要修改很多文件，那么怎么灵活处理呢？就用到了`静态文件动态解析`
 >
@@ -475,15 +844,15 @@ STATICFILES_DIRS = [
 
 
 
-### 8、request对象方法
+### 9、request对象方法
 
-#### 8.1 关闭`csrf`中间件
+#### 1.1 关闭`csrf`中间件
 
 > 在前阶段学习时，可以先注释`csrf`中间件，否则做一些`form`的`post`表单提交时会报错，后面再来探讨这个问题
 
 ![image-20211228001140316](django%E7%AC%94%E8%AE%B0/image-20211228001140316.png)
 
-#### 8.2 request对象
+#### 1.2 request对象
 
 > 在视图函数中都会有`request`形参，需要重点来学习下这个`request`，`request`是一个对象，里面有很多可以供我们使用的方法
 
@@ -510,7 +879,7 @@ dir(request) # 可以看到有很多的方法
 
 ![image-20220714231350440](django%E7%AC%94%E8%AE%B0/image-20220714231350440.png)
 
-##### 8.2.1 request.method
+##### 1.1.1 request.method
 
 > 用来获取请求这个url的请求方法
 >
@@ -534,7 +903,7 @@ def home(request):
     return render(request, "index.html")
 ```
 
-##### 8.2.2 request.POST
+##### 1.1.2 request.POST
 
 > 用来获取用户提交的`post`请求数据
 >
@@ -601,7 +970,7 @@ def home(request):
     return render(request, "index.html")
 ```
 
-##### 8.2.3 request.GET
+##### 1.1.3 request.GET
 
 > `request.GET`和`request.POST`的所有请求方法都一样
 >
@@ -630,7 +999,7 @@ def home(request):
     return render(request, "index.html")
 ```
 
-##### 8.2.4 POST请求知识扩展
+##### 1.1.4 POST请求知识扩展
 
 > Post提交数据的几种方式
 >
@@ -650,13 +1019,13 @@ def home(request):
 >
 > https://www.jianshu.com/p/7987a88f3022
 
-##### 8.2.5 编码方式知识扩展
+##### 1.1.5 编码方式知识扩展
 
 > 字符编码：ASCII 与 UTF-8编码
 >
 > https://blog.csdn.net/salvare/article/details/82941165
 
-#### 8.3 request.path相关
+#### 1.3 request.path相关
 
 ```python
 def index(request):
@@ -684,22 +1053,22 @@ def index(request):
 
 ![image-20220719134140233](django%E7%AC%94%E8%AE%B0/image-20220719134140233.png)
 
-##### 8.3.1 path属性(推荐)
+##### 1.1.1 path属性(推荐)
 
 > 获取的是不带域名、不带?号后面参数的路由部分
 
-##### 8.3.1 path_info属性(不推荐)
+##### 1.1.1 path_info属性(不推荐)
 
 > 获取的是不带域名、不带?号后面参数的路由部分
 
-##### 8.3.1 get_full_path方法
+##### 1.1.1 get_full_path方法
 
 > 注意：
 >
 > - 当访问路由时没有参数，get_full_path方法和path、path_info属性获取到的路由都一样
 > - 当访问路由时带了参数，get_full_path方法会`将路由和?号后面的参数都一起返回`
 
-#### 8.4 request.body相关
+#### 1.4 request.body相关
 
 > 返回的是原生浏览器发过来的二进制数据
 
@@ -711,27 +1080,27 @@ res = request.body
 
 
 
-### 9、Pycharm操作Django技巧
+### 10、Pycharm操作Django技巧
 
-#### 9.1 快速创建Django应用
+#### 1.1 快速创建Django应用
 
 ![image-20211216001638808](django%E7%AC%94%E8%AE%B0/image-20211216001638808.png)
 
-#### 9.2 修改Django端口
+#### 1.2 修改Django端口
 
 ![image-20211216001717991](django%E7%AC%94%E8%AE%B0/image-20211216001717991.png)
 
 ![image-20211216001748598](django%E7%AC%94%E8%AE%B0/image-20211216001748598.png)
 
-#### 9.3 浏览器访问页面不走缓存
+#### 1.3 浏览器访问页面不走缓存
 
 > 谷歌浏览器打开F12，找到设置，勾选下面的选项即可
 
 ![image-20211227235948716](django%E7%AC%94%E8%AE%B0/image-20211227235948716.png)
 
-### 10、路由
+### 11、路由
 
-#### 10.1 路由匹配
+#### 1.1 路由匹配
 
 > Django中的路由是通过正则进行匹配的
 
@@ -745,9 +1114,9 @@ res = request.body
 
 
 
-#### 10.2 无名分组
+#### 1.2 无名分组
 
-##### 10.2.1 无名分组使用
+##### 1.1.1 无名分组使用
 
 > Django支持在url中设置变量来接收传进来的值，本质就是通过正则表达式来匹配
 >
@@ -775,11 +1144,11 @@ def query_my_course(request, num):
 
 ![image-20220717223116129](django%E7%AC%94%E8%AE%B0/image-20220717223116129.png)
 
-##### 10.2.2 无名分组反向解析
+##### 1.1.2 无名分组反向解析
 
-#### 10.3 有名分组
+#### 1.3 有名分组
 
-##### 10.3.1 有名分组使用
+##### 1.1.1 有名分组使用
 
 > 相当于给正则匹配起了个别名，
 >
@@ -817,9 +1186,9 @@ def collect_new_course(request, level_id):
 
 
 
-##### 10.1.2 有名分组反向解析
+##### 1.1.2 有名分组反向解析
 
-#### 10.4 有名分组和无名分组注意
+#### 1.4 有名分组和无名分组注意
 
 > - 有名分组和无名分组注意不能混合使用
 > - 但是`单独`的有名分组、无名分组可以使用多个
@@ -839,7 +1208,7 @@ def collect_new_course(request, levelId, level_num):
 
 ![image-20220718010544283](django%E7%AC%94%E8%AE%B0/image-20220718010544283.png)
 
-#### 10.5 路由分发
+#### 1.5 路由分发
 
 > Django的每一个应用都可以有自己的`templates文件夹`、`urls.py`、`static文件夹`
 >
@@ -850,7 +1219,7 @@ def collect_new_course(request, levelId, level_num):
 >
 > - 利用路由分发以后，总路由不再处理路由和视图函数的直接对应关系，而只是进行分发处理(url指向需要找到的app)，然后根据识别到当前url是属于哪个应用下，然后分发给对应的应用去处理
 
-##### 10.5.1 路由分发第一步
+##### 1.1.1 路由分发第一步
 
 > app用来代表不同的应用简写，没有别的含义，比如`订单应用`、`用户应用`等等
 >
@@ -875,7 +1244,7 @@ urlpatterns = [
 
 > 可以看到将home应用所有的url都放在了home/urls.py文件中
 
-##### 10.5.2 路由分发第二步
+##### 1.1.2 路由分发第二步
 
 > 在项目总路由中添加应用的路由分发，需要提前导入`include`方法
 >
@@ -912,7 +1281,7 @@ urlpatterns = [
 
 ![image-20220719001034991](django%E7%AC%94%E8%AE%B0/image-20220719001034991.png)
 
-##### 10.5.3 访问路由分发的应用
+##### 1.1.3 访问路由分发的应用
 
 > 有了路由分发以后，访问路由就需要前带上应用名，再去访问应用里具体的路由
 >
@@ -926,17 +1295,17 @@ urlpatterns = [
 
 > 路由分发后面就可以根据应用(也可以叫模块)区分路由，比如用户应用(管理用户内容的，比如注册、查询、修改、注销等)、订单应用(管理订单相关内容，比如创建订单、支付订单、查询订单、关闭订单等等)
 
-#### 10.6 名称空间（了解）
+#### 1.6 名称空间（了解）
 
 > 当多个应用出现了相同的别名，反向解析是没法自动识别相同的别名的前缀的，用的很少
 
-#### 10.7 伪静态（了解）
+#### 1.7 伪静态（了解）
 
 > 其实就是把一个动态网页伪装成静态网页，乐嘉增大网站的seo查询热度，增加搜索引擎的查询概率，用的很少
 >
 > 用法就是在具体的路由后面加`.html`，伪装成一个静态网页，比如：`http://127.0.0.1:8000/home/user_info.html`
 
-### 11、JsonResponse对象
+### 12、JsonResponse对象
 
 > Django中返回的响应对象常见的有两个
 >
@@ -969,7 +1338,7 @@ return JsonResponse(ret, json_dumps_params={"ensure_ascii": False}, safe=False)
 
 ![image-20220716000407609](django%E7%AC%94%E8%AE%B0/image-20220716000407609.png)
 
-### 12、文件上传操作
+### 13、文件上传操作
 
 > 文件上传是属于form表单里的功能
 >
@@ -1009,17 +1378,11 @@ def upload_avatar(request):
 > - file_obj的类型：`class 'django.core.files.uploadedfile.InMemoryUploadedFile'`
 > - file_obj.name：可以通过获取到的文件对象`.name`属性来获取上传的文件名，然后保存到本地或其他地方
 
-### 13、FBV和CBV
+### 14、FBV和CBV
 
-#### 13.1 FBV
+#### 1.1 FBV
 
-
-
-#### 13.2 CBV
-
-
-
-
+#### 1.2 CBV
 
 
 

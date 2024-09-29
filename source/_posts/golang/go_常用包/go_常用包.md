@@ -926,17 +926,23 @@ func main() {
 
 ![image-20220331215554288](go_常用包/image-20220331215554288.png)
 
-## 七、errors包
+## 七、context包
 
-## 八、log包
+> context官方库文档：https://pkg.go.dev/context
 
-## 九、io包
+> 
 
-## 十、encoding包
+## 八、errors包
+
+## 九、log包
+
+## 十、io包
+
+## 十一、encoding包
 
 
 
-## X、rand包
+## x、rand包
 
 > rand模块可以用来生成随机数，是`math`包里的`rand`方法
 >
