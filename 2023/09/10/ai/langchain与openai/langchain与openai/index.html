@@ -1,0 +1,259 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Langchain与OpenAI | 笔记小窝</title><meta name="keywords" content="AI,Langchain,openai"><meta name="author" content="刘阳"><meta name="copyright" content="刘阳"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一、Langchain langchain官网地址：https:&#x2F;&#x2F;python.langchain.com&#x2F;docs&#x2F;get_started&#x2F;introduction.html  1、介绍 LangChain 是一个利用语言模型开发应用程序的框架，它使应用程序能够：  Data-aware：将语言模型与其他数据源连接起来  Proxy：允许语言模型与其环境交互   LangChain的主要价值部">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Langchain与OpenAI">
+<meta property="og:url" content="https://www.lynote.top/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/index.html">
+<meta property="og:site_name" content="笔记小窝">
+<meta property="og:description" content="一、Langchain langchain官网地址：https:&#x2F;&#x2F;python.langchain.com&#x2F;docs&#x2F;get_started&#x2F;introduction.html  1、介绍 LangChain 是一个利用语言模型开发应用程序的框架，它使应用程序能够：  Data-aware：将语言模型与其他数据源连接起来  Proxy：允许语言模型与其环境交互   LangChain的主要价值部">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.lynote.top/posts_cover_img/ai/ai.jpeg">
+<meta property="article:published_time" content="2023-09-10T14:03:08.000Z">
+<meta property="article:modified_time" content="2023-09-10T14:03:08.000Z">
+<meta property="article:author" content="刘阳">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Langchain">
+<meta property="article:tag" content="openai">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.lynote.top/posts_cover_img/ai/ai.jpeg"><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://www.lynote.top/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="/pluginsSrc/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: '/pluginsSrc/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: '/pluginsSrc/flickr-justified-gallery/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Langchain与OpenAI',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-09-10 22:03:08'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">36</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">36</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">36</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 博客分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 文章标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 博客归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/posts_cover_img/ai/ai.jpeg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">笔记小窝</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 博客分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 文章标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 博客归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Langchain与OpenAI</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-10T14:03:08.000Z" title="发表于 2023-09-10 22:03:08">2023-09-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-10T14:03:08.000Z" title="更新于 2023-09-10 22:03:08">2023-09-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/AI/">AI</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Langchain与OpenAI"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="一、Langchain"><a href="#一、Langchain" class="headerlink" title="一、Langchain"></a>一、Langchain</h2><blockquote>
+<p>langchain官网地址：<a target="_blank" rel="noopener" href="https://python.langchain.com/docs/get_started/introduction.html">https://python.langchain.com/docs/get_started/introduction.html</a></p>
+</blockquote>
+<h3 id="1、介绍"><a href="#1、介绍" class="headerlink" title="1、介绍"></a>1、介绍</h3><blockquote>
+<p>LangChain 是一个利用语言模型开发应用程序的框架，它使应用程序能够：</p>
+<ul>
+<li><p>Data-aware：将语言模型与其他数据源连接起来</p>
+</li>
+<li><p>Proxy：允许语言模型与其环境交互</p>
+</li>
+</ul>
+<p>LangChain的主要价值部分：</p>
+<ul>
+<li><p>Components：用于处理语言模型的抽象概念，以及每个抽象概念的实现集合。无论您是否使用 LangChain 框架的其他部分，组件都是模块化的，易于使用。</p>
+</li>
+<li><p>Off-the-shelf chains：用于完成特定高级任务的组件结构化组合，现成的链可以让您轻松上手。对于更复杂的应用和细微的用例，组件可以轻松定制现有链或构建新链。</p>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>LangChain 为下列模块提供了标准的、可扩展的接口和外部集成，这些模块的复杂程度从低到高依次排列：</p>
+<ul>
+<li><p>Model I&#x2F;O（模型输入输出）：语言模型接口</p>
+</li>
+<li><p>Retrieval（检索）：与特定应用数据的接口</p>
+</li>
+<li><p>Chains（链）：构建调用序列</p>
+</li>
+<li><p>Agents（代理）：让链根据高级指令选择要使用的工具</p>
+</li>
+<li><p>Memory（内存）：在链运行之间保持应用程序状态</p>
+</li>
+<li><p>Callbacks（回调）：记录任何链的中间步骤并进行流式处理</p>
+</li>
+</ul>
+</blockquote>
+<h3 id="2、安装Langchain"><a href="#2、安装Langchain" class="headerlink" title="2、安装Langchain"></a>2、安装Langchain</h3><blockquote>
+<p>要安装所有集成所需的所有模块，请运行如下命令</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install <span class="string">&quot;langchain[all]&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3、LLMs介绍"><a href="#3、LLMs介绍" class="headerlink" title="3、LLMs介绍"></a>3、LLMs介绍</h3><blockquote>
+<p><strong>LLMs</strong>是Large Language Model的缩写。</p>
+<p>LLMs语言模型分为两种类型，在LangChain中被称为：</p>
+<ul>
+<li>LLMs：这是一种语言模型，它接受一个字符串作为输入并返回一个字符串 </li>
+<li>ChatModels：这是一种语言模型，它接受一系列消息作为输入，并返回一个消息</li>
+</ul>
+<p>LLMs的输入&#x2F;输出非常简单易懂 - 一个字符串。但是ChatModels呢？输入是一个ChatMessages的列表，输出是一个单独的ChatMessage。</p>
+<p>一个ChatMessage有两个必需的组件：</p>
+<ul>
+<li>content：这是消息的内容。 </li>
+<li>role：这是发出ChatMessage的实体的角色。</li>
+</ul>
+<p>LangChain提供了几个对象，便于区分不同的角色：</p>
+<ul>
+<li>HumanMessage：来自人&#x2F;用户的ChatMessage。 </li>
+<li>AIMessage：来自AI&#x2F;助手的ChatMessage。 </li>
+<li>SystemMessage：来自系统的ChatMessage。 </li>
+<li>FunctionMessage：来自函数调用的ChatMessage。 </li>
+<li>如果这些角色都不确切，还有一个ChatMessage类，您可以手动指定角色。</li>
+</ul>
+<p>LangChain为上面两个语言模型都提供了标准接口，但理解这种差异对构建给定语言模型的提示很有帮助。LangChain提供的标准接口有两种方法：</p>
+<ul>
+<li>predict：输入一个字符串，返回一个字符串。 </li>
+<li>predict_messages（给ChatModels用）: 输入一系列消息，返回一个消息。</li>
+</ul>
+</blockquote>
+<h3 id="4、Prompt模板"><a href="#4、Prompt模板" class="headerlink" title="4、Prompt模板"></a>4、Prompt模板</h3><blockquote>
+<p>大多数 LLM 应用程序不会将用户输入直接传递到 LLM 中。通常，它们会将用户输入添加到一段较大的文本（称为提示模板）中，为手头的特定任务提供额外的上下文。</p>
+<p>在前面的例子中，我们传递给模型的文本包含生成公司名称的指令。对于我们的应用程序来说，如果用户只需提供公司&#x2F;产品的描述，而无需向模型提供说明，那就再好不过了。</p>
+<p>PromptTemplates 正好可以解决这个问题！它们捆绑了从用户输入到完全格式化提示的所有逻辑。一开始可以非常简单–例如，生成上述字符串的提示语可以是</p>
+</blockquote>
+<h4 id="4-1-prompt模板简单示例"><a href="#4-1-prompt模板简单示例" class="headerlink" title="4.1 prompt模板简单示例"></a>4.1 prompt模板简单示例</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain.prompts <span class="keyword">import</span> PromptTemplate</span><br><span class="line"></span><br><span class="line">prompt = PromptTemplate.from_template(<span class="string">&quot;What is a good name for a company that makes &#123;product&#125;?&quot;</span>)</span><br><span class="line">prompt.<span class="built_in">format</span>(product=<span class="string">&quot;colorful socks&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出，可以看到将&quot;colorful socks&quot;替换到了&#123;product&#125;中</span></span><br><span class="line">What <span class="keyword">is</span> a good name <span class="keyword">for</span> a company that makes colorful socks?</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain <span class="keyword">import</span> PromptTemplate</span><br><span class="line"></span><br><span class="line">prompt_template = PromptTemplate.from_template(</span><br><span class="line">    <span class="string">&quot;Tell me a &#123;adjective&#125; joke about &#123;content&#125;.&quot;</span></span><br><span class="line">)</span><br><span class="line">prompt_template.<span class="built_in">format</span>(adjective=<span class="string">&quot;funny&quot;</span>, content=<span class="string">&quot;chickens&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出</span></span><br><span class="line"><span class="string">&quot;Tell me a funny joke about chickens.&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="4-1-1-支持没有变量直接输出"><a href="#4-1-1-支持没有变量直接输出" class="headerlink" title="4.1.1 支持没有变量直接输出"></a>4.1.1 支持没有变量直接输出</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 支持没有变量直接输出</span></span><br><span class="line"><span class="keyword">from</span> langchain <span class="keyword">import</span> PromptTemplate</span><br><span class="line"></span><br><span class="line">prompt_template = PromptTemplate.from_template(</span><br><span class="line"><span class="string">&quot;Tell me a joke&quot;</span></span><br><span class="line">)</span><br><span class="line">prompt_template.<span class="built_in">format</span>()</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-1-2-指定输入的变量值"><a href="#4-1-2-指定输入的变量值" class="headerlink" title="4.1.2 指定输入的变量值"></a>4.1.2 指定输入的变量值</h5><blockquote>
+<p>可明确指定input_variables。input_variables是一个列表，里面的元素为模板需要替换的变量，当这些变量将与模板字符串中的变量进行比较，如果不匹配，就会出现异常。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain <span class="keyword">import</span> PromptTemplate</span><br><span class="line"></span><br><span class="line">invalid_prompt = PromptTemplate(</span><br><span class="line">    <span class="comment"># input_variables 只有adjective，缺少content变量，输出报错</span></span><br><span class="line">    input_variables=[<span class="string">&quot;adjective&quot;</span>],</span><br><span class="line">    template=<span class="string">&quot;Tell me a &#123;adjective&#125; joke about &#123;content&#125;.&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(invalid_prompt.<span class="built_in">format</span>(adjective=<span class="string">&quot;funny&quot;</span>, content=<span class="string">&quot;chickens&quot;</span>))</span><br></pre></td></tr></table></figure>
+
+<img src="/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/image-20230910225007662.png" class="" title="image-20230910225007662">
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain <span class="keyword">import</span> PromptTemplate</span><br><span class="line"></span><br><span class="line">invalid_prompt = PromptTemplate(</span><br><span class="line">    <span class="comment"># input_variables 有adjective、content变量，输出正常</span></span><br><span class="line">    input_variables=[<span class="string">&quot;adjective&quot;</span>, <span class="string">&quot;content&quot;</span>],</span><br><span class="line">    template=<span class="string">&quot;Tell me a &#123;adjective&#125; joke about &#123;content&#125;.&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(invalid_prompt.<span class="built_in">format</span>(adjective=<span class="string">&quot;funny&quot;</span>, content=<span class="string">&quot;chickens&quot;</span>))</span><br></pre></td></tr></table></figure>
+
+<img src="/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/image-20230910225041108.png" class="" title="image-20230910225041108">
+
+<h4 id="4-2-prompt模板组合使用"><a href="#4-2-prompt模板组合使用" class="headerlink" title="4.2 prompt模板组合使用"></a>4.2 prompt模板组合使用</h4><blockquote>
+<p>与原始字符串格式化相比，使用这些格式化有几个优点。</p>
+<ul>
+<li>可以 “部分 “删除变量–例如，一次只能格式化部分变量。</li>
+<li>可以将它们组合在一起，轻松地将不同模板组合成一个提示符。</li>
+</ul>
+<p>PromptTemplates也可用于生成信息列表</p>
+<ul>
+<li>在这种情况下，提示不仅包含内容信息，还包含每条信息（其角色、在列表中的位置等）</li>
+<li>最常见的情况是 ChatPromptTemplate 是 ChatMessageTemplate 的列表。</li>
+<li>每个 ChatMessageTemplate 都包含如何格式化 ChatMessage 的说明–它的角色和内容。下面我们就来看看：</li>
+</ul>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain.prompts.chat <span class="keyword">import</span> (</span><br><span class="line">    ChatPromptTemplate,</span><br><span class="line">    SystemMessagePromptTemplate,</span><br><span class="line">    HumanMessagePromptTemplate,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 系统消息模板</span></span><br><span class="line">template = <span class="string">&quot;You are a helpful assistant that translates &#123;input_language&#125; to &#123;output_language&#125;.&quot;</span></span><br><span class="line">system_message_prompt = SystemMessagePromptTemplate.from_template(template)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用户输出模板，也就是提问的问题</span></span><br><span class="line">human_template = <span class="string">&quot;&#123;text&#125;&quot;</span></span><br><span class="line">human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)</span><br><span class="line"></span><br><span class="line"><span class="comment"># chatGPT提问的模板，组合上面的system_message_prompt、human_message_prompt</span></span><br><span class="line">chat_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])</span><br><span class="line"><span class="built_in">print</span>(chat_prompt.format_messages(input_language=<span class="string">&quot;English&quot;</span>, output_language=<span class="string">&quot;French&quot;</span>, text=<span class="string">&quot;I love programming.&quot;</span>))</span><br></pre></td></tr></table></figure>
+
+<img src="/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/image-20230910225641989.png" class="" title="image-20230910225641989">
+
+<h2 id="X、ChatGPt遇到的问题"><a href="#X、ChatGPt遇到的问题" class="headerlink" title="X、ChatGPt遇到的问题"></a>X、ChatGPt遇到的问题</h2><h3 id="1、查出token长度"><a href="#1、查出token长度" class="headerlink" title="1、查出token长度"></a>1、查出token长度</h3><img src="/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/image-20230910221001040.png" class="" title="image-20230910221001040">
+
+<blockquote>
+<p>解决:初始化AI时，不要穿max_token参数，就暂时不会有这个报错，但是具体原因未知，后续再调研</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://www.lynote.top">刘阳</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.lynote.top/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/">https://www.lynote.top/2023/09/10/ai/langchain%E4%B8%8Eopenai/langchain%E4%B8%8Eopenai/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.lynote.top" target="_blank">笔记小窝</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AI/">AI</a><a class="post-meta__tags" href="/tags/Langchain/">Langchain</a><a class="post-meta__tags" href="/tags/openai/">openai</a></div><div class="post_share"><div class="social-share" data-image="/posts_cover_img/ai/ai.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/09/11/database/sql_50_practice/sql_50_practice/"><img class="prev-cover" src="/posts_cover_img/database/mysql_logo.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">50道SQL练习题</div></div></a></div><div class="next-post pull-right"><a href="/2023/03/18/golang/go_gorm%E4%BD%BF%E7%94%A8/go_gorm%E4%BD%BF%E7%94%A8/"><img class="next-cover" src="/posts_cover_img/golang/go_gorm.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Go Gorm使用</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">刘阳</div><div class="author-info__description">学习与记录</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">36</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">36</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">36</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Lyzin"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81Langchain"><span class="toc-text">一、Langchain</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81%E4%BB%8B%E7%BB%8D"><span class="toc-text">1、介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%E3%80%81%E5%AE%89%E8%A3%85Langchain"><span class="toc-text">2、安装Langchain</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3%E3%80%81LLMs%E4%BB%8B%E7%BB%8D"><span class="toc-text">3、LLMs介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4%E3%80%81Prompt%E6%A8%A1%E6%9D%BF"><span class="toc-text">4、Prompt模板</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-prompt%E6%A8%A1%E6%9D%BF%E7%AE%80%E5%8D%95%E7%A4%BA%E4%BE%8B"><span class="toc-text">4.1 prompt模板简单示例</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-1-1-%E6%94%AF%E6%8C%81%E6%B2%A1%E6%9C%89%E5%8F%98%E9%87%8F%E7%9B%B4%E6%8E%A5%E8%BE%93%E5%87%BA"><span class="toc-text">4.1.1 支持没有变量直接输出</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-1-2-%E6%8C%87%E5%AE%9A%E8%BE%93%E5%85%A5%E7%9A%84%E5%8F%98%E9%87%8F%E5%80%BC"><span class="toc-text">4.1.2 指定输入的变量值</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-prompt%E6%A8%A1%E6%9D%BF%E7%BB%84%E5%90%88%E4%BD%BF%E7%94%A8"><span class="toc-text">4.2 prompt模板组合使用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#X%E3%80%81ChatGPt%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-text">X、ChatGPt遇到的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81%E6%9F%A5%E5%87%BAtoken%E9%95%BF%E5%BA%A6"><span class="toc-text">1、查出token长度</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2024/09/28/java/Mybatis%E4%BD%BF%E7%94%A8/Mybatis%E4%BD%BF%E7%94%A8/" title="Mybatis使用"><img src="/img/index.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Mybatis使用"/></a><div class="content"><a class="title" href="/2024/09/28/java/Mybatis%E4%BD%BF%E7%94%A8/Mybatis%E4%BD%BF%E7%94%A8/" title="Mybatis使用">Mybatis使用</a><time datetime="2024-09-27T18:33:26.000Z" title="发表于 2024-09-28 02:33:26">2024-09-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/09/28/java/Maven%E4%BD%BF%E7%94%A8/Maven%E4%BD%BF%E7%94%A8/" title="Maven使用"><img src="/source/posts_cover_img/java/maven-logo-black-on-white.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Maven使用"/></a><div class="content"><a class="title" href="/2024/09/28/java/Maven%E4%BD%BF%E7%94%A8/Maven%E4%BD%BF%E7%94%A8/" title="Maven使用">Maven使用</a><time datetime="2024-09-27T18:23:10.000Z" title="发表于 2024-09-28 02:23:10">2024-09-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/09/22/java/java%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/java%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/" title="Java基础语法"><img src="/posts_cover_img/java/java_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java基础语法"/></a><div class="content"><a class="title" href="/2024/09/22/java/java%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/java%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/" title="Java基础语法">Java基础语法</a><time datetime="2024-09-22T07:08:33.000Z" title="发表于 2024-09-22 15:08:33">2024-09-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/09/17/golang/kafka%E4%BD%BF%E7%94%A8/kafka%E4%BD%BF%E7%94%A8/" title="kafka使用"><img src="/posts_cover_img/golang/kafka_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="kafka使用"/></a><div class="content"><a class="title" href="/2024/09/17/golang/kafka%E4%BD%BF%E7%94%A8/kafka%E4%BD%BF%E7%94%A8/" title="kafka使用">kafka使用</a><time datetime="2024-09-17T01:48:14.000Z" title="发表于 2024-09-17 09:48:14">2024-09-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/09/11/golang/elasticsearch/elasticsearch%E4%BD%BF%E7%94%A8/" title="elasticsearch使用"><img src="/posts_cover_img/golang/elastic.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="elasticsearch使用"/></a><div class="content"><a class="title" href="/2024/09/11/golang/elasticsearch/elasticsearch%E4%BD%BF%E7%94%A8/" title="elasticsearch使用">elasticsearch使用</a><time datetime="2024-09-11T05:49:03.000Z" title="发表于 2024-09-11 13:49:03">2024-09-11</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/posts_cover_img/ai/ai.jpeg')"><div id="footer-wrap"><div class="copyright">&copy;2021 - 2024 By 刘阳</div><div class="footer_custom_text">努力终会有回报</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/pluginsSrc/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"></div><script defer="defer" id="ribbon" src="/pluginsSrc/butterfly-extsrc/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="false"></script><script id="click-heart" src="/pluginsSrc/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

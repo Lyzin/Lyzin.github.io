@@ -1,0 +1,1062 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Go与gRPC | 笔记小窝</title><meta name="keywords" content="Go,gRPC,RPC"><meta name="author" content="刘阳"><meta name="copyright" content="刘阳"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一、RPC协议 https:&#x2F;&#x2F;www.jianshu.com&#x2F;p&#x2F;5ade587dbc58 https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;506415782 https:&#x2F;&#x2F;www.cnblogs.com&#x2F;wongbingming&#x2F;p&#x2F;11086773.html https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;524902149  1、RPC概念 RPC（Remote Pr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go与gRPC">
+<meta property="og:url" content="https://www.lynote.top/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="笔记小窝">
+<meta property="og:description" content="一、RPC协议 https:&#x2F;&#x2F;www.jianshu.com&#x2F;p&#x2F;5ade587dbc58 https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;506415782 https:&#x2F;&#x2F;www.cnblogs.com&#x2F;wongbingming&#x2F;p&#x2F;11086773.html https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;524902149  1、RPC概念 RPC（Remote Pr">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.lynote.top/posts_cover_img/golang/go_gRPC.png">
+<meta property="article:published_time" content="2022-08-01T08:32:29.000Z">
+<meta property="article:modified_time" content="2022-08-01T08:32:29.000Z">
+<meta property="article:author" content="刘阳">
+<meta property="article:tag" content="Go">
+<meta property="article:tag" content="gRPC">
+<meta property="article:tag" content="RPC">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.lynote.top/posts_cover_img/golang/go_gRPC.png"><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://www.lynote.top/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="/pluginsSrc/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: '/pluginsSrc/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: '/pluginsSrc/flickr-justified-gallery/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Go与gRPC',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-08-01 16:32:29'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">36</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">36</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">36</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 博客分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 文章标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 博客归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/posts_cover_img/golang/go_gRPC.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">笔记小窝</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 博客分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 文章标签</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 博客归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Go与gRPC</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-08-01T08:32:29.000Z" title="发表于 2022-08-01 16:32:29">2022-08-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-08-01T08:32:29.000Z" title="更新于 2022-08-01 16:32:29">2022-08-01</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Go%E4%B8%8EGRPC/">Go与GRPC</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Go与gRPC"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="一、RPC协议"><a href="#一、RPC协议" class="headerlink" title="一、RPC协议"></a>一、RPC协议</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/5ade587dbc58">https://www.jianshu.com/p/5ade587dbc58</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/506415782">https://zhuanlan.zhihu.com/p/506415782</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wongbingming/p/11086773.html">https://www.cnblogs.com/wongbingming/p/11086773.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/524902149">https://zhuanlan.zhihu.com/p/524902149</a></p>
+</blockquote>
+<h3 id="1、RPC概念"><a href="#1、RPC概念" class="headerlink" title="1、RPC概念"></a>1、RPC概念</h3><blockquote>
+<p>RPC（Remote Procedure Call Protocol）是远程过程调用的缩写，通俗的说就是调用远处服务器的一个函数，与之相对应的是本地函数调用</p>
+<p>PRC的理解：</p>
+<ul>
+<li>像调用本地函数一样，去调用远程服务器上的函数</li>
+<li>进程间通信–应用层协议(http协议同层)，底层使用TCP实现</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>一般调用函数时，最常见的就是本地调用和RPC调用，下面就来说说二者的区别</p>
+</blockquote>
+<h3 id="2、本地调用"><a href="#2、本地调用" class="headerlink" title="2、本地调用"></a>2、本地调用</h3><blockquote>
+<p>当在本地调用代码时，就是定义函数，然后函数名()调用</p>
+<p>下面代码：</p>
+<ul>
+<li>先定义了一个<code>useError</code>函数</li>
+<li>然后在main函数中调用</li>
+<li>这是在本地调用的方式</li>
+</ul>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;example.com/studygo/cerror&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">useError</span><span class="params">(x, y <span class="type">uint8</span>)</span></span> (<span class="type">uint8</span>, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">if</span> x &lt; <span class="number">10</span> &#123;</span><br><span class="line">		err := cerror.New(<span class="string">&quot;x小于0&quot;</span>, <span class="string">&quot;2022-08-08&quot;</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> x + y, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	u1, err := useError(<span class="number">9</span>, <span class="number">12</span>)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;u1:%v ,u1 type:%T\n&quot;</span>, u1, u1)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;err:%v ,err type:%T\n&quot;</span>, err, err.Error())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20220810233821783.png" class="" title="image-20220810233821783">
+
+<blockquote>
+<ul>
+<li>本地过程调用发生在同一进程中的，所以可以正常调用</li>
+<li>但是我们无法直接在另一个构建的程序直接调用上面代码中的<code>userError</code>函数，因为它们是两个程序，内存空间是相互隔离的</li>
+</ul>
+</blockquote>
+<h3 id="3、RPC调用"><a href="#3、RPC调用" class="headerlink" title="3、RPC调用"></a>3、RPC调用</h3><blockquote>
+<p>RPC调用解决了什么问题</p>
+<ul>
+<li>为了解决类似远程、跨内存空间、的函数&#x2F;方法调用</li>
+<li>比起以往的通过HTTP的Restful-API风格调用，使用RPC能够让我们调用远程方法像调用本地方法一样无差别<ul>
+<li>基于RESTful风格的API通常是基于HTTP协议，传输数据采用JSON等文本协议</li>
+<li>RPC可以使用TCP协议，传输数据采用二进制协议来说，相比RESTful的API来说性能会更好</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>实现RPC的步骤以及办法</p>
+<ul>
+<li>确定要执行的函数？ <ul>
+<li>在本地调用中，函数主体通过函数指针函数指定，然后调用对应的函数，编译器通过函数指针函数自动确定被调用函数在内存中的位置。</li>
+<li>在 RPC 中，调用不能通过函数指针完成，因为它们的内存地址可能完全不同。<ul>
+<li>调用方和被调用方都需要维护一个{ function &lt;-&gt; ID }映射表，以确保调用正确的函数。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>如何传递调用的参数？ <ul>
+<li>本地过程调用中传递的参数是通过堆栈内存结构实现的</li>
+<li>RPC不能直接使用内存传递参数，因此参数或返回值需要在传输期间序列化并转换成字节流，因为网络传输都是使用的二进制格式，所以需要序列化或反序列化</li>
+</ul>
+</li>
+<li>如何进行网络传输？ <ul>
+<li>函数的调用方和被调用方通常是通过网络连接的</li>
+<li>function ID 和序列化字节流需要通过网络传输<ul>
+<li>只要能完成调用，调用方和被调用方就不受现有特定网络协议的限制。</li>
+<li>比如有的RPC框架使用TCP协议，有的的使用HTTP协议</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h4 id="3-1-rpc包实现rpc调用步骤"><a href="#3-1-rpc包实现rpc调用步骤" class="headerlink" title="3.1 rpc包实现rpc调用步骤"></a>3.1 rpc包实现rpc调用步骤</h4><blockquote>
+<p>go语言内置的net&#x2F;rpc包可以通过网络导出一个需要被远程调用的对象方法</p>
+<ul>
+<li>编写一个需要被远程调用的对象方法<ul>
+<li>所以导出对象和对象方法都需要首字母大写</li>
+</ul>
+</li>
+<li>rpc服务器注册一个对象，暴露到外部网络可见，并且服务名称就是被导出的对象类型的名称</li>
+<li>接着对象的导出方法就可以支持远程调用访问</li>
+</ul>
+</blockquote>
+<h4 id="3-2-rpc代码调用示例"><a href="#3-2-rpc代码调用示例" class="headerlink" title="3.2 rpc代码调用示例"></a>3.2 rpc代码调用示例</h4><h5 id="3-2-1-rpc服务端代码"><a href="#3-2-1-rpc服务端代码" class="headerlink" title="3.2.1 rpc服务端代码"></a>3.2.1 rpc服务端代码</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;net&quot;</span></span><br><span class="line">	<span class="string">&quot;net/rpc&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义导出对象结构体</span></span><br><span class="line"><span class="keyword">type</span> SayHiService <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义导出对象的方法，建议定义为指针接收者</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *SayHiService)</span></span> SayGreet(sayStr <span class="type">string</span>, reply *<span class="type">string</span>) <span class="type">error</span> &#123;</span><br><span class="line">	fmt.Printf(<span class="string">&quot;我说啦：:%v\n&quot;</span>, sayStr)</span><br><span class="line">	*reply = <span class="string">&quot;你好呀，&quot;</span> + sayStr</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  RpcSayHiService := <span class="built_in">new</span>(SayHiService)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 注册rpc服务</span></span><br><span class="line">	_ = rpc.Register(RpcSayHiService)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 使用TCP协议s</span></span><br><span class="line">	listener, err := net.Listen(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;:1234&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot;listen tcp rpc err:%v\n&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	conn, err := listener.Accept()</span><br><span class="line">	fmt.Printf(<span class="string">&quot;conn==&gt;:%v\n&quot;</span>, conn)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot;conn rpc err:%v\n&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	rpc.ServeConn(conn)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-2-2-rpc客户端代码"><a href="#3-2-2-rpc客户端代码" class="headerlink" title="3.2.2 rpc客户端代码"></a>3.2.2 rpc客户端代码</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;net/rpc&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	address := <span class="string">&quot;127.0.0.1:1234&quot;</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 与服务端使用tcp建立链接</span></span><br><span class="line">	client, err := rpc.Dial(<span class="string">&quot;tcp&quot;</span>, address)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot;client dial err:%v\n&quot;</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// 同步调用服务端函数</span></span><br><span class="line">	<span class="keyword">var</span> reply <span class="type">string</span></span><br><span class="line">	sayStr := <span class="string">&quot;忠实的仆人&quot;</span></span><br><span class="line">	err = client.Call(<span class="string">&quot;SayHiService.SayGreet&quot;</span>, sayStr, &amp;reply)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot;client call err:%v\n&quot;</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Printf(<span class="string">&quot;reply val:%v\n&quot;</span>, reply)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4、RPC原理图"><a href="#4、RPC原理图" class="headerlink" title="4、RPC原理图"></a>4、RPC原理图</h3><blockquote>
+<p>下图来自李文周老师博客</p>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/rpc04.png" class="" title="rpc">
+
+<blockquote>
+<ol>
+<li>服务调用方（client）以本地调用方式调用服务；</li>
+<li>client stub接收到调用后负责将方法、参数等组装成能够进行网络传输的消息体；</li>
+<li>client stub找到服务地址，并将消息发送到服务端；</li>
+<li>server 端接收到消息；</li>
+<li>server stub收到消息后进行解码；</li>
+<li>server stub根据解码结果调用本地的服务；</li>
+<li>本地服务执行并将结果返回给server stub；</li>
+<li>server stub将返回结果打包成能够进行网络传输的消息体；</li>
+<li>按地址将消息发送至调用方；</li>
+<li>client 端接收到消息；</li>
+<li>client stub收到消息并进行解码；</li>
+<li>调用方得到最终结果</li>
+</ol>
+<p>使用RPC框架的目标是只需要关心第1步和最后1步，中间的其他步骤统统封装起来，让使用者无需关心。例如社区中各式RPC框架（grpc、thrift等）就是为了让RPC调用更方便。</p>
+</blockquote>
+<h2 id="二、gRPC框架"><a href="#二、gRPC框架" class="headerlink" title="二、gRPC框架"></a>二、gRPC框架</h2><blockquote>
+<p>从第一章可以看出来go内置的rpc包就可以实现rpc功能，不过go社区提供了比较成熟的RPC框架，来简化平时使用RPC的一些步骤，后面的章节来学习理解gRPC框架</p>
+</blockquote>
+<h3 id="1、gRPC是什么"><a href="#1、gRPC是什么" class="headerlink" title="1、gRPC是什么"></a>1、gRPC是什么</h3><blockquote>
+<p>gRPC官网：<a target="_blank" rel="noopener" href="https://grpc.io/docs/what-is-grpc/introduction/">https://grpc.io/docs/what-is-grpc/introduction/</a></p>
+</blockquote>
+<blockquote>
+<p>从gRPC官网介绍可以得知gRPC是做什么用的？</p>
+<ul>
+<li>在gRPC中，客户端应用程序可以直接调用不同机器上的服务器应用程序的方法，就像它是一个本地对象一样，使你更容易创建分布式应用程序和服务。</li>
+<li>就像许多RPC系统一样，gRPC是围绕着定义服务(Interface Definition Language)的想法，指定可以远程调用的方法及其参数和返回类型。</li>
+<li>在服务器端，服务器实现这个接口并运行gRPC服务器来处理客户端的调用。</li>
+<li>在客户端，客户端有一个存根（在某些语言中被称为只是一个客户端），提供与服务器相同的方法。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>gRPC客户端和服务器可以在各种环境中运行并相互交谈–从谷歌内部的服务器到你自己的桌面–并且可以用gRPC支持的任何语言编写。</p>
+<p>因此，举例来说，你可以很容易地用Java创建一个gRPC服务器，客户端用Go、Python或Ruby。</p>
+<p>此外最新的谷歌API将有gRPC版本的接口，让你轻松地在你的应用程序中建立谷歌功能。</p>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/landing-2.svg" class="" title="Concept Diagram">
+
+<blockquote>
+<p>上图来自gRPC官网，从上图可以看出：</p>
+<ul>
+<li>客户端（gRPC Stub）在自己的程序中调用某个函数或者方法，此时发起了RPC调用<ul>
+<li>对请求信息使用Protobuf进行对象序列化压缩</li>
+</ul>
+</li>
+<li>服务端（gRPC Server）收到请求信息以后，解码请求体，进行业务逻辑处理并返回<ul>
+<li>对响应结果使用Protobuf进行对象序列化压缩</li>
+</ul>
+</li>
+<li>客户端接收到服务端响应结果后，解码请求体。<ul>
+<li>回调被调用的A方法，唤醒正在被等待响应（阻塞）的客户端调用并返回响应结果</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h3 id="2、Protobuf介绍"><a href="#2、Protobuf介绍" class="headerlink" title="2、Protobuf介绍"></a>2、Protobuf介绍</h3><blockquote>
+<p>在<code>gRPC是什么</code>这一小节中，反复提到Protobuf这个名词，那Protobuf是什么？gRPC与Protobuf的关系是什么？如何使用Protobuf？是我们接下来需要探讨的事情</p>
+</blockquote>
+<h4 id="2-1-Protobuf是什么"><a href="#2-1-Protobuf是什么" class="headerlink" title="2.1 Protobuf是什么"></a>2.1 Protobuf是什么</h4><blockquote>
+<p>Protobuf官网：<a target="_blank" rel="noopener" href="https://protobuf.dev/overview/">https://protobuf.dev/overview/</a></p>
+</blockquote>
+<blockquote>
+<p>Protobuf介绍</p>
+<ul>
+<li><p>Protocol Buffers是一种语言中立、平台中立的可扩展机制，用于序列化结构化数据</p>
+</li>
+<li><p>Protocol Buffers提供了一种语言中立、平台中立、可扩展的机制，用于以向前兼容和向后兼容的方式序列化结构化数据。</p>
+</li>
+<li><p>它就像JSON，只是它更小、更快，而且能生成本地语言绑定。</p>
+</li>
+<li><p>你只需定义一次你希望你的数据如何被结构化，然后你就可以使用特殊生成的源代码，轻松地从各种数据流和使用各种语言写入和读取你的结构化数据。</p>
+</li>
+<li><p>Protocol Buffers是定义语言（在.proto文件中创建）、proto编译器生成的与数据接口的代码、特定语言的运行库以及写入文件（或通过网络连接发送）的数据的序列化格式的组合</p>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>Protobuf解决了什么问题？</p>
+<ul>
+<li>Protocol Buffers为大小不超过几兆字节的类型化、结构化数据包提供了一种序列化格式，该格式适用于短暂的网络通信和长期的数据存储。</li>
+<li>Protocol Buffers可以用新的信息进行扩展，而不会使现有的数据失效或需要更新代码。</li>
+<li>Protocol Buffers是谷歌最常使用的数据格式。它们被广泛用于服务器间的通信以及磁盘上的数据存档存储。</li>
+<li>Protocol Buffers的信息和服务由工程师编写的.proto文件描述。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>Protobuf的作用与特点</p>
+<ul>
+<li>Protocol Buffers是任何需要以语言中立、平台中立、可扩展的方式序列化结构化、类似记录、类型化数据的情况的理想选择。它们最常被用于定义通信协议（与gRPC一起）和数据存储。</li>
+<li>使用Protocol Buffers的一些优点包括：<ul>
+<li>紧凑的数据存储</li>
+<li>快速解析</li>
+<li>在许多编程语言中可用<ul>
+<li>Dart、Go、C++、C#、Java、Kotlin、Objective-C、PHP、Python、Ruby</li>
+<li>由于Dart和Go语言是谷歌公司出品的语言，所以这两个语言的protoc编译器是由谷歌公司维护的</li>
+<li>本笔记只探讨Go语言，这里是Go语言的编译器插件：<a target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf-go">https://github.com/protocolbuffers/protobuf-go</a></li>
+</ul>
+</li>
+<li>通过自动生成的类来优化功能</li>
+<li>跨语言的兼容性</li>
+<li>用任何支持的编程语言编写的代码都可以读取相同的信息。<ul>
+<li>你可以让一个平台上的Java程序从一个软件系统中捕获数据，根据.proto定义将其序列化，然后在另一个平台上运行的单独的Python应用程序中从该序列化数据中提取特定值</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>对于Protobuf的介绍先到这里，需要更详细的信息可以查看Protobuf官网</p>
+</blockquote>
+<h4 id="2-2-gRPC与Protobuf关系"><a href="#2-2-gRPC与Protobuf关系" class="headerlink" title="2.2 gRPC与Protobuf关系"></a>2.2 gRPC与Protobuf关系</h4><blockquote>
+<p>默认情况下，gRPC使用谷歌成熟的开源机制Protocol Buffers来序列化结构化数据（尽管它也可以用于其他数据格式，如JSON）</p>
+<p>这就说明gRPC使用的是Protobuf进行序列化数据的，那么就需要熟悉对Protobuf的使用</p>
+</blockquote>
+<h4 id="2-3-Protobuf编译器安装"><a href="#2-3-Protobuf编译器安装" class="headerlink" title="2.3 Protobuf编译器安装"></a>2.3 Protobuf编译器安装</h4><blockquote>
+<p>protobuf编译器的作用，就是根据定义的.proto文件，编译出对应编程语言的代码文件</p>
+<p>protobuf官方安装参考文档：<a target="_blank" rel="noopener" href="https://grpc.io/docs/protoc-installation/">https://grpc.io/docs/protoc-installation/</a></p>
+<p>如果按照上述文档安装，我们无法安装想要的protobuf指定版本，那么就需要去下载指定版本的protobuf，然后放置到自己电脑的PATH中</p>
+<p>编写此文档时，protobuf编译器使用的版本是<code>v3.20.0</code></p>
+<p>下载地址在github中找到：<a target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf/releases">https://github.com/protocolbuffers/protobuf/releases</a></p>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230411134346630.png" class="" title="image-20230411134346630">
+
+<blockquote>
+<p>在下载地址页面下载适合你平台的预编译好的二进制文件（<code>protoc-&lt;version&gt;-&lt;platform&gt;.zip</code>），下面是不同版本的解释</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf/releases/download/v3.20.0/protobuf-all-3.20.0.zip">protobuf-all-3.20.0.zip</a></td>
+<td>这是未编译成可执行的protobuf二进制程序的源文件，一般不选择这个</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf/releases/download/v3.20.0/protoc-3.20.0-osx-aarch_64.zip">protoc-3.20.0-osx-aarch_64.zip</a></td>
+<td>适用于Mac ARM 64位系统，可执行的protobuf二进制程序</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf/releases/download/v3.20.0/protoc-3.20.0-osx-x86_64.zip">protoc-3.20.0-osx-x86_64.zip</a></td>
+<td>适用于Mac Intel 64位系统，可执行的protobuf二进制程序</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf/releases/download/v3.20.0/protoc-3.20.0-win64.zip">protoc-3.20.0-win64.zip</a></td>
+<td>适用Windows 64位系统，可执行的protobuf二进制程序</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf/releases/download/v3.20.0/protoc-3.20.0-linux-x86_64.zip">protoc-3.20.0-linux-x86_64.zip</a></td>
+<td>适用Linux 64位系统，可执行的protobuf二进制程序</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>编写此文档时使用的macos系统，电脑芯片是Intel的，所以选择<code>protoc-3.20.0-osx-x86_64.zip</code>这个版本</p>
+<p>下载上面版本以后，解压并配置bin目录到环境变量中，查看protoc的版本</p>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230411220304072.png" class="" title="image-20230411220304072">
+
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/protoc_help.jpg" class="" title="image-20230918190257191">
+
+<blockquote>
+<p>从上面可以看出，当运行help出现的语言参数，说明protoc本身已经内置该语言对应的编译插件，无需安装再安装对应语言的编译插件，但是go语言的编译插件是由谷歌公司单独维护的，所以需要单独安装</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf-go">GO protobuf仓库</a></p>
+</blockquote>
+<h4 id="2-4-Protobuf语法版本"><a href="#2-4-Protobuf语法版本" class="headerlink" title="2.4 Protobuf语法版本"></a>2.4 Protobuf语法版本</h4><blockquote>
+<p>官方的建议：</p>
+<ul>
+<li>虽然Protocol Buffers已经向开源用户提供了一段时间，但官方的大多数例子都使用了Protocol Buffers第3版（proto3），它的语法稍微简化，有一些有用的新功能，并支持更多的语言。</li>
+<li>Proto3目前有Java、C++、Dart、Python、Objective-C、C#、一个ite-runtime（Android Java）、Ruby和JavaScript版本，来自protocol buffers GitHub repo，以及来自golang&#x2F;protobuf官方软件包的Go语言生成器，还有更多语言正在开发中。</li>
+<li>可以在proto3语言指南和每种语言的参考文档中找到更多信息。参考文档还包括一个.proto文件格式的正式规范</li>
+<li>一般来说，虽然可以使用proto2（目前默认的Protocol Buffers），但官方建议使用proto3与gRPC，因为它可以让你使用全部的gRPC支持的语言，以及避免proto2客户端与proto3服务器之间的兼容性问题。</li>
+</ul>
+</blockquote>
+<h3 id="3、Protobuf语法"><a href="#3、Protobuf语法" class="headerlink" title="3、Protobuf语法"></a>3、Protobuf语法</h3><blockquote>
+<p>下面文档来自proto3版本语法文档：<a target="_blank" rel="noopener" href="https://protobuf.dev/programming-guides/proto3/">https://protobuf.dev/programming-guides/proto3/</a></p>
+</blockquote>
+<h4 id="3-1-首行语法声明"><a href="#3-1-首行语法声明" class="headerlink" title="3.1 首行语法声明"></a>3.1 首行语法声明</h4><blockquote>
+<p>下面是官方提供的第一个示例，定义一个消息类型</p>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">syntax = <span class="string">&quot;proto3&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>需要注意：</p>
+<ul>
+<li>文件的第一行指定使用的是proto3语法，如果不这样做，Protocol Buffers编译器会认为你使用的是proto2</li>
+<li>第一行指定语法必须是文件中第一行非空的、非注释的行</li>
+<li>每一句都以英文的<code>;</code>结束</li>
+</ul>
+</blockquote>
+<h4 id="3-2-注释语法"><a href="#3-2-注释语法" class="headerlink" title="3.2 注释语法"></a>3.2 注释语法</h4><blockquote>
+<p>在<code>.proto</code> 文件中, 使用C&#x2F;C++-风格的<code>//</code>and<code>/* ... */</code>语法来表示注释</p>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">syntax = <span class="string">&quot;proto3&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	这是多行注释</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义一个消息</span></span><br><span class="line"><span class="keyword">message </span><span class="title class_">SearchRequest</span> &#123;</span><br><span class="line">  <span class="type">string</span> query = <span class="number">1</span>;</span><br><span class="line">  <span class="type">int32</span> page_number = <span class="number">2</span>;</span><br><span class="line">  <span class="type">int32</span> result_per_page = <span class="number">3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-3-Message类型"><a href="#3-3-Message类型" class="headerlink" title="3.3 Message类型"></a>3.3 Message类型</h4><blockquote>
+<p>Message类型可以理解为go中的结构体，承载请求消息的字段和响应消息的字段</p>
+<p>文档参考：<a target="_blank" rel="noopener" href="https://protobuf.dev/programming-guides/proto3/#simple">https://protobuf.dev/programming-guides/proto3/#simple</a></p>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">syntax = <span class="string">&quot;proto3&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">message </span><span class="title class_">SearchRequest</span> &#123;</span><br><span class="line">  <span class="type">string</span> query = <span class="number">1</span>;</span><br><span class="line">  <span class="type">int32</span> page_number = <span class="number">2</span>;</span><br><span class="line">  <span class="type">int32</span> result_per_page = <span class="number">3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>从上面代码可以看出：</p>
+<ul>
+<li>指定了三个字段（变量名与值对）每个字段代表你想在这种类型的消息中包含的数据</li>
+<li>每个字段都有一个名称和一个类型。<ul>
+<li>query变量的类型是一个字符串</li>
+<li>page_number和result_per_page类型是整型</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h5 id="3-3-1-声明字段编号"><a href="#3-3-1-声明字段编号" class="headerlink" title="3.3.1 声明字段编号"></a>3.3.1 声明字段编号</h5><blockquote>
+<p>从前面定义的message中，可以看到每个变量等号右边都有数字，数字就是message类型中变量的编号</p>
+<ul>
+<li>在 Protocol Buffers（protobuf）中，等号右边的数字（如 1、2、3）表示字段的唯一标识符（Tag），这些标识符在编码消息时用于标记字段。它们在整个消息定义中必须是唯一的。</li>
+<li>每个字段有一个唯一的数字标识符，这是在序列化和反序列化过程中使用的。</li>
+<li>此标识符并不会影响消息字段的顺序，但它们在定义.proto 文件时必须是唯一的。</li>
+<li>在更新.proto 文件时，请注意：不要更改现有字段的标识符，因为这会破坏向后兼容性。当需要为消息添加新字段时，可以分配一个新的、尚未使用过的标识符。</li>
+</ul>
+<p>注意：</p>
+<ul>
+<li>字段编号的值范围限定为 1 ~ 536870911（不包括 19000 到 19999 区间的保留值）<ul>
+<li>字段编号 19,000 至 19,999 保留给协议缓冲区实现。如果在报文中使用了这些保留字段编号，协议缓冲区编译器将发出报警。</li>
+</ul>
+</li>
+<li>最常设置的字段应使用字段编号1至15。较低的字段编号值在导线格式中占用的空间较少。<ul>
+<li>例如，字段编号范围为 1 至 15 的字段编号只需一个字节进行编码</li>
+<li>16 至 2047 范围内的字段编号需要两个字节</li>
+</ul>
+</li>
+<li>重复使用字段编号会使解码线格式消息变得模糊，其实就是导致解码时不知道该用哪个字段</li>
+</ul>
+</blockquote>
+<h5 id="3-3-2-指定字段标签"><a href="#3-3-2-指定字段标签" class="headerlink" title="3.3.2 指定字段标签"></a>3.3.2 指定字段标签</h5><blockquote>
+<p>字段标签支持：</p>
+<ul>
+<li><p>optional：</p>
+<ul>
+<li><p>字段已设置，包含一个显式设置或从电文中解析的值。它将被序列化到电文中。</p>
+</li>
+<li><p>字段未设置，将返回默认值。它不会被序列化到数据线上。</p>
+</li>
+<li><p>您可以检查该值是否已明确设置。</p>
+</li>
+</ul>
+</li>
+<li><p>repeated：该字段类型可以在格式良好的报文中重复零次或多次。重复值的顺序将被保留。</p>
+</li>
+<li><p>map：这是一个成对的键&#x2F;值字段类型。有关此字段类型的更多信息，请参阅<a target="_blank" rel="noopener" href="https://protobuf.dev/programming-guides/encoding/#maps">map</a>。</p>
+</li>
+<li><p>注意：</p>
+<ul>
+<li>如果没有应用显式字段标签，则默认使用字段标签，称为 “隐式字段存在”。</li>
+<li>(格式良好的报文可以有 0 个或 1 个这种字段（但不能多于 1 个）。</li>
+<li>您也无法确定这种类型的字段是否是从电文中解析出来的。</li>
+<li>隐式存在字段将被序列化到电文中，除非它是默认值。有关这方面的更多信息，请参阅字段存在。</li>
+<li>在 proto3 中，标量数字类型的重复字段默认使用打包编码。</li>
+</ul>
+<p>参考：<a target="_blank" rel="noopener" href="https://protobuf.dev/programming-guides/proto3/#field-labels">https://protobuf.dev/programming-guides/proto3/#field-labels</a></p>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>TODO：这一部分暂时没用用到，等后续用到再来补充知识</p>
+</blockquote>
+<h5 id="3-3-3-多个message类型"><a href="#3-3-3-多个message类型" class="headerlink" title="3.3.3 多个message类型"></a>3.3.3 多个message类型</h5><blockquote>
+<p>在一个<code>.proto</code>文件中，可以存在多个message，比如有requestMessage，那就可以定义responseMessage</p>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">syntax = <span class="string">&quot;proto3&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">message </span><span class="title class_">SearchRequest</span> &#123;</span><br><span class="line">  <span class="type">string</span> query = <span class="number">1</span>;</span><br><span class="line">  <span class="type">int32</span> page_number = <span class="number">2</span>;</span><br><span class="line">  <span class="type">int32</span> result_per_page = <span class="number">3</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">message </span><span class="title class_">SearchResponse</span> &#123;</span><br><span class="line">  <span class="type">string</span> result = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-3-4-删除字段"><a href="#3-3-4-删除字段" class="headerlink" title="3.3.4 删除字段"></a>3.3.4 删除字段</h5><blockquote>
+<p>下面为官网翻译，了解到时再来补充</p>
+<p>删除字段如果操作不当，删除字段可能会导致严重问题。</p>
+<ul>
+<li>当您不再需要非必填字段，并且已从客户端代码中删除所有引用时，您可以从报文中删除字段定义。但必须保留已删除的字段编号。如果不保留字段编号，开发人员将来有可能重新使用该编号。</li>
+<li>您还应保留字段名称，以便继续解析消息的 JSON 和 TextFormat 编码。</li>
+</ul>
+</blockquote>
+<h5 id="3-3-5-Proto变量类型与Go变量类型"><a href="#3-3-5-Proto变量类型与Go变量类型" class="headerlink" title="3.3.5 Proto变量类型与Go变量类型"></a>3.3.5 Proto变量类型与Go变量类型</h5><blockquote>
+<p>在.proto文件中消息类型声明的变量类型与go语言对应的消息类型是有映射规则的，下面是最常用的几个类型的映射</p>
+<p>注意：</p>
+<ul>
+<li>在官方文档中对应proto变量类型未找到int类型的说明，所以暂时先理解为proto定义整型时不支持int类型</li>
+</ul>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center"><strong>.proto中类型</strong></th>
+<th align="center"><strong>Go中类型</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">int32</td>
+<td align="center">int32</td>
+</tr>
+<tr>
+<td align="center">int64</td>
+<td align="center">int64</td>
+</tr>
+<tr>
+<td align="center">bool</td>
+<td align="center">bool</td>
+</tr>
+<tr>
+<td align="center">string</td>
+<td align="center">string</td>
+</tr>
+<tr>
+<td align="center">bytes</td>
+<td align="center">[]bytes</td>
+</tr>
+<tr>
+<td align="center">float</td>
+<td align="center">float32</td>
+</tr>
+<tr>
+<td align="center">double</td>
+<td align="center">float64</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>proto文件中声明的变量默认值和Go里面不同变量类型的默认值类似</p>
+<ul>
+<li>对于string，默认值是空字符串</li>
+<li>对于bytes，默认值是空字节</li>
+<li>对于bool，默认值是false</li>
+<li>对于int32、int64等整型类型，默认值是零</li>
+</ul>
+</blockquote>
+<h5 id="3-3-6-字段类型为message类型"><a href="#3-3-6-字段类型为message类型" class="headerlink" title="3.3.6 字段类型为message类型"></a>3.3.6 字段类型为message类型</h5><blockquote>
+<p>message支持可以把一个message类型当成某一个字段的类型</p>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">message </span><span class="title class_">SearchResponse</span> &#123;</span><br><span class="line">  <span class="comment">// 把Result消息作为results字段的类型</span></span><br><span class="line">  <span class="keyword">repeated</span> Result results = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 定义了Result消息体</span></span><br><span class="line"><span class="keyword">message </span><span class="title class_">Result</span> &#123;</span><br><span class="line">  <span class="type">string</span> url = <span class="number">1</span>;</span><br><span class="line">  <span class="type">string</span> title = <span class="number">2</span>;</span><br><span class="line">  <span class="keyword">repeated</span> <span class="type">string</span> snippets = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-3-7-message嵌套"><a href="#3-3-7-message嵌套" class="headerlink" title="3.3.7 message嵌套"></a>3.3.7 message嵌套</h5><blockquote>
+<p>message类型可以在其他消息类型中定义和使用已有的消息类型，就形成了message嵌套</p>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">message </span><span class="title class_">SearchResponse</span> &#123;</span><br><span class="line">  <span class="keyword">message </span><span class="title class_">Result</span> &#123;</span><br><span class="line">    <span class="type">string</span> url = <span class="number">1</span>;</span><br><span class="line">    <span class="type">string</span> title = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">repeated</span> <span class="type">string</span> snippets = <span class="number">3</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">repeated</span> Result results = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果要在嵌套message类型之外的其他message中，使用被嵌套的message类型，则语法Parent.Type</p>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">message </span><span class="title class_">SearchResponse</span> &#123;</span><br><span class="line">  <span class="keyword">message </span><span class="title class_">Result</span> &#123;</span><br><span class="line">    <span class="type">string</span> url = <span class="number">1</span>;</span><br><span class="line">    <span class="type">string</span> title = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">repeated</span> <span class="type">string</span> snippets = <span class="number">3</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">repeated</span> Result results = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">message </span><span class="title class_">SomeOtherMessage</span> &#123;</span><br><span class="line">  <span class="comment">// 使用上面的SearchResponse中的Result类型</span></span><br><span class="line">  SearchResponse.Result result = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>嵌套的层数，这块需要编写proto文件时特别关注，</p>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">message </span><span class="title class_">Outer</span> &#123;                  <span class="comment">// Level 0</span></span><br><span class="line">  <span class="keyword">message </span><span class="title class_">MiddleAA</span> &#123;  <span class="comment">// Level 1</span></span><br><span class="line">    <span class="keyword">message </span><span class="title class_">Inner</span> &#123;   <span class="comment">// Level 2</span></span><br><span class="line">      <span class="type">int64</span> ival = <span class="number">1</span>;</span><br><span class="line">      <span class="type">bool</span>  booly = <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">message </span><span class="title class_">MiddleBB</span> &#123;  <span class="comment">// Level 1</span></span><br><span class="line">    <span class="keyword">message </span><span class="title class_">Inner</span> &#123;   <span class="comment">// Level 2</span></span><br><span class="line">      <span class="type">int32</span> ival = <span class="number">1</span>;</span><br><span class="line">      <span class="type">bool</span>  booly = <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-3-8-枚举类型"><a href="#3-3-8-枚举类型" class="headerlink" title="3.3.8 枚举类型"></a>3.3.8 枚举类型</h5><blockquote>
+<p>待补充</p>
+<p><a target="_blank" rel="noopener" href="https://protobuf.dev/programming-guides/proto3/#enum">https://protobuf.dev/programming-guides/proto3/#enum</a></p>
+</blockquote>
+<h4 id="3-4-定义服务"><a href="#3-4-定义服务" class="headerlink" title="3.4 定义服务"></a>3.4 定义服务</h4><blockquote>
+<ul>
+<li>可以在.proto文件中定义一个RPC服务接口，协议缓冲区编译器将会在你选择的语言中生成服务接口代码和存根。</li>
+<li>当想定义一个RPC服务，包含一个接收你的SearchRequest并返回SearchResponse的方法</li>
+<li>可以在你的.proto文件中像下面这样定义：</li>
+</ul>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">service </span><span class="title class_">SearchService</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> Search(SearchRequest) <span class="keyword">returns</span> (SearchResponse)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：</p>
+<ul>
+<li>rpc方法中的参数、返回值只能有一个，如果有多个字段需要返回，那就定义到message类型中</li>
+<li>service在go语言中表示需要实现接口类型</li>
+<li>建议service后的服务名、rpc方法名都首字母大写，这也符合go语言首字母大写表示公共方法，其它包可以导入访问到</li>
+</ul>
+</blockquote>
+<h4 id="3-5-导入proto文件"><a href="#3-5-导入proto文件" class="headerlink" title="3.5 导入proto文件"></a>3.5 导入proto文件</h4><blockquote>
+<p>用到再来补充</p>
+</blockquote>
+<blockquote>
+<p>导入定义 在上述例子中，Result消息类型在与SearchResponse相同的文件中定义 - 如果你想要使用的作为字段类型的消息类型已经在其他的.proto文件中定义了呢？</p>
+<p>你可以通过导入它们来使用其他.proto文件中的定义。要导入另一个.proto的定义，你需要在文件的顶部添加一个import语句：</p>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;myproject/other_protos.proto&quot;</span>; </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>默认情况下，你只能使用直接导入的.proto文件中的定义。然而，有时你可能需要将.proto文件移动到新的位置。</p>
+<p>你可以在旧位置放置一个占位符.proto文件，使用import public的概念，将所有的导入转发到新的位置，而不是直接移动.proto文件，并在一次更改中更新所有的调用位置。</p>
+<p>注意，Java中不提供public import功能。</p>
+<p>可以在任何导入包含import public声明的proto的代码中依赖import public依赖。例如：</p>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// new.proto</span></span><br><span class="line"><span class="comment">// 所有的定义都移动到这里</span></span><br><span class="line"><span class="comment">// old.proto</span></span><br><span class="line"><span class="comment">// 这是所有客户端都在导入的proto。</span></span><br><span class="line"><span class="keyword">import</span> public <span class="string">&quot;new.proto&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;other.proto&quot;</span>;</span><br><span class="line"><span class="comment">// client.proto</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;old.proto&quot;</span>;</span><br><span class="line"><span class="comment">// 你使用来自old.proto和new.proto的定义，但不使用other.proto</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>协议编译器在使用-I&#x2F;–proto_path标志指定的一系列目录中搜索导入的文件。如果没有给出标志，它会在调用编译器的目录中查找。一般情况下，你应该将–proto_path标志设置为你的项目的根目录，并且对所有的导入使用完全限定的名字。</p>
+</blockquote>
+<h3 id="4、go与gRPC工具"><a href="#4、go与gRPC工具" class="headerlink" title="4、go与gRPC工具"></a>4、go与gRPC工具</h3><blockquote>
+<p>在第三节的<code>Protobuf语法</code>中介绍了protobuf的语法，学习到了Message、服务的定义，这节来熟悉go根据.proto文件生成.pb代码、生成gRPC代码</p>
+</blockquote>
+<h4 id="4-1、相关工具介绍"><a href="#4-1、相关工具介绍" class="headerlink" title="4.1、相关工具介绍"></a>4.1、相关工具介绍</h4><blockquote>
+<p>生成grpc的代码时，需要用到 protoc 、protoc-gen-go  、protoc-gen-go-grpc 、grpc 这几个库</p>
+</blockquote>
+<h5 id="4-1-1-protoc编译器"><a href="#4-1-1-protoc编译器" class="headerlink" title="4.1.1 protoc编译器"></a>4.1.1 protoc编译器</h5><blockquote>
+<ul>
+<li><strong>protoc</strong>编译器 <ul>
+<li>这是 Protocol Buffers 编译器（<code>protoc</code> 命令）。</li>
+<li>它能够根据 .proto 文件生成各种编程语言（如 Go、Python、Java 等）的数据结构、序列化和反序列化代码。</li>
+<li>这个编译器非常重要，因为它是 Protocol Buffers 为各种编程语言生成代码的核心工具。</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li>protoc编译器重要参数<ul>
+<li>-IPATH<ul>
+<li>–proto_path&#x3D;PATH 表示的是我们要在哪个路径下搜索<code>.proto</code>文件，这个参数既可以用<code>-I</code>指定，也可以使用<code>--proto_path=</code>指定，可能多次指定，将按顺序搜索目录。</li>
+<li>如果不指定该参数，则默认在<strong>当前路径</strong>下进行搜索。</li>
+<li>如果在这些目录中都找不到，将检查 –descriptor_set_in 描述符所需的proto文件</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h5 id="4-1-2-protoc-gen-go插件"><a href="#4-1-2-protoc-gen-go插件" class="headerlink" title="4.1.2 protoc-gen-go插件"></a>4.1.2 protoc-gen-go插件</h5><blockquote>
+<p>为什么有这个插件？</p>
+<ul>
+<li>非内置的语言支持就得自己单独安装语言插件</li>
+<li>从<code>proto --help</code>命令看出，protoc没有内置go语言的插件，那么就需要单独安装go语言插件，另外可以看到其它语言都是类似<code>--java_out=OUT_DIR</code>、<code>--php_out=OUT_DIR</code>这样的，那么在编译go代码时，命令就应该是<code>--go_out=OUT_DIR</code>，表示生成go的pb文件的路径</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>插件的作用：</p>
+<ul>
+<li><code>protoc-gen-go</code>将 .proto 文件中声明的消息和枚举类型转换为 Go 语言中的数据结构，并实现序列化和反序列化方法。</li>
+<li>重要提示：纯粹用来生成pb序列化相关的文件，不再承载gRPC代码生成功能</li>
+<li>这个插件是为 Go 语言开发者提供的，用于生成 Go 语言的 Protocol Buffers 代码。</li>
+</ul>
+</blockquote>
+<h5 id="4-1-3-protoc-gen-go-grpc插件"><a href="#4-1-3-protoc-gen-go-grpc插件" class="headerlink" title="4.1.3 protoc-gen-go-grpc插件"></a>4.1.3 protoc-gen-go-grpc插件</h5><blockquote>
+<ul>
+<li>这也是一个protoc插件，主要用来生成gRPC相关代码</li>
+<li>基于.proto文件声明的服务接口，这个插件为 gRPC 自动生成对应的客户端和服务端代码。这使得开发者可以只关心业务逻辑，而无需操心底层的网络通信实现。</li>
+<li><code>protoc-gen-go-grpc</code> 插件与 <code>protoc-gen-go</code> 插件配合使用，提供完整的 gRPC Go 语言编程支持。</li>
+</ul>
+</blockquote>
+<h5 id="4-1-4-gRPC库"><a href="#4-1-4-gRPC库" class="headerlink" title="4.1.4 gRPC库"></a>4.1.4 gRPC库</h5><blockquote>
+<ul>
+<li><code>grpc</code> 库提供了 gRPC 框架的核心实现，包括客户端、服务端及拦截器等一系列功能。在编写实际的 gRPC 代码时，需要用到这个库（如调用 API、处理底层网络操作等）。</li>
+<li>对于 Go 语言，<code>grpc</code> 库对应的包路径是 <code>google.golang.org/grpc</code>。这些组件在 gRPC 开发过程中扮演着不同的角色。</li>
+<li><code>protoc</code> 和相应的插件（<code>protoc-gen-go</code> 和 <code>protoc-gen-go-grpc</code>）用于根据 .proto 文件生成客户端和服务端的代码；而 <code>grpc</code> 库提供了 gRPC 运行时的核心实现。在执行 gRPC 调用时，我们需要使用由这些组件生成的代码，以及基于 <code>grpc</code> 库的核心功能。</li>
+</ul>
+</blockquote>
+<h4 id="4-2-protoc-gen-go插件单独使用"><a href="#4-2-protoc-gen-go插件单独使用" class="headerlink" title="4.2 protoc-gen-go插件单独使用"></a>4.2 protoc-gen-go插件单独使用</h4><blockquote>
+<p>从上面对于插件的介绍可以知道，protoc-gen-go插件纯粹用来生成pb序列化相关的文件，那么可以先单独使用protoc-gen-go插件来看看会生成什么内容</p>
+</blockquote>
+<blockquote>
+<p><code>protoc-gen-go</code>插件的安装命令如下：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 最新版</span></span><br><span class="line">$ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定版本</span></span><br><span class="line">$ go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.3.0</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-2-1-定义-proto文件"><a href="#4-2-1-定义-proto文件" class="headerlink" title="4.2.1 定义.proto文件"></a>4.2.1 定义.proto文件</h5><blockquote>
+<p>定义订单的proto文件，名称为：order.proto</p>
+</blockquote>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">syntax = <span class="string">&quot;proto3&quot;</span>; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义包名</span></span><br><span class="line"><span class="keyword">package</span> order;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义go包名</span></span><br><span class="line"><span class="keyword">option</span> go_package = <span class="string">&quot;lytest.com/orders&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义订单请求消息</span></span><br><span class="line"><span class="keyword">message </span><span class="title class_">OrderRequest</span> &#123;</span><br><span class="line">  <span class="type">int64</span> uid = <span class="number">1</span>;</span><br><span class="line">  <span class="type">int64</span> goodsId = <span class="number">2</span>;</span><br><span class="line">  <span class="type">string</span> userName = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义订单响应消息</span></span><br><span class="line"><span class="keyword">message </span><span class="title class_">OrderResponse</span> &#123;</span><br><span class="line">  <span class="type">int64</span> orderId = <span class="number">1</span>;</span><br><span class="line">  <span class="type">bool</span> payResult = <span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义订单RPC服务</span></span><br><span class="line"><span class="keyword">service </span><span class="title class_">OrderService</span>&#123;</span><br><span class="line">  <span class="comment">// GetOrderInfo rpc方法，用来获取订单信息</span></span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> GetOrderInfo(OrderRequest) <span class="keyword">returns</span> (OrderResponse)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-2-2-编译-proto文件"><a href="#4-2-2-编译-proto文件" class="headerlink" title="4.2.2 编译.proto文件"></a>4.2.2 编译.proto文件</h5><blockquote>
+<p>接下来就是对上面的.proto文件进行编译，生成go的pb序列化相关的文件，</p>
+<p>下面命令是使用 <code>protoc</code>（即Protocol Buffers编译器）对.proto文件进行编译，生成 Go 代码的命令</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">protoc --proto_path=src --go_out=goods_demo --go_opt=paths=source_relative order.proto</span><br></pre></td></tr></table></figure>
+
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920000603469.png" class="" title="image-20230920000603469">
+
+<blockquote>
+<ul>
+<li><code>--proto_path=src</code>：这是指定.proto文件的源文件路径。<ul>
+<li>这里是指.proto文件路径为当前目录（项目）下的 <code>src</code> 文件夹，也就是上面order.proto文件所在的目录</li>
+<li>当指定了–proto_path&#x3D;src参数，那么表示<code>order.proto</code>文件一定是在src这个目录中，在命令最后指定proto文件时，就不需要显明的写<code>src/order.proto</code>了，，只写order.proto即可，因为已经–proto_path&#x3D;src指定了proto文件所在的目录了</li>
+<li>当不指定这个参数时，会以当前执行<code>procto</code>命令所在的当前目录为order.proto文件所在的目录，如果order.proto文件不在执行proto命令时的当前目录，就会提示proto文件不存在的报错</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li><code>--go_out=goods_demo</code>：这是指定Go代码的输出目录。<ul>
+<li>这里将编译后的Go文件输出到goods_demo目录，当–go_out指定的目录不存在，则会提示目录不存在的报错，所以在执行命令前创建好即可</li>
+<li>这个参数不能省略，否则会报错提示:”缺少输出的指令的错误”</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920001012137.png" class="" title="image-20230920001012137">
+
+<blockquote>
+<p>–go_opt：主要是给proto-gen-go插件设定插件参数，有三个参数可以设置：</p>
+<ul>
+<li>paths&#x3D;import</li>
+<li>module&#x3D;$PREFIX（不常用）</li>
+<li>paths&#x3D;source_relative</li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li>–go_opt&#x3D;paths&#x3D;import<ul>
+<li>生成的文件会按proto文件中指定的<code>optional go_package</code>声明的路径来生成，以斜杠(&#x2F;)表示一层目录</li>
+<li>如上面order.proto文件中声明了<code>option go_package = &quot;lytest.com/orders&quot;;</code>，且–go_out&#x3D;goods_demo，那么生成的pb文件就会在这个目录下：goods_demo&#x2F;lytest.com&#x2F;orders</li>
+<li>如果没有指定生成pb文件时不指定这个参数<code>--go_opt=paths=import</code>，那pathsimport是–go_out的默认参数</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920002116761.png" class="" title="image-20230920002116761">
+
+<blockquote>
+<ul>
+<li>–go_opt&#x3D;paths&#x3D;source_relative：<ul>
+<li><code>source_relative</code>：表示生成的pb.go文件将使用与源.proto文件所在的相对路径，但是也分情况<ul>
+<li>当–go_out&#x3D;. 等号后面的点表示生成pb.go文件的存放目录为源文件所在的目录，那么生成的pb.go文件就会和源.porto文件在同一个目录，也就是在：src目录下有<code>order.proto</code>、<code>order.pb.go</code>两个文件</li>
+<li>当–go_out&#x3D;goods_demo 等号后面的目录表示pb.go文件的存放目录为指定的goods_demo目录(需要goods_demo目录存在)，那么生成的pb.go文件所在目录为：goods_demo&#x2F;order.pb.go</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920003848148.png" class="" title="image-20230920003848148">
+
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920003950209.png" class="" title="image-20230920003950209">
+
+<blockquote>
+<ul>
+<li><code>order.proto</code>：这是源.proto 文件名称<ul>
+<li>源文件可以指定一个或多个</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h5 id="4-2-3-编译的pb-go文件解析"><a href="#4-2-3-编译的pb-go文件解析" class="headerlink" title="4.2.3 编译的pb.go文件解析"></a>4.2.3 编译的pb.go文件解析</h5><blockquote>
+<p>从上面protoc命令我们仅得到了order.pb.go文件，没有gRPC相关的文件，生成gRPC文件需要<code>protoc-gen-go-grpc</code>插件支持，下节介绍，本小节来看看我们生成的order.pb.go文件内容</p>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920004422062.png" class="" title="image-20230920004422062">
+
+<blockquote>
+<ul>
+<li>从上面的注释看到protoc、protoc-gen-go的版本，源.proto文件的名称是<code>order.proto</code></li>
+<li>接着看到一个注释：”&#x2F;&#x2F; 定义包名”，这个注释是从order.proto中的package order上方来的，且在order.proto文件中还声明pb文件的包名为&#96;option go_package &#x3D; lytest.com&#x2F;orders，从order.pb.go代码中也看到当前包名为斜杠后的orders</li>
+</ul>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920004954938.png" class="" title="image-20230920004954938">
+
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920005218946.png" class="" title="image-20230920005218946">
+
+<blockquote>
+<p>上面可以看到：</p>
+<ul>
+<li>在proto中定义的OrderRequest消息、OrderResponse消息会转换为go语言的结构体，并且字段都变为首字母大写，且还加了<code>protobuf</code>、<code>json</code>的结构体tag</li>
+<li>下面是对上面生成go结构体字段的protobuf标签解释如下：<ul>
+<li>varint： 表示这个字段的数据类型是变长的整数类型。</li>
+<li>1： 这是这个字段在 protobuf 消息中的序号，也称作字段编号(field number)，每个字段都有一个唯一的编号，protobuf 不关心字段的名字，而是通过这个编号来标识字段的。</li>
+<li>opt： 表示这是一个可选字段（optional）。在 proto3 中，所有的字段都是可选的，这个可选实际上是相对于 proto2 中的 required（必选）字段而言的。</li>
+<li>name&#x3D;uid： 在 protobuf 中，这个字段的名字为 “uid”。</li>
+<li>proto3： 表示这是 protobuf v3 的字段。</li>
+</ul>
+</li>
+<li>结构体字段的 json 标签解释如下：<ul>
+<li>uid：在转为 JSON 时，这个字段的名字为 “uid”。</li>
+<li>omitempty：如果这个字段为 0值（对于整型是0，对于字符串是空字符串，对于布尔型是false等等），那么在转为 JSON 时就忽略（省略）该字段。</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920005411842.png" class="" title="image-20230920005411842">
+
+<blockquote>
+<p>另外在源.proto文件中还定义了一个OrderService，但是编译生成的pb.go文件没有改部分的代码，能搜到的只是图中的注释，看来pb.go仅仅是生成message消息对应的结构体，对定义的服务不会生成代码</p>
+</blockquote>
+<blockquote>
+<p>总结：</p>
+<ul>
+<li>源proto文件中的message消息会生成go中的对应的结构体</li>
+<li>源.proto文件中定义了的rpc 服务，在只编译生成pb.go文件时不会生成rpc服务的代码</li>
+</ul>
+</blockquote>
+<h4 id="4-3-protoc-gen-go与protoc-gen-go-grpc插件搭配使用"><a href="#4-3-protoc-gen-go与protoc-gen-go-grpc插件搭配使用" class="headerlink" title="4.3 protoc-gen-go与protoc-gen-go-grpc插件搭配使用"></a>4.3 protoc-gen-go与protoc-gen-go-grpc插件搭配使用</h4><blockquote>
+<p>从4.2小节可以得知，使用protoc-gen-go插件只能生成pb文件，仅仅用作序列化和反序列化，生成grpc相关的代码，还需要protoc-gen-go-grpc插件</p>
+</blockquote>
+<blockquote>
+<p>安装protoc-gen-go-grpc插件</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-3-1-定义-protoc文件"><a href="#4-3-1-定义-protoc文件" class="headerlink" title="4.3.1 定义.protoc文件"></a>4.3.1 定义.protoc文件</h5><blockquote>
+<p>定义的proto文件和4.2.1小节中的一样，不做重复说明</p>
+</blockquote>
+<h5 id="4-3-2-编译-proto文件"><a href="#4-3-2-编译-proto文件" class="headerlink" title="4.3.2 编译.proto文件"></a>4.3.2 编译.proto文件</h5><blockquote>
+<p>因为从4.2小节中，可以得知，protoc-gen-go插件只能生成仅仅序列化的pb.go文件，gRPC相关的go代码文件需要protoc-gen-go-grpc插件，所以编译命令中需要指定使用protoc-gen-go-grpc插件</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">protoc --proto_path=src --go_out=goods_demo  --go_opt=paths=source_relative --go-grpc_out=goods_demo --go-grpc_opt=paths=source_relative src/order.proto</span><br></pre></td></tr></table></figure>
+
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920011945861.png" class="" title="image-20230920011945861">
+
+<blockquote>
+<p>从上面的命令可以看到，使用了下面几个参数：</p>
+<ul>
+<li>–go-grpc_out参数：指定gRPC代码生成的路径</li>
+<li>–go-grpc_opt参数和–go_opt一致，不做重复解释</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>从上图看出，我们把pb.go和xx_grpc.pb.go文件都生成在了goods_demo目录。</p>
+<p>至于编译proto文件为go代码的参数使用就灵活多变，根据具体场景去使用</p>
+</blockquote>
+<h5 id="4-3-3-编译的xx-grpc-pg-go文件解析"><a href="#4-3-3-编译的xx-grpc-pg-go文件解析" class="headerlink" title="4.3.3 编译的xx_grpc.pg.go文件解析"></a>4.3.3 编译的xx_grpc.pg.go文件解析</h5><blockquote>
+<p>注意：</p>
+<ul>
+<li>proto编译gRPC代码时，会同时把gRPC的server端代码和client端代码都自动生成</li>
+<li>需要自己去单独实现server端的RPC方法，然后由client端来调用，这块具体要看下节解释</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>从上面编译的goods_demo&#x2F;order_grpc.pb.go文件，来看看编译的内容是什么</p>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920234409837.png" class="" title="image-20230920234409837">
+
+<blockquote>
+<ul>
+<li>可以看到首部的注释内容和编译出来的order.pb.go文件中的一致</li>
+<li>包名也是orders，和order.pb.go文件的包名也一致，那么外部调用时，既可以调用order.pb.go的序列化代码，还可以调用order_grpc.pb.go中的gRPC代码，因为都属于同一个orders包，也是因为都是从同一个源.proto文件生成的</li>
+</ul>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230920234746370.png" class="" title="image-20230920234746370">
+
+<blockquote>
+<p>可以看到根据源.proto文件的定义的OrderService服务，生成了如下内容</p>
+<ul>
+<li>OrderServiceServer接口类型<ul>
+<li>OrderServiceServer是OrderService服务的服务器API。</li>
+<li>所有rpc方法实现都必须内嵌UnimplementedOrderServiceServer结构体（是为了保证UnimplementedOrderServiceServer结构体也是OrderServiceServer接口类型）中以保证向前兼容性，这块是由proto编译时自动完成，不需要我们人为手动去实现接口的方法</li>
+<li>接口中有2个需要实现的方法<ul>
+<li>GetOrderInfo方法，方法中的第一个参数为context（用来传递上下文，不在此解释），第二个参数和我们在源.proto的rpc方法定义的参数一样，返回值也是一样，还多了一个error。</li>
+<li>mustEmbedUnimplementedOrderServiceServer方法，中文翻译过来：“必须嵌入未实现的订单服务”，作用是为了向后兼容，这块在下节解释</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>UnimplementedOrderServiceServer结构体，从名字翻译到中文来看”未实现的OrderServiceServer”，那就说明需要我们人为手动去实现这个结构体，而且结构体还有两个方法：<ul>
+<li>GetOrderInfo方法，这个方法中都是空，没有具体的业务逻辑，看来是需要把业务逻辑实现在这个方法里</li>
+<li>mustEmbedUnimplementedOrderServiceServer方法是个空</li>
+<li>从go接口定义来看，UnimplementedOrderServiceServer结构体实现了OrderServiceServer接口类型的两个方法，那么UnimplementedOrderServiceServer结构体的类型也可以是OrderServiceServer接口类型（隐式实现）</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230921001211232.png" class="" title="image-20230921001211232">
+
+<blockquote>
+<p>前面提到过proto编译gRPC代码时，会同时把gRPC的server端代码和client端代码都自动生成，已经介绍完server端代码了，那来介绍下gRPC的client代码，可以看到根据源.proto文件定义的OrderService服务，生成了如下的client端内容</p>
+<ul>
+<li>OrderServiceClient接口类型<ul>
+<li>表示是OrderServiceClient是OrderService服务的客户端API</li>
+<li>接口中有1个需要实现的方法<ul>
+<li>GetOrderInfo方法，方法中的第一个参数为context（用来传递上下文，不在此解释），第二个参数有一个和我们在源.proto中定义的一样，第三个参数为可变长参数，用来传一个gRPC库内置的一些方法，返回值也是一样，还多了一个error</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>orderServiceClient结构体，这是客户端调用时使用的结构体<ul>
+<li>orderServiceClient结构体的初始化方法NewOrderServiceClient来初始化客户端，并且入参为grpc.ClientConnInterface类型，看来是需要传入一个gRPC客户端连接进来，由客户端连接进行后续的操作</li>
+<li>GetOrderInfo方法，这个方法里写好了客户端调用的逻辑，这块是gRPC自己生成好的，我们不需要修改，只需要在客户端调用时，按参数传参即可</li>
+<li>从从go接口定义来看，orderServiceClient结构体实现了OrderServiceClient接口类型的方法，那么orderServiceClient结构体就可以是OrderServiceClient接口类型了（隐式实现）</li>
+</ul>
+</li>
+<li>为什么orderServiceClient结构体要实现OrderServiceClient接口类型？<ul>
+<li>因为orderServiceClient结构体的初始化方法NewOrderServiceClient的返回值是OrderServiceClient接口类型，而且在外部调用时，肯定会调用NewOrderServiceClient初始化方法，没法调用到orderServiceClient结构体，因为orderServiceClient结构体首字母是小写的</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>至此对编译生成的xx_grpc.pb.go文件解析就到这里，文件中的其余代码我们先不用关注</p>
+</blockquote>
+<h3 id="5、gRPC交互模式"><a href="#5、gRPC交互模式" class="headerlink" title="5、gRPC交互模式"></a>5、gRPC交互模式</h3><h4 id="5-1-Simple-RPC"><a href="#5-1-Simple-RPC" class="headerlink" title="5.1 Simple RPC"></a>5.1 Simple RPC</h4><blockquote>
+<p>客户端发送请求，服务端响应请求，一问一答的模式在gRPC里叫做<code>Simple RPC</code> (也称<code>Unary RPC)</code>，这也是最基本的一种gRPC交互方式，下面介绍下<code>Simple RPC</code>这种方式如何使用</p>
+</blockquote>
+<h5 id="5-1-1-前置知识"><a href="#5-1-1-前置知识" class="headerlink" title="5.1.1 前置知识"></a>5.1.1 前置知识</h5><blockquote>
+<p>在使用gRPC之前，先补充一个必须了解或者熟悉的知识点，那就是结构体嵌套，为什么这么说呢？</p>
+<ul>
+<li>从4.3.3小节可以看出，生成的gRPC的Server端和Client代码中，大量用到了接口、结构，</li>
+<li>在讲到生成Server端代码时，发现生成的结构体、rpc方法都是未实现的，需要我们自己去实现，那么在一个已有的结构体、结构体方法的前提下，想对它实现，能想到就是继承，但是在go中没有继承的概念，那就是结构体嵌套</li>
+<li>也就是说我们实现gPRC的Server端时，需要定义自己的结构体来嵌套gRPC生成的结构体和结构体方法，因为有了结构体嵌套了，那嵌套的结构体本身就有个被嵌套结构体的类型和方法，就和python中的父子继承逻辑一样，就可以对被嵌套的结构体的方法进行重写（编写属于我们的业务逻辑），那达成实现了被嵌套结构体方法的目的</li>
+</ul>
+</blockquote>
+<h5 id="5-1-2-编写自己的server端"><a href="#5-1-2-编写自己的server端" class="headerlink" title="5.1.2 编写自己的server端"></a>5.1.2 编写自己的server端</h5><blockquote>
+<p>到此我们就需要去实现自己的server代码，编写自己的server端最好管理在新的文件或目录里，不要和gRPC生成的代码混在一起</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> ordersSvr</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;errors&quot;</span></span><br><span class="line">	orders <span class="string">&quot;example.com/studygo/grpc_study/goods_demo&quot;</span></span><br><span class="line">	<span class="string">&quot;google.golang.org/grpc/metadata&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// OrderService 嵌套了orders.UnimplementedOrderServiceServer</span></span><br><span class="line"><span class="keyword">type</span> OrderService <span class="keyword">struct</span> &#123;</span><br><span class="line">	orders.UnimplementedOrderServiceServer</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewOrderService</span><span class="params">()</span></span> *OrderService &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;OrderService&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 重写GetOrderInfo方法，实现我们的业务逻辑</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(o *OrderService)</span></span> GetOrderInfo(c context.Context, orderReq *orders.OrderRequest) (*orders.OrderResponse, <span class="type">error</span>) &#123;</span><br><span class="line">	log.Printf(<span class="string">&quot;orderReq is : %#+v\n&quot;</span>, orderReq)</span><br><span class="line">	log.Printf(<span class="string">&quot;context is : %#+v\n&quot;</span>, c)</span><br><span class="line">	md, _ := metadata.FromIncomingContext(c)</span><br><span class="line">	traceId := md[<span class="string">&quot;traceid&quot;</span>][<span class="number">0</span>]</span><br><span class="line">	log.Printf(<span class="string">&quot;context val is : %#+v\n&quot;</span>, traceId)</span><br><span class="line">	uid := orderReq.Uid</span><br><span class="line">	<span class="keyword">if</span> uid == <span class="number">0</span> &#123;</span><br><span class="line">		log.Printf(<span class="string">&quot;uid为0，traceId: %v&quot;</span>, traceId)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, errors.New(<span class="string">&quot;uid为0&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">var</span> payRet <span class="type">bool</span></span><br><span class="line">	<span class="keyword">if</span> orderReq.GoodsId &lt;= <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(orderReq.UserName) &lt;= <span class="number">0</span> &#123;</span><br><span class="line">		log.Printf(<span class="string">&quot;goodsId为0且userName为空，traceId: %v&quot;</span>, traceId)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, errors.New(<span class="string">&quot;goodsId为0且userName为空&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	payRet = <span class="literal">true</span></span><br><span class="line">	<span class="keyword">return</span> &amp;orders.OrderResponse&#123;</span><br><span class="line">		OrderId:   uid + <span class="number">10</span>,</span><br><span class="line">		PayResult: payRet,</span><br><span class="line">	&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>代码解释：</p>
+<ul>
+<li>首先导入了编译生成的gRPC的orders_grpc.pb.go文件中的相关代码</li>
+<li>定义了OrderService结构体，嵌套了orders_grpc.pb.go中需要被实现的UnimplementedOrderServiceServer结构体，并且OrderService结构体还重写了UnimplementedOrderServiceServer结构体的GetOrderInfo方法，编写了我们自己的业务逻辑</li>
+</ul>
+</blockquote>
+<h5 id="5-1-3-启动gRPC服务"><a href="#5-1-3-启动gRPC服务" class="headerlink" title="5.1.3 启动gRPC服务"></a>5.1.3 启动gRPC服务</h5><blockquote>
+<p>server端需要实现的功能编写完以后，就可以注册启动gRPC服务了</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	orders <span class="string">&quot;example.com/studygo/grpc_study/goods_demo&quot;</span></span><br><span class="line">	ordersSvr <span class="string">&quot;example.com/studygo/grpc_study/orders&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;google.golang.org/grpc&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;net&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 创建tcp链接，拿到一个tcp的listener</span></span><br><span class="line">	port := <span class="number">9999</span></span><br><span class="line">	lis, err := net.Listen(<span class="string">&quot;tcp&quot;</span>, fmt.Sprintf(<span class="string">&quot;localhost:%d&quot;</span>, port))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatalf(<span class="string">&quot;failed to listen: %v&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 创建一个grpc服务，并且没有服务注册，而且也没有开始接收gRPC请求</span></span><br><span class="line">	gRpcSvr := grpc.NewServer()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 声明一个我们编写的NewOrderService服务对象</span></span><br><span class="line">	orderService := ordersSvr.NewOrderService()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 给grpc服务注册orders服务，需要传入一个gRPC服务对象，以及我们实现的orderService对象</span></span><br><span class="line">	orders.RegisterOrderServiceServer(gRpcSvr, orderService)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Serve在监听器lis上接受传入的连接，为每个连接创建一个新的ServerTransport和服务goroutine。服务goroutine读取gRPC请求，然后调用注册的处理器来回复它们。当lis.Accept因致命错误失败时，Serve返回。当这个方法返回时，lis将被关闭。</span></span><br><span class="line">	log.Printf(<span class="string">&quot;gRPC server running at: %v\n&quot;</span>, port)</span><br><span class="line">	err = gRpcSvr.Serve(lis)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(fmt.Sprintf(<span class="string">&quot;start gRpc Serve err:%v&quot;</span>, err.Error()))</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>代码说明：</p>
+<ul>
+<li>先用net包创建了一个tcp连接，获取到一个网络监听器(network listener)</li>
+<li>然后使用grpc.NewServer创建gPRC服务，返回值是gRPC的Server类型，Server是gRPC server来为gRPC请求服务的</li>
+<li>然后需要实例化我们自己编写的server端，拿到我们定义的OrderService对象</li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li>到这里时网络监听(network listener)创建成功了、gRPC服务也创建好了，那就需要给gRPC服务注册我们自己编写的gRPC服务，也就是OrderService</li>
+<li>在编译好的gRPC代码中有一个RegisterOrderServiceServer方法就是用来注册gRPC服务的，下面是源码</li>
+</ul>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230921221347170.png" class="" title="image-20230921221347170">
+
+<blockquote>
+<p>第一个参数是grpc.ServiceRegistrar接口类型，那要给RegisterOrderServiceServer方法第一个参数传值，就需要传一个满足grpc.ServiceRegistrar接口类型的变量</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 下面是grpc.ServiceRegistrar接口的源码</span></span><br><span class="line"><span class="comment">// ServiceRegistrar 包装了一个支持服务注册的单个方法。它使用户能够将除 grpc.Server 之外的具体类型传递给由IDL生成的代码导出的服务注册方法。</span></span><br><span class="line"><span class="keyword">type</span> ServiceRegistrar <span class="keyword">interface</span> &#123;</span><br><span class="line">	<span class="comment">// RegisterService 将服务及其实现注册到实现此接口的具体类型。</span></span><br><span class="line">    <span class="comment">// 一旦服务器开始服务，它可能不会被调用。desc描述了服务及其方法和处理器。</span></span><br><span class="line">    <span class="comment">// impl 是传递给方法处理器的服务实现</span></span><br><span class="line">	RegisterService(desc *ServiceDesc, impl <span class="keyword">interface</span>&#123;&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>那就可以把grpc.NewServer()生成的gRPC server对象传给第一个参数</p>
+<p>为什么说grpc.NewServer()的返回值可以是grpc.ServiceRegistrar接口类型？</p>
+<ul>
+<li>首先grpc.NewServer()方法返回的是gRPC.Server类型（结构体类型），但是Server结构体实现了grpc.ServiceRegistrar接口的RegisterService方法，所以可以传给第一个参数</li>
+</ul>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 下面是gRPC.Server实现的RegisterService方法源码</span></span><br><span class="line"><span class="comment">// RegisterService 将服务及其实现注册到gRPC服务器。它是从IDL生成的代码中调用的。这必须在调用gRPC进行Serve之前被调用。如果ss非空（用于传统代码）,则会检查其类型以确保其实现了sd.HandlerType。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span></span> RegisterService(sd *ServiceDesc, ss <span class="keyword">interface</span>&#123;&#125;) &#123;</span><br><span class="line">	<span class="keyword">if</span> ss != <span class="literal">nil</span> &#123;</span><br><span class="line">		ht := reflect.TypeOf(sd.HandlerType).Elem()</span><br><span class="line">		st := reflect.TypeOf(ss)</span><br><span class="line">		<span class="keyword">if</span> !st.Implements(ht) &#123;</span><br><span class="line">			logger.Fatalf(<span class="string">&quot;grpc: Server.RegisterService found the handler of type %v that does not satisfy %v&quot;</span>, st, ht)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	s.register(sd, ss)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230921223325793.png" class="" title="image-20230921223325793">
+
+<blockquote>
+<p>第二个参数是源.proto文件生成gRPC代码中的OrderServiceServer接口类型，从之前的小节知识我们很容易知道，我们自己编写的server端实现了OrderServiceServer接口，那就把我们自己编写的server实例化的orderService传给第二个参数就可以了</p>
+<p>那源.proto文件生成gRPC代码中的有没有我们可以给传的参数？</p>
+<ul>
+<li>没有，而且生成的代码中的UnimplementedOrderServiceServer结构体仅仅是实现了OrderServiceServer接口类型，但是没有实际的业务逻辑代码（比如GetOrderInfo），所以即使传了UnimplementedOrderServiceServer结构体也没有用</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>接着就是启动gRPC服务，使用grpc.NewServer()生成的gRPC server对象，再调用serve方法来启动gRPC服务</p>
+<ul>
+<li>从Serve方法源码中可以看出，使用for死循环来监听tcp链接，然后处理gRPC请求。</li>
+<li>这也是gRPC服务启动后会一直处于运行中，等待客户端来发起请求，然后处理请求返回远程调用结果</li>
+</ul>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 下面是Serve源码</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span></span> Serve(lis net.Listener) <span class="type">error</span> &#123;</span><br><span class="line">	...</span><br><span class="line">    <span class="comment">// for死循环启动tcp连接监听</span></span><br><span class="line">	<span class="keyword">for</span> &#123;   </span><br><span class="line">		rawConn, err := lis.Accept()</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> ne, ok := err.(<span class="keyword">interface</span> &#123;</span><br><span class="line">				Temporary() <span class="type">bool</span></span><br><span class="line">			&#125;); ok &amp;&amp; ne.Temporary() &#123;</span><br><span class="line">				<span class="keyword">if</span> tempDelay == <span class="number">0</span> &#123;</span><br><span class="line">					tempDelay = <span class="number">5</span> * time.Millisecond</span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					tempDelay *= <span class="number">2</span></span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> max := <span class="number">1</span> * time.Second; tempDelay &gt; max &#123;</span><br><span class="line">					tempDelay = max</span><br><span class="line">				&#125;</span><br><span class="line">				s.mu.Lock()</span><br><span class="line">				s.printf(<span class="string">&quot;Accept error: %v; retrying in %v&quot;</span>, err, tempDelay)</span><br><span class="line">				s.mu.Unlock()</span><br><span class="line">				timer := time.NewTimer(tempDelay)</span><br><span class="line">				<span class="keyword">select</span> &#123;</span><br><span class="line">				<span class="keyword">case</span> &lt;-timer.C:</span><br><span class="line">				<span class="keyword">case</span> &lt;-s.quit.Done():</span><br><span class="line">					timer.Stop()</span><br><span class="line">					<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">continue</span></span><br><span class="line">			&#125;</span><br><span class="line">			s.mu.Lock()</span><br><span class="line">			s.printf(<span class="string">&quot;done serving; Accept = %v&quot;</span>, err)</span><br><span class="line">			s.mu.Unlock()</span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> s.quit.HasFired() &#123;</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">		tempDelay = <span class="number">0</span></span><br><span class="line">		<span class="comment">// Start a new goroutine to deal with rawConn so we don&#x27;t stall this Accept</span></span><br><span class="line">		<span class="comment">// loop goroutine.</span></span><br><span class="line">		<span class="comment">//</span></span><br><span class="line">		<span class="comment">// Make sure we account for the goroutine so GracefulStop doesn&#x27;t nil out</span></span><br><span class="line">		<span class="comment">// s.conns before this conn can be added.</span></span><br><span class="line">		s.serveWG.Add(<span class="number">1</span>)</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			s.handleRawConn(lis.Addr().String(), rawConn)</span><br><span class="line">			s.serveWG.Done()</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="5-1-4-启动gRPC客户端"><a href="#5-1-4-启动gRPC客户端" class="headerlink" title="5.1.4 启动gRPC客户端"></a>5.1.4 启动gRPC客户端</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	orders <span class="string">&quot;example.com/studygo/grpc_study/goods_demo&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;github.com/google/uuid&quot;</span></span><br><span class="line">	<span class="string">&quot;google.golang.org/grpc&quot;</span></span><br><span class="line">	<span class="string">&quot;google.golang.org/grpc/credentials/insecure&quot;</span></span><br><span class="line">	<span class="string">&quot;google.golang.org/grpc/metadata&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;strings&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">genUUID</span><span class="params">()</span></span> <span class="type">string</span> &#123;</span><br><span class="line">	uuidStr := uuid.New().String()</span><br><span class="line">	uuidStrList := strings.Split(uuidStr, <span class="string">&quot;-&quot;</span>)</span><br><span class="line">	<span class="keyword">return</span> uuidStrList[<span class="built_in">len</span>(uuidStrList)<span class="number">-1</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	creds := insecure.NewCredentials()</span><br><span class="line">	<span class="comment">// 连接gRPC服务， 拿到一个连接</span></span><br><span class="line">	conn, err := grpc.Dial(<span class="string">&quot;:9999&quot;</span>, grpc.WithTransportCredentials(creds))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatalf(<span class="string">&quot;连接gRPC服务失败: %v\n&quot;</span>, err.Error())</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 执行完关闭连接</span></span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 用连接去执行本地gRPC方法 先根据创建的连接拿到一个gRPC的客户端</span></span><br><span class="line">	client := orders.NewOrderServiceClient(conn)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 调用client对象的方法，就像是调用grpc服务中本地方法一样</span></span><br><span class="line">	orderReq := &amp;orders.OrderRequest&#123;</span><br><span class="line">		Uid:      <span class="number">50</span>,</span><br><span class="line">		GoodsId:  <span class="number">10</span>,</span><br><span class="line">		UserName: <span class="string">&quot;风情万种&quot;</span>,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 带参数的ctx</span></span><br><span class="line">	md := metadata.New(<span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span>&#123;<span class="string">&quot;traceId&quot;</span>: fmt.Sprintf(<span class="string">&quot;%v&quot;</span>, genUUID())&#125;)</span><br><span class="line">	ctx := metadata.NewOutgoingContext(context.Background(), md)</span><br><span class="line"></span><br><span class="line">	info, orderErr := client.GetOrderInfo(ctx, orderReq)</span><br><span class="line">	<span class="keyword">if</span> orderErr != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatalf(<span class="string">&quot;client调用方法失败: %v\n&quot;</span>, orderErr.Error())</span><br><span class="line">	&#125;</span><br><span class="line">	log.Printf(<span class="string">&quot;client调用GetOrderInfo获取到的结果:%#+v\n&quot;</span>, info)</span><br><span class="line">	log.Printf(<span class="string">&quot;client调用GetOrderInfo获取到的info.OrderId:%#+v\n&quot;</span>, info.OrderId)</span><br><span class="line">	log.Printf(<span class="string">&quot;client调用GetOrderInfo获取到的info.PayResult:%#+v\n&quot;</span>, info.PayResult)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>客户端的代码相对来说就比较简单好理解</p>
+<ul>
+<li>grpc.Dial()用来连接gRPC服务，并且使用defer在调用完以后关闭本次rpc请求，保证连接的安全释放</li>
+<li>需要注意，连接gRPC服务时，需要传证书保证传输安全，但是一开始我们没有证书，那就需要先略过传输证书，但是如果不传证书，启动gRPC客户端时就会有如下报错，提示需要设置证书</li>
+</ul>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230921225115649.png" class="" title="image-20230921225115649">
+
+<blockquote>
+<p>那gRPC也考虑到了这一点，给我们提供了禁用传输安全证书的方法，也就是表示不需要传证书也可以发起gRPC连接，主要会用到如下2个方法</p>
+<ul>
+<li>grpc.WithInsecure方法，但是这个方法在gRPC的1.55版本中被废弃了，推荐使用gRPC.WithTransportCredentials 和 insecure.NewCredentials()</li>
+<li>gRPC.WithTransportCredentials方法，需要传credentials.TransportCredentials类型参数，使用insecure.NewCredentials()返回的就是credentials.TransportCredentials类型，传给gRPC.WithTransportCredentials方法即可</li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li><p>然后调用源.proto文件中的客户端代码，即NewOrderServiceClient方法拿到客户端对象，需要把第一步创建的gRPC连接作为第一个参数传进去</p>
+</li>
+<li><p>客户端对象就可以调用它的GetOrderInfo方法</p>
+<ul>
+<li>GetOrderInfo方法需要传递的参数其实就是源.proto中定义的OrderRequest类型，即编译生成gRPC的go代码中的OrderRequest结构体</li>
+<li>GetOrderInfo方法还会把调用结果返回，类型是编译生成gRPC的go代码中的OrderResponse结构体</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>下面就是一次gRPC调用过程的截图</p>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230921230725733.png" class="" title="image-20230921230725733">
+
+<h5 id="5-1-5-gRPC调用传值"><a href="#5-1-5-gRPC调用传值" class="headerlink" title="5.1.5 gRPC调用传值"></a>5.1.5 gRPC调用传值</h5><blockquote>
+<p>从上面代码可以看到:</p>
+<ul>
+<li>无论是客户端调用、还是服务端重写GetOrderInfo方法，第一个参数都是context</li>
+<li>客户端调用时，给context设置值，然后gRPC服务端的context可以接收到客户端传过来的值，那就可以做日志的链路追踪，可以根据traceId，追踪到每一次调用的请求以及响应，对查问题有很大帮助</li>
+<li>在gRPC中不能直接用go的context包来设置值，因为只会在客户端运行时生效，不会传递到gRPC请求中的</li>
+<li>而是需要用grpc封装的metadata包来传值，这样gRPC服务端才可以接收到客户端设置在context中的值<ul>
+<li>metadata.NewOutgoingContext方法返回的也是一个context对象，那就可以作为第一个参数来传递</li>
+<li>metadata.FromIncomingContext方法来解析传递过来的值</li>
+</ul>
+</li>
+</ul>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.yht7.com/news/264670">https://www.yht7.com/news/264670</a></p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span>  <span class="string">&quot;google.golang.org/grpc/metadata&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">genUUID</span><span class="params">()</span></span> <span class="type">string</span> &#123;</span><br><span class="line">	uuidStr := uuid.New().String()</span><br><span class="line">	uuidStrList := strings.Split(uuidStr, <span class="string">&quot;-&quot;</span>)</span><br><span class="line">	<span class="keyword">return</span> uuidStrList[<span class="number">0</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 客户端设置需要传递的值，NewOutgoingContext方法返回的是context.Context类型</span></span><br><span class="line">...</span><br><span class="line">md := metadata.New(<span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span>&#123;<span class="string">&quot;traceId&quot;</span>: fmt.Sprintf(<span class="string">&quot;%v&quot;</span>, genUUID())&#125;)</span><br><span class="line">ctx := metadata.NewOutgoingContext(context.Background(), md)</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 服务端从客户端传递的context中解析值，FromIncomingContext方法返回的是map[string][]string</span></span><br><span class="line"><span class="comment">// 需要注意取值的索引</span></span><br><span class="line">md, _ := metadata.FromIncomingContext(c)</span><br><span class="line">traceId := md[<span class="string">&quot;traceid&quot;</span>][<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>下面就客户端把traceId传给了gRPC服务端</p>
+</blockquote>
+<img src="/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/image-20230921232050062.png" class="" title="image-20230921232050062">
+
+<blockquote>
+<p>注意：</p>
+<ul>
+<li>在客户端使用metadata.New方法设置需要传递的值时，即使设置值的key为小驼峰格式(xxXX格式)，服务端解析传递的值的key时，会把key解析为全小写，这一点需要留意，否则会出现服务端解析不到值的情况</li>
+</ul>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://www.lynote.top">刘阳</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.lynote.top/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/">https://www.lynote.top/2022/08/01/golang/go_grpc/go_grpc%E4%BD%BF%E7%94%A8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.lynote.top" target="_blank">笔记小窝</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Go/">Go</a><a class="post-meta__tags" href="/tags/gRPC/">gRPC</a><a class="post-meta__tags" href="/tags/RPC/">RPC</a></div><div class="post_share"><div class="social-share" data-image="/posts_cover_img/golang/go_gRPC.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/08/03/network/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"><img class="prev-cover" src="/posts_cover_img/network/computer_net.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">计算机网络</div></div></a></div><div class="next-post pull-right"><a href="/2022/07/25/web_dev/element_ui%E5%AD%A6%E4%B9%A0/element_ui%E5%AD%A6%E4%B9%A0/"><img class="next-cover" src="/posts_cover_img/web_dev/element_ui.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Element_UI学习</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/03/18/golang/go_gorm%E4%BD%BF%E7%94%A8/go_gorm%E4%BD%BF%E7%94%A8/" title="Go Gorm使用"><img class="cover" src="/posts_cover_img/golang/go_gorm.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-18</div><div class="title">Go Gorm使用</div></div></a></div><div><a href="/2022/10/24/golang/go_leetcode/go_leetcode/" title="Go LeetCode"><img class="cover" src="/posts_cover_img/golang/go_leetcode.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-10-24</div><div class="title">Go LeetCode</div></div></a></div><div><a href="/2021/05/16/golang/go_gin%E5%AD%A6%E4%B9%A0/go_gin%E5%AD%A6%E4%B9%A0/" title="Go Gin笔记"><img class="cover" src="/posts_cover_img/golang/gin.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-05-16</div><div class="title">Go Gin笔记</div></div></a></div><div><a href="/2022/05/23/golang/go_redis%E4%BD%BF%E7%94%A8/go_redis%E4%BD%BF%E7%94%A8/" title="Go Redis使用"><img class="cover" src="/posts_cover_img/golang/go_redis.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-23</div><div class="title">Go Redis使用</div></div></a></div><div><a href="/2022/05/25/golang/go_zap%E6%97%A5%E5%BF%97%E4%BD%BF%E7%94%A8/go_zap%E6%97%A5%E5%BF%97%E4%BD%BF%E7%94%A8/" title="Go Zap日志库"><img class="cover" src="/posts_cover_img/golang/go_zap.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-25</div><div class="title">Go Zap日志库</div></div></a></div><div><a href="/2021/05/16/golang/go_mysql%E4%BD%BF%E7%94%A8/go_mysql%E4%BD%BF%E7%94%A8/" title="Go Mysql笔记"><img class="cover" src="/posts_cover_img/golang/go_mysql.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-05-16</div><div class="title">Go Mysql笔记</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">刘阳</div><div class="author-info__description">学习与记录</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">36</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">36</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">36</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Lyzin"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81RPC%E5%8D%8F%E8%AE%AE"><span class="toc-text">一、RPC协议</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81RPC%E6%A6%82%E5%BF%B5"><span class="toc-text">1、RPC概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%E3%80%81%E6%9C%AC%E5%9C%B0%E8%B0%83%E7%94%A8"><span class="toc-text">2、本地调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3%E3%80%81RPC%E8%B0%83%E7%94%A8"><span class="toc-text">3、RPC调用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-rpc%E5%8C%85%E5%AE%9E%E7%8E%B0rpc%E8%B0%83%E7%94%A8%E6%AD%A5%E9%AA%A4"><span class="toc-text">3.1 rpc包实现rpc调用步骤</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-rpc%E4%BB%A3%E7%A0%81%E8%B0%83%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="toc-text">3.2 rpc代码调用示例</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-1-rpc%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BB%A3%E7%A0%81"><span class="toc-text">3.2.1 rpc服务端代码</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-2-rpc%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%A3%E7%A0%81"><span class="toc-text">3.2.2 rpc客户端代码</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4%E3%80%81RPC%E5%8E%9F%E7%90%86%E5%9B%BE"><span class="toc-text">4、RPC原理图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81gRPC%E6%A1%86%E6%9E%B6"><span class="toc-text">二、gRPC框架</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81gRPC%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">1、gRPC是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%E3%80%81Protobuf%E4%BB%8B%E7%BB%8D"><span class="toc-text">2、Protobuf介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-Protobuf%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">2.1 Protobuf是什么</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-gRPC%E4%B8%8EProtobuf%E5%85%B3%E7%B3%BB"><span class="toc-text">2.2 gRPC与Protobuf关系</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-Protobuf%E7%BC%96%E8%AF%91%E5%99%A8%E5%AE%89%E8%A3%85"><span class="toc-text">2.3 Protobuf编译器安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-Protobuf%E8%AF%AD%E6%B3%95%E7%89%88%E6%9C%AC"><span class="toc-text">2.4 Protobuf语法版本</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3%E3%80%81Protobuf%E8%AF%AD%E6%B3%95"><span class="toc-text">3、Protobuf语法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E9%A6%96%E8%A1%8C%E8%AF%AD%E6%B3%95%E5%A3%B0%E6%98%8E"><span class="toc-text">3.1 首行语法声明</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-%E6%B3%A8%E9%87%8A%E8%AF%AD%E6%B3%95"><span class="toc-text">3.2 注释语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-Message%E7%B1%BB%E5%9E%8B"><span class="toc-text">3.3 Message类型</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-1-%E5%A3%B0%E6%98%8E%E5%AD%97%E6%AE%B5%E7%BC%96%E5%8F%B7"><span class="toc-text">3.3.1 声明字段编号</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-2-%E6%8C%87%E5%AE%9A%E5%AD%97%E6%AE%B5%E6%A0%87%E7%AD%BE"><span class="toc-text">3.3.2 指定字段标签</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-3-%E5%A4%9A%E4%B8%AAmessage%E7%B1%BB%E5%9E%8B"><span class="toc-text">3.3.3 多个message类型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-4-%E5%88%A0%E9%99%A4%E5%AD%97%E6%AE%B5"><span class="toc-text">3.3.4 删除字段</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-5-Proto%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%E4%B8%8EGo%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B"><span class="toc-text">3.3.5 Proto变量类型与Go变量类型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-6-%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B%E4%B8%BAmessage%E7%B1%BB%E5%9E%8B"><span class="toc-text">3.3.6 字段类型为message类型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-7-message%E5%B5%8C%E5%A5%97"><span class="toc-text">3.3.7 message嵌套</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-8-%E6%9E%9A%E4%B8%BE%E7%B1%BB%E5%9E%8B"><span class="toc-text">3.3.8 枚举类型</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-4-%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1"><span class="toc-text">3.4 定义服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-5-%E5%AF%BC%E5%85%A5proto%E6%96%87%E4%BB%B6"><span class="toc-text">3.5 导入proto文件</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4%E3%80%81go%E4%B8%8EgRPC%E5%B7%A5%E5%85%B7"><span class="toc-text">4、go与gRPC工具</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1%E3%80%81%E7%9B%B8%E5%85%B3%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D"><span class="toc-text">4.1、相关工具介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-1-1-protoc%E7%BC%96%E8%AF%91%E5%99%A8"><span class="toc-text">4.1.1 protoc编译器</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-1-2-protoc-gen-go%E6%8F%92%E4%BB%B6"><span class="toc-text">4.1.2 protoc-gen-go插件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-1-3-protoc-gen-go-grpc%E6%8F%92%E4%BB%B6"><span class="toc-text">4.1.3 protoc-gen-go-grpc插件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-1-4-gRPC%E5%BA%93"><span class="toc-text">4.1.4 gRPC库</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-protoc-gen-go%E6%8F%92%E4%BB%B6%E5%8D%95%E7%8B%AC%E4%BD%BF%E7%94%A8"><span class="toc-text">4.2 protoc-gen-go插件单独使用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-2-1-%E5%AE%9A%E4%B9%89-proto%E6%96%87%E4%BB%B6"><span class="toc-text">4.2.1 定义.proto文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-2-2-%E7%BC%96%E8%AF%91-proto%E6%96%87%E4%BB%B6"><span class="toc-text">4.2.2 编译.proto文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-2-3-%E7%BC%96%E8%AF%91%E7%9A%84pb-go%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90"><span class="toc-text">4.2.3 编译的pb.go文件解析</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-protoc-gen-go%E4%B8%8Eprotoc-gen-go-grpc%E6%8F%92%E4%BB%B6%E6%90%AD%E9%85%8D%E4%BD%BF%E7%94%A8"><span class="toc-text">4.3 protoc-gen-go与protoc-gen-go-grpc插件搭配使用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-1-%E5%AE%9A%E4%B9%89-protoc%E6%96%87%E4%BB%B6"><span class="toc-text">4.3.1 定义.protoc文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-2-%E7%BC%96%E8%AF%91-proto%E6%96%87%E4%BB%B6"><span class="toc-text">4.3.2 编译.proto文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-%E7%BC%96%E8%AF%91%E7%9A%84xx-grpc-pg-go%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90"><span class="toc-text">4.3.3 编译的xx_grpc.pg.go文件解析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5%E3%80%81gRPC%E4%BA%A4%E4%BA%92%E6%A8%A1%E5%BC%8F"><span class="toc-text">5、gRPC交互模式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-1-Simple-RPC"><span class="toc-text">5.1 Simple RPC</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#5-1-1-%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-text">5.1.1 前置知识</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5-1-2-%E7%BC%96%E5%86%99%E8%87%AA%E5%B7%B1%E7%9A%84server%E7%AB%AF"><span class="toc-text">5.1.2 编写自己的server端</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5-1-3-%E5%90%AF%E5%8A%A8gRPC%E6%9C%8D%E5%8A%A1"><span class="toc-text">5.1.3 启动gRPC服务</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5-1-4-%E5%90%AF%E5%8A%A8gRPC%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="toc-text">5.1.4 启动gRPC客户端</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5-1-5-gRPC%E8%B0%83%E7%94%A8%E4%BC%A0%E5%80%BC"><span class="toc-text">5.1.5 gRPC调用传值</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2024/09/28/java/Mybatis%E4%BD%BF%E7%94%A8/Mybatis%E4%BD%BF%E7%94%A8/" title="Mybatis使用"><img src="/img/index.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Mybatis使用"/></a><div class="content"><a class="title" href="/2024/09/28/java/Mybatis%E4%BD%BF%E7%94%A8/Mybatis%E4%BD%BF%E7%94%A8/" title="Mybatis使用">Mybatis使用</a><time datetime="2024-09-27T18:33:26.000Z" title="发表于 2024-09-28 02:33:26">2024-09-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/09/28/java/Maven%E4%BD%BF%E7%94%A8/Maven%E4%BD%BF%E7%94%A8/" title="Maven使用"><img src="/source/posts_cover_img/java/maven-logo-black-on-white.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Maven使用"/></a><div class="content"><a class="title" href="/2024/09/28/java/Maven%E4%BD%BF%E7%94%A8/Maven%E4%BD%BF%E7%94%A8/" title="Maven使用">Maven使用</a><time datetime="2024-09-27T18:23:10.000Z" title="发表于 2024-09-28 02:23:10">2024-09-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/09/22/java/java%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/java%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/" title="Java基础语法"><img src="/posts_cover_img/java/java_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java基础语法"/></a><div class="content"><a class="title" href="/2024/09/22/java/java%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/java%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/" title="Java基础语法">Java基础语法</a><time datetime="2024-09-22T07:08:33.000Z" title="发表于 2024-09-22 15:08:33">2024-09-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/09/17/golang/kafka%E4%BD%BF%E7%94%A8/kafka%E4%BD%BF%E7%94%A8/" title="kafka使用"><img src="/posts_cover_img/golang/kafka_logo.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="kafka使用"/></a><div class="content"><a class="title" href="/2024/09/17/golang/kafka%E4%BD%BF%E7%94%A8/kafka%E4%BD%BF%E7%94%A8/" title="kafka使用">kafka使用</a><time datetime="2024-09-17T01:48:14.000Z" title="发表于 2024-09-17 09:48:14">2024-09-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/09/11/golang/elasticsearch/elasticsearch%E4%BD%BF%E7%94%A8/" title="elasticsearch使用"><img src="/posts_cover_img/golang/elastic.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="elasticsearch使用"/></a><div class="content"><a class="title" href="/2024/09/11/golang/elasticsearch/elasticsearch%E4%BD%BF%E7%94%A8/" title="elasticsearch使用">elasticsearch使用</a><time datetime="2024-09-11T05:49:03.000Z" title="发表于 2024-09-11 13:49:03">2024-09-11</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/posts_cover_img/golang/go_gRPC.png')"><div id="footer-wrap"><div class="copyright">&copy;2021 - 2024 By 刘阳</div><div class="footer_custom_text">努力终会有回报</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/pluginsSrc/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"></div><script defer="defer" id="ribbon" src="/pluginsSrc/butterfly-extsrc/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="false"></script><script id="click-heart" src="/pluginsSrc/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
