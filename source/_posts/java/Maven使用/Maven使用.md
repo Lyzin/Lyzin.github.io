@@ -3,7 +3,7 @@ title: Maven使用
 date: 2024-09-28 02:23:10
 updated: 2024-09-28 02:23:10
 tags: Maven
-cover: source/posts_cover_img/java/maven-logo-black-on-white.png
+cover: /posts_cover_img/java/maven.png
 categories: Maven
 ---
 

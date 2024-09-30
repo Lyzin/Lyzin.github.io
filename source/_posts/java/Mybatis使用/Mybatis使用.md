@@ -3,7 +3,7 @@ title: Mybatis使用
 date: 2024-09-28 02:33:26
 updated: 2024-09-28 02:33:26
 tags: Mybatis
-cover: 
+cover: /posts_cover_img/java/Mybatis.png
 categories: Mybatis
 ---
 
